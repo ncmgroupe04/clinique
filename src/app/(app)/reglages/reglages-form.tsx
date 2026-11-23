@@ -71,7 +71,7 @@ export default function ReglagesForm({ defaults }: { defaults: Defaults }) {
         </p>
       )}
       <button type="submit" disabled={pending} className="btn-primary w-full">
-        {pending ? "Enregistrement…" : "Enregistrer"}
+        {pending ? "Enregistrement…" : "Enregistrer l'en-tête"}
       </button>
     </form>
   );

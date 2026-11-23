@@ -62,7 +62,7 @@ export default function HistoriqueClient({ tickets }: { tickets: Ticket[] }) {
                     href={`/tickets/${t.id}`}
                     className="text-sm text-[#0B7A6B] font-medium"
                   >
-                    Voir / Imprimer
+                    Voir le reçu
                   </Link>
                   {t.status === "actif" && (
                     <button
@@ -70,7 +70,7 @@ export default function HistoriqueClient({ tickets }: { tickets: Ticket[] }) {
                       onClick={() => setCancelingId(t.id)}
                       className="text-sm font-semibold text-[#DC2626]"
                     >
-                      Annuler
+                      Annuler le ticket
                     </button>
                   )}
                 </div>
@@ -90,14 +90,14 @@ export default function HistoriqueClient({ tickets }: { tickets: Ticket[] }) {
                     disabled={pending}
                     className="btn-danger-solid w-full sm:w-auto"
                   >
-                    {pending ? "…" : "Confirmer"}
+                    {pending ? "…" : "Annuler le ticket"}
                   </button>
                   <button
                     type="button"
                     onClick={() => setCancelingId(null)}
                     className="btn-secondary"
                   >
-                    X
+                    Retour
                   </button>
                 </form>
               )}

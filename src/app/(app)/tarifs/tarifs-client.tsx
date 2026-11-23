@@ -54,7 +54,7 @@ export default function TarifsClient({ services }: { services: Service[] }) {
             disabled={createPending}
             className="btn-primary disabled:opacity-60"
           >
-            {createPending ? "Ajout…" : "Ajouter"}
+            {createPending ? "Ajout…" : "Ajouter un service"}
           </button>
         </form>
         {createState?.message && (
