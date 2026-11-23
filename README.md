@@ -1,36 +1,109 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Tickets de caisse — structures de santé (multi-tenant)
 
-## Getting Started
+Application web (Next.js + Supabase) permettant à chaque structure de santé
+(clinique, hôpital, pharmacie) de gérer ses propres tickets de caisse thermiques.
+Seul le module **Ticket** est développé (le module Ordonnancier est reporté).
 
-First, run the development server:
+## Stack
+
+- Next.js 16 (App Router) + TypeScript + Tailwind CSS
+- Supabase : PostgreSQL, Auth, Row Level Security (région Europe)
+- Déploiement : Vercel
+- Interface 100 % en français, monnaie F CFA
+
+## Installation locale
+
+### Prérequis
+
+- Node.js 20+
+- Docker Desktop (pour Supabase local)
+- (Optionnel) GitHub CLI, Vercel CLI, Supabase CLI (installés en devDependencies)
+
+### Étapes
 
 ```bash
+# 1. Installer les dépendances
+npm install
+
+# 2. Copier les variables d'environnement
+cp .env.example .env.local
+# puis renseigner les valeurs (voir section Variables d'environnement)
+
+# 3. Démarrer Supabase local
+npx supabase start
+# Les clés sont affichées à la fin : copier API_URL, ANON_KEY, SERVICE_ROLE_KEY dans .env.local
+
+# 4. Appliquer les migrations
+npx supabase migration up
+
+# 5. Lancer l'application
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+# → http://localhost:3000
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+### Variables d'environnement
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+Voir `.env.example`. Trois variables sont requises :
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+- `NEXT_PUBLIC_SUPABASE_URL` : URL du projet Supabase
+- `NEXT_PUBLIC_SUPABASE_ANON_KEY` : clé publique (anon)
+- `SUPABASE_SERVICE_ROLE_KEY` : clé secrète (serveur uniquement, jamais côté navigateur)
 
-## Learn More
+### Tests
 
-To learn more about Next.js, take a look at the following resources:
+```bash
+# Tests unitaires / logique (Vitest + PGlite)
+npm test
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+# Tests de parcours (Playwright)
+npx playwright test
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+# Build de production
+npm run build
+```
 
-## Deploy on Vercel
+## Déploiement
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+### 1. Supabase (région Europe)
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+1. Créer un projet sur https://supabase.com (région Europe).
+2. Noter l'URL du projet et les clés `anon` et `service_role`.
+3. Lier le projet local :
+   ```bash
+   npx supabase link --project-ref <PROJECT_REF>
+   ```
+4. Pousser les migrations :
+   ```bash
+   npx supabase db push
+   ```
+
+### 2. Vercel
+
+1. Pousser le code sur GitHub.
+2. Importer le dépôt sur https://vercel.com.
+3. Renseigner les variables d'environnement dans Vercel :
+   - `NEXT_PUBLIC_SUPABASE_URL`
+   - `NEXT_PUBLIC_SUPABASE_ANON_KEY`
+   - `SUPABASE_SERVICE_ROLE_KEY`
+4. Déployer.
+
+### 3. Vérifications post-déploiement
+
+- [ ] Aucun secret dans le dépôt (scan gitleaks).
+- [ ] RLS active sur toutes les tables.
+- [ ] Deux structures de test ne voient pas les données l'une de l'autre.
+- [ ] Impression vérifiée sur une imprimante thermique réelle (58 et 80 mm).
+- [ ] README à jour.
+
+## Sécurité
+
+- Isolation multi-tenant par `structure_id` + Row Level Security.
+- Aucune clé `service_role` côté navigateur.
+- Pas de suppression de ticket (annulation avec motif).
+- Prix copié sur le ticket à la création.
+- Calculs en entiers (F CFA).
+- Numéro de reçu attribué côté serveur.
+
+## Licence
+
+Projet privé.

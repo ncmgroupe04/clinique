@@ -1,0 +1,109 @@
+"use server";
+
+import { redirect } from "next/navigation";
+import { createClient, createServiceClient } from "@/lib/supabase/server";
+import {
+  signupSchema,
+  loginSchema,
+  type SignupState,
+  type LoginState,
+} from "@/lib/validations/auth";
+
+export type { SignupState, LoginState };
+
+export async function signup(
+  _prev: SignupState,
+  formData: FormData,
+): Promise<SignupState> {
+  const parsed = signupSchema.safeParse({
+    email: formData.get("email"),
+    password: formData.get("password"),
+    structureName: formData.get("structureName"),
+    fullName: formData.get("fullName"),
+  });
+  if (!parsed.success) {
+    return { errors: parsed.error.flatten().fieldErrors };
+  }
+  const { email, password, structureName, fullName } = parsed.data;
+
+  const supabase = await createClient();
+  const { data, error } = await supabase.auth.signUp({ email, password });
+  if (error || !data.user) {
+    return { message: error?.message ?? "Inscription impossible." };
+  }
+
+  const userId = data.user.id;
+
+  // Create structure + profile using service role (bypasses RLS for bootstrap).
+  try {
+    const admin = createServiceClient();
+    const { data: structure, error: structError } = await admin
+      .from("structures")
+      .insert({ name: structureName })
+      .select("id")
+      .single();
+    if (structError || !structure) throw structError ?? new Error("structure");
+
+    const { error: profileError } = await admin.from("profiles").insert({
+      id: userId,
+      structure_id: structure.id,
+      role: "structure_admin",
+      full_name: fullName,
+    });
+    if (profileError) throw profileError;
+
+    // Two example services (modifiable by the structure).
+    await admin.from("services").insert([
+      { structure_id: structure.id, name: "Consultation", price: 5000 },
+      { structure_id: structure.id, name: "Visite prénatale", price: 3000 },
+    ]);
+  } catch {
+    return {
+      message:
+        "Compte créé mais la structure n'a pas pu être initialisée. Contactez le support.",
+    };
+  }
+
+  if (!data.session) {
+    return {
+      success: true,
+      message:
+        "Compte créé. Vérifiez votre boîte mail pour confirmer l'adresse, puis connectez-vous.",
+    };
+  }
+  redirect("/tableau");
+}
+
+export async function login(
+  _prev: LoginState,
+  formData: FormData,
+): Promise<LoginState> {
+  const parsed = loginSchema.safeParse({
+    email: formData.get("email"),
+    password: formData.get("password"),
+  });
+  if (!parsed.success) {
+    return { errors: parsed.error.flatten().fieldErrors };
+  }
+  const supabase = await createClient();
+  const { error } = await supabase.auth.signInWithPassword(parsed.data);
+  if (error) {
+    console.error("[login] Supabase error:", error.message, error.status);
+    // On ne révèle pas si c'est l'e-mail ou le mot de passe qui est faux,
+    // mais on remonte les autres erreurs (réseau, config, etc.) pour aider au diagnostic.
+    if (
+      error.message?.toLowerCase().includes("invalid login credentials") ||
+      error.message?.toLowerCase().includes("invalid credentials")
+    ) {
+      return { message: "Identifiants incorrects." };
+    }
+    return { message: `Connexion impossible : ${error.message}` };
+  }
+  redirect("/tableau");
+}
+
+export async function logout() {
+  const supabase = await createClient();
+  await supabase.auth.signOut();
+  redirect("/connexion");
+}
