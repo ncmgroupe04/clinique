@@ -3,7 +3,6 @@
 import { useActionState, useState } from "react";
 import Link from "next/link";
 import { signup, login, type SignupState, type LoginState } from "@/app/actions/auth";
-import { PLAN_FEATURES } from "@/lib/plan-features";
 
 function EyeIcon({ visible }: { visible: boolean }) {
   return visible ? (
@@ -219,36 +218,23 @@ export default function AuthScreen({
                 <label className="lbl">Formule d&apos;abonnement</label>
                 <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
                   <div className="rounded-xl border-2 border-border bg-white has-[:checked]:border-accent has-[:checked]:bg-accent-light">
-                    <label className="flex cursor-pointer items-start gap-3 p-3">
-                      <input type="radio" name="planId" value="" defaultChecked className="mt-1 accent-accent" />
-                      <span className="min-w-0 flex-1">
-                        <span className="block text-sm font-extrabold text-ink">Essai gratuit 7 jours</span>
-                        <span className="text-xs text-muted">Sans formule · 0 F</span>
-                      </span>
+                    <label className="flex cursor-pointer items-center gap-3 p-4">
+                      <input type="radio" name="planId" value="" defaultChecked className="accent-accent" />
+                      <span className="min-w-0 flex-1 text-sm font-extrabold text-ink">Essai gratuit 7 jours</span>
                     </label>
-                    <Link href="/formules#essai-gratuit" className="flex w-full items-center justify-center gap-1 rounded-b-xl border-t border-accent px-4 py-2.5 text-sm font-semibold text-accent hover:bg-accent-light">
+                    <Link href="/formules#essai-gratuit" className="flex w-full items-center justify-center rounded-b-xl border-t border-accent px-4 py-2.5 text-sm font-semibold text-accent hover:bg-accent-light">
                       Voir les détails →
                     </Link>
                   </div>
                   {plans.map((p) => (
                     <div key={p.id} className="rounded-xl border-2 border-border bg-white has-[:checked]:border-accent has-[:checked]:bg-accent-light">
-                      <label className="flex cursor-pointer items-start gap-3 p-3">
-                        <input type="radio" name="planId" value={p.id} className="mt-1 accent-accent" />
-                        <span className="min-w-0 flex-1">
-                          <span className="block text-sm font-extrabold text-ink">
-                            {p.name} · {p.monthly_price.toLocaleString("fr-FR")} F/mois
-                          </span>
-                          <span className="block text-xs text-muted">
-                            {p.is_unlimited ? "Utilisateurs illimités" : `${p.max_cashiers ?? 0} caissier(s), ${p.max_docteurs ?? 0} docteur(s)`}
-                            {" · "}
-                            {p.max_documents_per_month ? `${p.max_documents_per_month.toLocaleString("fr-FR")} documents/mois` : "Documents illimités"}
-                          </span>
-                          <span className="mt-1 block text-[11px] text-muted">
-                            {(p.features ?? []).map((f: string) => PLAN_FEATURES.find((x) => x.value === f)?.label ?? f).join(" · ")}
-                          </span>
+                      <label className="flex cursor-pointer items-center gap-3 p-4">
+                        <input type="radio" name="planId" value={p.id} className="accent-accent" />
+                        <span className="min-w-0 flex-1 text-sm font-extrabold text-ink">
+                          {p.name} · {p.monthly_price.toLocaleString("fr-FR")} F/mois
                         </span>
                       </label>
-                      <Link href={`/formules#${p.name.toLowerCase().replace(/\s+/g, "-")}`} className="flex w-full items-center justify-center gap-1 rounded-b-xl border-t border-accent px-4 py-2.5 text-sm font-semibold text-accent hover:bg-accent-light">
+                      <Link href={`/formules#${p.name.toLowerCase().replace(/\s+/g, "-")}`} className="flex w-full items-center justify-center rounded-b-xl border-t border-accent px-4 py-2.5 text-sm font-semibold text-accent hover:bg-accent-light">
                         Voir les détails →
                       </Link>
                     </div>
