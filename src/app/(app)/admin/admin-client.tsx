@@ -6,6 +6,7 @@ import {
   updateSubscription,
   toggleSuspended,
   toggleRegistrationFee,
+  deletePlan,
 } from "@/app/actions/admin";
 
 type Structure = {
@@ -26,6 +27,24 @@ const STATUS_OPTIONS = [
   { value: "expired", label: "Expirés" },
   { value: "deactivated", label: "Désactivés" },
 ];
+
+export function DeletePlanButton({ id }: { id: string }) {
+  return (
+    <form action={deletePlan} className="inline">
+      <input type="hidden" name="id" value={id} />
+      <button
+        type="submit"
+        className="btn-danger-solid"
+        style={{ height: 34, padding: "0 12px", borderRadius: 10, fontSize: 12, width: "auto" }}
+        onClick={(e) => {
+          if (!window.confirm("Supprimer cette formule ?")) e.preventDefault();
+        }}
+      >
+        Supprimer
+      </button>
+    </form>
+  );
+}
 
 export default function AdminStructuresTable({
   structures,
@@ -56,7 +75,6 @@ export default function AdminStructuresTable({
 
   return (
     <div className="space-y-3">
-      {/* Filters */}
       <div className="flex flex-col gap-3 sm:flex-row sm:items-center">
         <input
           type="text"

@@ -6,9 +6,8 @@ import ScreenHeader from "../screen-header";
 import {
   createPlan,
   togglePlanActive,
-  deletePlan,
 } from "@/app/actions/admin";
-import AdminStructuresTable from "./admin-client";
+import AdminStructuresTable, { DeletePlanButton } from "./admin-client";
 
 export default async function AdminPage() {
   await connection();
@@ -111,17 +110,7 @@ export default async function AdminPage() {
                     {p.active ? "Active" : "Inactive"}
                   </button>
                 </form>
-                <form action={deletePlan}>
-                  <input type="hidden" name="id" value={p.id} />
-                  <button
-                    type="submit"
-                    className="btn-danger-solid"
-                    style={{ height: 34, padding: "0 12px", borderRadius: 10, fontSize: 12, width: "auto" }}
-                    onClick={(e) => { if (!confirm("Supprimer cette formule ?")) e.preventDefault(); }}
-                  >
-                    Supprimer
-                  </button>
-                </form>
+                <DeletePlanButton id={p.id} />
               </div>
             </li>
           ))}
