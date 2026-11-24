@@ -4,6 +4,7 @@ import { requireUser } from "@/lib/auth";
 import { createClient } from "@/lib/supabase/server";
 import { formatCfa, formatReceipt, formatDateTime } from "@/lib/format";
 import PrintButton from "./print-button";
+import Link from "next/link";
 
 export default async function TicketDetailPage({
   params,
@@ -57,9 +58,14 @@ export default async function TicketDetailPage({
       `}</style>
       <div className="space-y-4">
         <div className="no-print">
-          <h1 className="scr-title">
-            {formatReceipt(ticket.year, ticket.number)}
-          </h1>
+          <div className="flex items-center justify-between">
+            <h1 className="scr-title">
+              {formatReceipt(ticket.year, ticket.number)}
+            </h1>
+            <Link href="/tickets" className="btn-secondary">
+              ← Retour
+            </Link>
+          </div>
         </div>
 
         {isA6 ? (
@@ -129,24 +135,24 @@ export default async function TicketDetailPage({
             <div className="border-t border-dashed border-gray-400 my-2" />
 
             <p className="text-sm">
-              <span className="font-medium">Patient :</span> {ticket.patient_name}
+              <span className="font-bold">Patient :</span> {ticket.patient_name}
             </p>
             <p className="text-sm">
-              <span className="font-medium">Service :</span> {ticket.service_name}
+              <span className="font-bold">Service :</span> {ticket.service_name}
             </p>
             <p className="text-sm">
-              <span className="font-medium">Quantité :</span> {ticket.quantity}
+              <span className="font-bold">Quantité :</span> {ticket.quantity}
             </p>
 
             <div className="border-t border-dashed border-gray-400 my-2" />
 
             <div className="text-sm space-y-1">
               <div className="flex justify-between">
-                <span>Total</span>
+                <span className="font-bold">Total</span>
                 <span>{formatCfa(ticket.total)}</span>
               </div>
               <div className="flex justify-between">
-                <span>Avance</span>
+                <span className="font-bold">Avance</span>
                 <span>{formatCfa(ticket.advance)}</span>
               </div>
               <div className="flex justify-between font-bold" style={{ fontSize: "16px" }}>
