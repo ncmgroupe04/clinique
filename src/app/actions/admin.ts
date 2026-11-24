@@ -80,7 +80,13 @@ export async function createPlan(formData: FormData): Promise<void> {
   const monthlyPrice = Number(formData.get("monthly_price"));
   const registrationFee = 50000;
   const durationDays = Number(formData.get("duration_days"));
-  if (!name || !Number.isFinite(monthlyPrice) || !Number.isFinite(registrationFee) || !Number.isFinite(durationDays)) return;
+  const maxCashiers = formData.get("max_cashiers") === "" ? null : Number(formData.get("max_cashiers"));
+  const maxDocteurs = formData.get("max_docteurs") === "" ? null : Number(formData.get("max_docteurs"));
+  const isUnlimited = formData.get("is_unlimited") === "true";
+  const isPublic = formData.get("is_public") === "true";
+  const maxDocuments = formData.get("max_documents_per_month") === "" ? null : Number(formData.get("max_documents_per_month"));
+  const features = formData.getAll("features").map(String);
+  if (!name || !Number.isFinite(monthlyPrice) || !Number.isFinite(durationDays)) return;
 
   const supabase = createServiceClient();
   await supabase.from("subscription_plans").insert({
@@ -88,10 +94,57 @@ export async function createPlan(formData: FormData): Promise<void> {
     monthly_price: monthlyPrice,
     registration_fee: registrationFee,
     duration_days: durationDays,
+    max_cashiers: isUnlimited ? null : maxCashiers,
+    max_docteurs: isUnlimited ? null : maxDocteurs,
+    is_unlimited: isUnlimited,
+    is_public: isPublic,
+    max_documents_per_month: isUnlimited ? null : maxDocuments,
+    features,
   });
 
   revalidatePath("/admin");
   revalidateTag("plans", "max");
+}
+
+export async function updatePlan(
+  _prev: { message?: string; success?: boolean },
+  formData: FormData,
+): Promise<{ message?: string; success?: boolean }> {
+  await requireRole("platform_admin");
+  const id = String(formData.get("id") ?? "");
+  const name = String(formData.get("name") ?? "").trim();
+  if (!id || !name) return { message: "Champs requis." };
+
+  const monthlyPrice = Number(formData.get("monthly_price"));
+  const durationDays = Number(formData.get("duration_days"));
+  const maxCashiers = formData.get("max_cashiers") === "" ? null : Number(formData.get("max_cashiers"));
+  const maxDocteurs = formData.get("max_docteurs") === "" ? null : Number(formData.get("max_docteurs"));
+  const isUnlimited = formData.get("is_unlimited") === "true";
+  const isPublic = formData.get("is_public") === "true";
+  const maxDocuments = formData.get("max_documents_per_month") === "" ? null : Number(formData.get("max_documents_per_month"));
+  const features = formData.getAll("features").map(String);
+  if (!Number.isFinite(monthlyPrice) || !Number.isFinite(durationDays)) return { message: "Valeurs invalides." };
+
+  const supabase = createServiceClient();
+  const { error } = await supabase
+    .from("subscription_plans")
+    .update({
+      name,
+      monthly_price: monthlyPrice,
+      duration_days: durationDays,
+      max_cashiers: isUnlimited ? null : maxCashiers,
+      max_docteurs: isUnlimited ? null : maxDocteurs,
+      is_unlimited: isUnlimited,
+      is_public: isPublic,
+      max_documents_per_month: isUnlimited ? null : maxDocuments,
+      features,
+    })
+    .eq("id", id);
+  if (error) return { message: "Mise à jour impossible." };
+
+  revalidatePath("/admin/formules");
+  revalidateTag("plans", "max");
+  return { success: true };
 }
 
 export async function togglePlanActive(formData: FormData): Promise<void> {

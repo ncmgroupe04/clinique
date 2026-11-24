@@ -7,8 +7,9 @@ const getPublicPlans = unstable_cache(
     const supabase = createServiceClient();
     const { data } = await supabase
       .from("subscription_plans")
-      .select("id, name, monthly_price, registration_fee")
+      .select("id, name, monthly_price, is_unlimited, max_cashiers, max_docteurs")
       .eq("active", true)
+      .eq("is_public", true)
       .order("created_at", { ascending: true });
     return data ?? [];
   },

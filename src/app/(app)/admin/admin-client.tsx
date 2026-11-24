@@ -1,13 +1,15 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useActionState, useTransition } from "react";
 import {
   toggleStructureActive,
   updateSubscription,
   toggleSuspended,
   toggleRegistrationFee,
   deletePlan,
+  updatePlan,
 } from "@/app/actions/admin";
+import { PLAN_FEATURES } from "@/lib/plan-features";
 
 type Structure = {
   id: string;
@@ -30,6 +32,17 @@ const STATUS_OPTIONS = [
 
 export function DeletePlanButton({ id }: { id: string }) {
   const [open, setOpen] = useState(false);
+  const [pending, startTransition] = useTransition();
+
+  const confirm = () => {
+    const fd = new FormData();
+    fd.set("id", id);
+    startTransition(async () => {
+      await deletePlan(fd);
+      setOpen(false);
+    });
+  };
+
   return (
     <>
       <button
@@ -64,17 +77,15 @@ export function DeletePlanButton({ id }: { id: string }) {
               >
                 Annuler
               </button>
-              <form action={deletePlan}>
-                <input type="hidden" name="id" value={id} />
-                <button
-                  type="submit"
-                  className="btn-danger-solid"
-                  style={{ height: 40, padding: "0 18px", borderRadius: 12, fontSize: 13, width: "auto" }}
-                  onClick={() => setOpen(false)}
-                >
-                  Supprimer
-                </button>
-              </form>
+              <button
+                type="button"
+                disabled={pending}
+                className="btn-danger-solid"
+                style={{ height: 40, padding: "0 18px", borderRadius: 12, fontSize: 13, width: "auto" }}
+                onClick={confirm}
+              >
+                {pending ? "…" : "Supprimer"}
+              </button>
             </div>
           </div>
         </div>
@@ -282,5 +293,78 @@ export default function AdminStructuresTable({
         </div>
       )}
     </div>
+  );
+}
+
+type PlanEdit = {
+  id: string;
+  name: string;
+  monthly_price: number;
+  duration_days: number;
+  max_cashiers: number | null;
+  max_docteurs: number | null;
+  is_unlimited: boolean;
+  is_public: boolean;
+  max_documents_per_month: number | null;
+  features: string[];
+};
+
+export function EditPlanButton({ plan }: { plan: PlanEdit }) {
+  const [open, setOpen] = useState(false);
+  const [state, action, pending] = useActionState(updatePlan, {});
+
+  return (
+    <>
+      <button
+        type="button"
+        onClick={() => setOpen(true)}
+        className="btn-secondary text-xs"
+        style={{ height: 34, padding: "0 12px", borderRadius: 10, width: "auto" }}
+      >
+        Modifier
+      </button>
+      {open && (
+        <div
+          className="fixed inset-0 z-50 flex items-center justify-center p-4"
+          style={{ background: "rgba(11, 31, 42, 0.55)" }}
+          onClick={() => setOpen(false)}
+        >
+          <div className="card max-h-[90vh] w-full max-w-lg overflow-y-auto" onClick={(e) => e.stopPropagation()}>
+            <h3 className="text-lg font-extrabold text-ink">Modifier la formule</h3>
+            <form action={action} className="mt-4 grid grid-cols-1 gap-3 sm:grid-cols-2">
+              <input type="hidden" name="id" value={plan.id} />
+              <input name="name" defaultValue={plan.name} required className="input" style={{ height: 38, fontSize: 13 }} />
+              <input name="monthly_price" type="number" min={0} defaultValue={plan.monthly_price} required className="input" style={{ height: 38, fontSize: 13 }} />
+              <input name="duration_days" type="number" min={1} defaultValue={plan.duration_days} className="input" style={{ height: 38, fontSize: 13 }} />
+              <input name="max_cashiers" type="number" min={0} defaultValue={plan.max_cashiers ?? ""} placeholder="Nb caissiers" className="input" style={{ height: 38, fontSize: 13 }} />
+              <input name="max_docteurs" type="number" min={0} defaultValue={plan.max_docteurs ?? ""} placeholder="Nb docteurs" className="input" style={{ height: 38, fontSize: 13 }} />
+              <input name="max_documents_per_month" type="number" min={1} defaultValue={plan.max_documents_per_month ?? ""} placeholder="Documents / mois" className="input" style={{ height: 38, fontSize: 13 }} />
+              <div className="sm:col-span-2 flex flex-wrap gap-4">
+                <label className="flex items-center gap-2 text-xs text-muted"><input type="checkbox" name="is_unlimited" value="true" defaultChecked={plan.is_unlimited} className="accent-accent" /> Utilisateurs illimités</label>
+                <label className="flex items-center gap-2 text-xs text-muted"><input type="checkbox" name="is_public" value="true" defaultChecked={plan.is_public} className="accent-accent" /> Visible à l&apos;inscription</label>
+              </div>
+              <div className="sm:col-span-2">
+                <p className="lbl">Fonctionnalités incluses</p>
+                <div className="flex flex-wrap gap-x-4 gap-y-2">
+                  {PLAN_FEATURES.map((f) => (
+                    <label key={f.value} className="flex items-center gap-1.5 text-xs text-ink">
+                      <input type="checkbox" name="features" value={f.value} defaultChecked={plan.features.includes(f.value)} className="accent-accent" />
+                      {f.label}
+                    </label>
+                  ))}
+                </div>
+              </div>
+              {state?.message && <p className="text-sm text-danger sm:col-span-2">{state.message}</p>}
+              <div className="sm:col-span-2 flex justify-end gap-2">
+                <button type="button" onClick={() => setOpen(false)} className="btn-secondary" style={{ height: 38, borderRadius: 10, fontSize: 13 }}>Annuler</button>
+                <button type="submit" disabled={pending} className="go" style={{ height: 38, padding: "0 16px", borderRadius: 10, fontSize: 13, width: "auto" }}>
+                  {pending ? "…" : "Enregistrer"}
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
+    </>
   );
 }

@@ -5,6 +5,7 @@ import { revalidatePath } from "next/cache";
 import { requireRole } from "@/lib/auth";
 import { createClient, createServiceClient } from "@/lib/supabase/server";
 import { createTicketSchema, type CreateTicketState } from "@/lib/validations/tickets";
+import { assertDocumentQuota } from "@/lib/quotas";
 
 export type { CreateTicketState };
 
@@ -28,6 +29,12 @@ export async function createTicket(
     return { errors: parsed.error.flatten().fieldErrors };
   }
   const d = parsed.data;
+
+  try {
+    await assertDocumentQuota(user.structureId);
+  } catch (e) {
+    return { message: e instanceof Error ? e.message : "Quota atteint." };
+  }
 
   // Resolve service_id (create an ad-hoc service for "Autre service").
   let serviceId = d.service_id && d.service_id !== "" ? d.service_id : null;

@@ -16,7 +16,7 @@ function EyeIcon({ visible }: { visible: boolean }) {
   );
 }
 
-type PlanOption = { id: string; name: string; monthly_price: number; registration_fee: number };
+type PlanOption = { id: string; name: string; monthly_price: number; is_unlimited: boolean; max_cashiers: number | null; max_docteurs: number | null };
 
 export default function AuthScreen({
   initialMode,
@@ -211,7 +211,8 @@ export default function AuthScreen({
                     <option value="">Choisir une formule (essai 7 jours offert)</option>
                     {plans.map((p) => (
                       <option key={p.id} value={p.id}>
-                        {p.name} — {p.monthly_price.toLocaleString("fr-FR")} F/mois · inscription 50 000 F
+                        {p.name} — {p.monthly_price.toLocaleString("fr-FR")} F/mois
+                      {p.is_unlimited ? " · illimité" : ` · ${p.max_cashiers ?? 0} caissier(s), ${p.max_docteurs ?? 0} docteur(s)`}
                       </option>
                     ))}
                   </select>
