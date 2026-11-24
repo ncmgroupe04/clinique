@@ -204,19 +204,21 @@ export default function AuthScreen({
                 <label className="lbl" htmlFor="headerText">Autres informations</label>
                 <input id="headerText" name="headerText" className="input" placeholder="Informations complémentaires" />
               </div>
-              <div className="sm:col-span-2 relative">
+              <div className="sm:col-span-2">
                 <label className="lbl" htmlFor="planId">Formule d&apos;abonnement</label>
-                <select id="planId" name="planId" className="input appearance-none" style={{ paddingRight: 42 }} defaultValue="">
-                  <option value="">Choisir une formule (essai 7 jours offert)</option>
-                  {plans.map((p) => (
-                    <option key={p.id} value={p.id}>
-                      {p.name} — {p.monthly_price.toLocaleString("fr-FR")} F/mois · inscription {p.registration_fee.toLocaleString("fr-FR")} F
-                    </option>
-                  ))}
-                </select>
-                <svg className="pointer-events-none absolute top-1/2 -translate-y-1/2" style={{ right: 16 }} width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#0b7a6b" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
-                  <path d="m6 9 6 6 6-6" />
-                </svg>
+                <div className="relative">
+                  <select id="planId" name="planId" className="input appearance-none" style={{ paddingRight: 42 }} defaultValue="">
+                    <option value="">Choisir une formule (essai 7 jours offert)</option>
+                    {plans.map((p) => (
+                      <option key={p.id} value={p.id}>
+                        {p.name} — {p.monthly_price.toLocaleString("fr-FR")} F/mois · inscription {p.registration_fee.toLocaleString("fr-FR")} F
+                      </option>
+                    ))}
+                  </select>
+                  <svg className="pointer-events-none absolute right-4 top-1/2 -translate-y-1/2" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#0b7a6b" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+                    <path d="m6 9 6 6 6-6" />
+                  </svg>
+                </div>
               </div>
               {signupState?.message && !signupState.success && (
                 <p className="text-sm text-danger sm:col-span-2">{signupState.message}</p>
