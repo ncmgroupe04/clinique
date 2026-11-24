@@ -174,3 +174,4 @@ pas bloquer les choix d'architecture actuels (multi-tenant, devise, langue).
 ## Licence
 
 Projet privé.
+"# clinique" 
