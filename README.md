@@ -148,6 +148,19 @@ d'environnement :
 - [ ] Impression vérifiée sur une imprimante thermique réelle (58 et 80 mm) et A6.
 - [ ] Essai de 7 jours et suspension automatique vérifiés.
 
+## Roadmap (évolutions prévues, hors V1)
+
+Le détail est dans le cahier des charges, section 13. Ces deux sujets sont
+**anticipés mais non développés** ; ils ont été cadrés avant la production pour ne
+pas bloquer les choix d'architecture actuels (multi-tenant, devise, langue).
+
+- **Mode hors ligne** : file locale IndexedDB, numéros temporaires `TEMP-…`
+  réattribués côté serveur à la reconnexion, mention « À régulariser » sur le ticket
+  imprimé hors ligne. Critère : 10 tickets hors ligne synchronisés sans trou ni doublon.
+- **Extension vers la sous-région** : table `countries`, devise et langue par
+  structure, mentions légales adaptées par pays, numérotation toujours par structure.
+  Critère : deux structures de pays différents avec devises distinctes sans mélange.
+
 ## Sécurité
 
 - Isolation multi-tenant par `structure_id` + Row Level Security.
