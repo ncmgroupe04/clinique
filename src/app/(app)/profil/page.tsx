@@ -1,6 +1,6 @@
 import { connection } from "next/server";
 import { requireUser } from "@/lib/auth";
-import { createClient } from "@/lib/supabase/server";
+import { createServiceClient } from "@/lib/supabase/server";
 import ProfileActions from "./profile-actions";
 
 function initials(name: string | null, email: string): string {
@@ -21,7 +21,7 @@ export default async function ProfilPage() {
   let endDate = "—";
   let paymentStatus = "—";
   if (user.structureId) {
-    const supabase = await createClient();
+    const supabase = createServiceClient();
     const { data } = await supabase
       .from("structures")
       .select("name, plan_id, subscription_ends_at, registration_fee_paid")

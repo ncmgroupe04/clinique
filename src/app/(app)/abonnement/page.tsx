@@ -1,7 +1,7 @@
 import { redirect } from "next/navigation";
 import { connection } from "next/server";
 import { requireUser } from "@/lib/auth";
-import { createClient } from "@/lib/supabase/server";
+import { createServiceClient } from "@/lib/supabase/server";
 import ScreenHeader from "../screen-header";
 import RenewalForm from "./renewal-form";
 import WaveQr from "./wave-qr";
@@ -14,7 +14,7 @@ export default async function AbonnementPage() {
   if (user.role !== "structure_admin" && user.role !== "platform_admin") redirect("/tableau");
   if (!user.structureId) redirect("/tableau");
 
-  const supabase = await createClient();
+  const supabase = createServiceClient();
   const { data: structure } = await supabase
     .from("structures")
     .select("name, plan, subscription_ends_at, renewal_requested, renewal_reference, registration_fee_paid")
