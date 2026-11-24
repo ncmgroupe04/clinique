@@ -2,7 +2,7 @@
 
 import { revalidatePath } from "next/cache";
 import { requireRole } from "@/lib/auth";
-import { createClient } from "@/lib/supabase/server";
+import { createServiceClient } from "@/lib/supabase/server";
 import { settingsSchema, type SettingsState } from "@/lib/validations/settings";
 
 export type { SettingsState };
@@ -28,10 +28,7 @@ export async function updateSettings(
     return { errors: parsed.error.flatten().fieldErrors };
   }
 
-  const printFormat = parsed.data.print_format ?? (parsed.data.paper_width_mm === 58 ? "58" : "80");
-  const paperWidth = printFormat === "58" ? 58 : 80;
-
-  const supabase = await createClient();
+  const supabase = await createServiceClient();
   const { error } = await supabase
     .from("structures")
     .update({
@@ -39,8 +36,7 @@ export async function updateSettings(
       address: parsed.data.address || null,
       phone: parsed.data.phone || null,
       header_text: parsed.data.header_text || null,
-      paper_width_mm: paperWidth,
-      print_format: printFormat,
+      paper_width_mm: parsed.data.paper_width_mm,
     })
     .eq("id", user.structureId);
 
@@ -63,7 +59,7 @@ export async function updatePaperWidth(formData: FormData): Promise<void> {
 
   const paperWidth = printFormat === "58" ? 58 : 80;
 
-  const supabase = await createClient();
+  const supabase = await createServiceClient();
   await supabase
     .from("structures")
     .update({ paper_width_mm: paperWidth, print_format: printFormat })
