@@ -113,8 +113,8 @@ body {
 .nv.on { background: #163545; color: #fff; }
 
 /* Logout: icône + libellé, fond vert, texte blanc */
-.nv-logout { width: auto; height: 48px; flex-direction: row; justify-content: center; align-items: center; gap: 10px; padding: 0 16px; border: none; border-radius: 14px; color: #fff; font-weight: 800; background: #085e54; white-space: nowrap; transition: background 0.15s ease; }
-.nv-logout:hover { background: #0b7a6b; }
+.nv-logout { width: auto; height: 48px; flex-direction: row; justify-content: center; align-items: center; gap: 10px; padding: 0 16px; border: none; border-radius: 14px; color: #fff; font-weight: 800; background: #0b7a6b; white-space: nowrap; transition: background 0.15s ease; }
+.nv-logout:hover { background: #085e54; }
 .nv-logout .logout-label { display: inline; font-size: 13px; font-weight: 800; white-space: nowrap; color: #fff; }
 .nv-logout .logout-icon { display: inline; width: 18px; height: 18px; color: #fff; }
 
