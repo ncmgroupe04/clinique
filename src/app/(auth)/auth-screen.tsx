@@ -226,7 +226,7 @@ export default function AuthScreen({
                         <span className="text-xs text-muted">Sans formule · 0 F</span>
                       </span>
                     </label>
-                    <Link href="/formules" className="flex w-full items-center justify-center gap-1 rounded-b-xl border-t border-accent px-4 py-2.5 text-sm font-semibold text-accent hover:bg-accent-light">
+                    <Link href="/formules#essai-gratuit" className="flex w-full items-center justify-center gap-1 rounded-b-xl border-t border-accent px-4 py-2.5 text-sm font-semibold text-accent hover:bg-accent-light">
                       Voir les détails →
                     </Link>
                   </div>

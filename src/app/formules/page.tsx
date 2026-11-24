@@ -28,6 +28,17 @@ export default async function FormulesPubliquesPage() {
           <p className="scr-sub">Choisissez la formule adaptée à votre structure. Essai gratuit de 7 jours offert à l&apos;inscription.</p>
         </div>
         <div className="grid grid-cols-1 gap-5 md:grid-cols-3">
+          <section id="essai-gratuit" className="card flex flex-col gap-4 md:col-span-3 lg:col-span-1">
+            <h2 className="text-xl font-extrabold text-ink">Essai gratuit 7 jours</h2>
+            <p className="text-3xl font-extrabold text-accent">0 F <span className="text-sm font-semibold text-muted">/ 7 jours</span></p>
+            <p className="text-sm text-muted">Sans formule, sans engagement. Découvrez la plateforme pendant 7 jours avant de choisir une formule.</p>
+            <ul className="space-y-2 text-sm">
+              {["Création de tickets", "Factures", "Historique et caisse", "Impression thermique 80/58 mm", "Réglages de la structure"].map((f) => (
+                <li key={f} className="flex items-center gap-2 text-ink"><span className="text-accent">✓</span>{f}</li>
+              ))}
+            </ul>
+            <Link href="/inscription" className="btn-primary mt-auto text-center">Commencer l&apos;essai</Link>
+          </section>
           {plans.map((p) => (
             <section key={p.id} id={p.name.toLowerCase().replace(/\s+/g, "-")} className="card flex flex-col gap-4">
               <h2 className="text-xl font-extrabold text-ink">{p.name}</h2>
