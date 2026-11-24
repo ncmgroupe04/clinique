@@ -73,7 +73,7 @@ export default function HistoriqueClient({ tickets }: { tickets: Ticket[] }) {
                     <button
                       type="button"
                       onClick={() => setCancelingId(t.id)}
-                      className="text-sm font-semibold text-[#DC2626]"
+                      className="text-sm font-semibold text-[#DC2626] cursor-pointer"
                     >
                       Annuler le ticket
                     </button>
@@ -83,7 +83,7 @@ export default function HistoriqueClient({ tickets }: { tickets: Ticket[] }) {
                       <input type="hidden" name="ticket_id" value={t.id} />
                       <button
                         type="submit"
-                        className="text-sm font-semibold text-[#0B7A6B]"
+                        className="text-sm font-semibold text-[#0B7A6B] cursor-pointer"
                       >
                         Rétablir
                       </button>

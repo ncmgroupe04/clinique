@@ -116,7 +116,7 @@ export async function restoreTicket(formData: FormData): Promise<void> {
   const ticketId = String(formData.get("ticket_id") ?? "");
   if (!ticketId) return;
 
-  const supabase = await createClient();
+  const supabase = await createServiceClient();
   const { data: ticket } = await supabase
     .from("tickets")
     .select("id, status")

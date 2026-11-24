@@ -307,7 +307,13 @@ function DeleteServiceButton({ id }: { id: string }) {
               </button>
               <form action={action}>
                 <input type="hidden" name="id" value={id} />
-                <button type="submit" disabled={pending} className="btn-danger-solid" style={{ height: 40, padding: "0 18px", borderRadius: 12, fontSize: 13, width: "auto" }}>
+                <button
+                  type="submit"
+                  disabled={pending}
+                  className="btn-danger-solid"
+                  style={{ height: 40, padding: "0 18px", borderRadius: 12, fontSize: 13, width: "auto" }}
+                  onClick={() => setOpen(false)}
+                >
                   {pending ? "…" : "Supprimer"}
                 </button>
               </form>

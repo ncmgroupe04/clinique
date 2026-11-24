@@ -70,6 +70,7 @@ export function DeletePlanButton({ id }: { id: string }) {
                   type="submit"
                   className="btn-danger-solid"
                   style={{ height: 40, padding: "0 18px", borderRadius: 12, fontSize: 13, width: "auto" }}
+                  onClick={() => setOpen(false)}
                 >
                   Supprimer
                 </button>
