@@ -119,6 +119,8 @@ export default function SidebarNav({ role }: { role: Role }) {
       items.push({ href: "/tickets", label: "Tickets", icon: "ticket" });
       items.push({ href: "/tickets/historique", label: "Historique", icon: "history" });
       items.push({ href: "/factures", label: "Factures", icon: "invoice" });
+    }
+    if (role === "structure_admin" || role === "docteur") {
       items.push({ href: "/ordonnances", label: "Ordonnances", icon: "ordonnance", badge: "Bientôt" });
     }
     if (adminAccess) {

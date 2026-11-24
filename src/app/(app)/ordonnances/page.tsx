@@ -1,10 +1,12 @@
+import { redirect } from "next/navigation";
 import { connection } from "next/server";
 import { requireUser } from "@/lib/auth";
 import ScreenHeader from "../screen-header";
 
 export default async function OrdonnancesPage() {
   await connection();
-  await requireUser();
+  const user = await requireUser();
+  if (user.role !== "structure_admin" && user.role !== "docteur") redirect("/tableau");
   return (
     <div className="flex flex-1 flex-col gap-[26px]">
       <ScreenHeader title="Ordonnances" subtitle="Module en préparation." />
