@@ -55,6 +55,8 @@ export default function AdminStructuresTable({
 }) {
   const [query, setQuery] = useState("");
   const [statusFilter, setStatusFilter] = useState("all");
+  const [page, setPage] = useState(1);
+  const PAGE_SIZE = 20;
 
   const now = new Date();
   const filtered = structures.filter((s) => {
@@ -73,6 +75,11 @@ export default function AdminStructuresTable({
     return status === statusFilter;
   });
 
+  const totalPages = Math.max(1, Math.ceil(filtered.length / PAGE_SIZE));
+  const safePage = Math.min(page, totalPages);
+  const start = (safePage - 1) * PAGE_SIZE;
+  const pageItems = filtered.slice(start, start + PAGE_SIZE);
+
   return (
     <div className="space-y-3">
       <div className="flex flex-col gap-3 sm:flex-row sm:items-center">
@@ -80,13 +87,13 @@ export default function AdminStructuresTable({
           type="text"
           placeholder="Rechercher une structure…"
           value={query}
-          onChange={(e) => setQuery(e.target.value)}
+          onChange={(e) => { setQuery(e.target.value); setPage(1); }}
           className="input"
           style={{ height: 40, fontSize: 14 }}
         />
         <select
           value={statusFilter}
-          onChange={(e) => setStatusFilter(e.target.value)}
+          onChange={(e) => { setStatusFilter(e.target.value); setPage(1); }}
           className="input appearance-none"
           style={{ height: 40, fontSize: 14, width: 200, paddingRight: 36 }}
         >
@@ -117,7 +124,7 @@ export default function AdminStructuresTable({
               </tr>
             </thead>
             <tbody>
-              {filtered.map((s) => {
+              {pageItems.map((s) => {
                 const endsAt = s.subscription_ends_at ? new Date(s.subscription_ends_at) : null;
                 const expired = endsAt ? endsAt < now : false;
                 const status = !s.active
@@ -188,6 +195,53 @@ export default function AdminStructuresTable({
               })}
             </tbody>
           </table>
+        </div>
+      )}
+      {/* Pagination */}
+      {filtered.length > 0 && (
+        <div className="flex flex-wrap items-center justify-between gap-3 pt-2">
+          <span className="text-xs text-muted">
+            Page {safePage} sur {totalPages} · {filtered.length} résultat(s)
+          </span>
+          <div className="flex items-center gap-1">
+            <button
+              type="button"
+              onClick={() => setPage((p) => Math.max(1, p - 1))}
+              disabled={safePage <= 1}
+              className="btn-secondary"
+              style={{ height: 32, padding: "0 12px", borderRadius: 10, fontSize: 12 }}
+            >
+              Précédent
+            </button>
+            {Array.from({ length: totalPages }, (_, i) => i + 1)
+              .filter((n) => n === 1 || n === totalPages || Math.abs(n - safePage) <= 1)
+              .map((n, idx, arr) => {
+                const prev = arr[idx - 1];
+                const showEllipsis = prev && n - prev > 1;
+                return (
+                  <span key={n} className="flex items-center gap-1">
+                    {showEllipsis && <span className="px-1 text-muted">…</span>}
+                    <button
+                      type="button"
+                      onClick={() => setPage(n)}
+                      className={n === safePage ? "go" : "btn-secondary"}
+                      style={{ height: 32, width: 32, padding: 0, borderRadius: 10, fontSize: 12 }}
+                    >
+                      {n}
+                    </button>
+                  </span>
+                );
+              })}
+            <button
+              type="button"
+              onClick={() => setPage((p) => Math.min(totalPages, p + 1))}
+              disabled={safePage >= totalPages}
+              className="btn-secondary"
+              style={{ height: 32, padding: "0 12px", borderRadius: 10, fontSize: 12 }}
+            >
+              Suivant
+            </button>
+          </div>
         </div>
       )}
     </div>
