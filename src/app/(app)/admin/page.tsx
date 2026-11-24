@@ -4,13 +4,11 @@ import { requireUser } from "@/lib/auth";
 import { createServiceClient } from "@/lib/supabase/server";
 import ScreenHeader from "../screen-header";
 import {
-  toggleStructureActive,
-  updateSubscription,
-  toggleSuspended,
-  toggleRegistrationFee,
   createPlan,
   togglePlanActive,
+  deletePlan,
 } from "@/app/actions/admin";
+import AdminStructuresTable from "./admin-client";
 
 export default async function AdminPage() {
   await connection();
@@ -101,17 +99,30 @@ export default async function AdminPage() {
                   {p.monthly_price.toLocaleString("fr-FR")} F/mois · inscription {p.registration_fee.toLocaleString("fr-FR")} F · {p.duration_days} jours
                 </p>
               </div>
-              <form action={togglePlanActive}>
-                <input type="hidden" name="id" value={p.id} />
-                <input type="hidden" name="active" value={String(p.active)} />
-                <button
-                  type="submit"
-                  className={p.active ? "btn-secondary" : "btn-danger-solid"}
-                  style={{ height: 34, padding: "0 12px", borderRadius: 10, fontSize: 12, width: "auto" }}
-                >
-                  {p.active ? "Active" : "Inactive"}
-                </button>
-              </form>
+              <div className="flex items-center gap-2">
+                <form action={togglePlanActive}>
+                  <input type="hidden" name="id" value={p.id} />
+                  <input type="hidden" name="active" value={String(p.active)} />
+                  <button
+                    type="submit"
+                    className={p.active ? "btn-secondary" : "btn-danger-solid"}
+                    style={{ height: 34, padding: "0 12px", borderRadius: 10, fontSize: 12, width: "auto" }}
+                  >
+                    {p.active ? "Active" : "Inactive"}
+                  </button>
+                </form>
+                <form action={deletePlan}>
+                  <input type="hidden" name="id" value={p.id} />
+                  <button
+                    type="submit"
+                    className="btn-danger-solid"
+                    style={{ height: 34, padding: "0 12px", borderRadius: 10, fontSize: 12, width: "auto" }}
+                    onClick={(e) => { if (!confirm("Supprimer cette formule ?")) e.preventDefault(); }}
+                  >
+                    Supprimer
+                  </button>
+                </form>
+              </div>
             </li>
           ))}
         </ul>
@@ -128,103 +139,24 @@ export default async function AdminPage() {
         </form>
       </section>
 
-      {/* Structures table */}
+      {/* Structures table with search & filters */}
       <section className="card">
         <div className="mb-4 flex items-center justify-between">
           <h2 className="text-lg font-extrabold">Structures abonnées</h2>
-          <span className="text-sm font-semibold text-muted">
-            {structures?.length ?? 0} structure(s)
-          </span>
         </div>
-        {(!structures || structures.length === 0) ? (
-          <p className="text-sm text-muted">Aucune structure.</p>
-        ) : (
-          <div className="overflow-x-auto">
-            <table className="w-full text-sm">
-              <thead>
-                <tr className="border-b border-border text-left text-xs font-bold uppercase tracking-wide text-muted">
-                  <th className="py-2 pr-3">Structure</th>
-                  <th className="py-2 pr-3">Inscription (50 000 F)</th>
-                  <th className="py-2 pr-3">Échéance mensuelle</th>
-                  <th className="py-2 pr-3">Statut</th>
-                  <th className="py-2 pr-3">Tickets</th>
-                  <th className="py-2 pr-3">Actions</th>
-                </tr>
-              </thead>
-              <tbody>
-                {structures.map((s) => {
-                  const endsAt = s.subscription_ends_at ? new Date(s.subscription_ends_at) : null;
-                  const expired = endsAt ? endsAt < now : false;
-                  const status = !s.active
-                    ? "Désactivée"
-                    : s.suspended
-                      ? "Suspendue"
-                      : expired
-                        ? "Expirée"
-                        : "Active";
-                  const statusColor = !s.active || s.suspended || expired ? "text-danger" : "text-accent";
-                  return (
-                    <tr key={s.id} className="border-b border-border last:border-0">
-                      <td className="py-3 pr-3 font-bold text-ink">{s.name}</td>
-                      <td className="py-3 pr-3">
-                        <form action={toggleRegistrationFee} className="inline">
-                          <input type="hidden" name="id" value={s.id} />
-                          <input type="hidden" name="paid" value={String(s.registration_fee_paid)} />
-                          <button
-                            type="submit"
-                            className={s.registration_fee_paid ? "text-accent font-semibold" : "text-danger font-semibold"}
-                          >
-                            {s.registration_fee_paid ? "Payée" : "Non payée"}
-                          </button>
-                        </form>
-                      </td>
-                      <td className="py-3 pr-3">
-                        {endsAt ? endsAt.toLocaleDateString("fr-FR") : "—"}
-                      </td>
-                      <td className={`py-3 pr-3 font-semibold ${statusColor}`}>{status}</td>
-                      <td className="py-3 pr-3">{countMap.get(s.id) ?? 0}</td>
-                      <td className="py-3 pr-3">
-                        <div className="flex flex-wrap items-center gap-2">
-                          <form action={updateSubscription} className="inline">
-                            <input type="hidden" name="id" value={s.id} />
-                            <button
-                              type="submit"
-                              className="go"
-                              style={{ height: 32, padding: "0 12px", borderRadius: 10, fontSize: 12, width: "auto" }}
-                            >
-                              + 30 jours
-                            </button>
-                          </form>
-                          <form action={toggleSuspended} className="inline">
-                            <input type="hidden" name="id" value={s.id} />
-                            <input type="hidden" name="suspended" value={String(s.suspended)} />
-                            <button
-                              type="submit"
-                              className="btn-secondary"
-                              style={{ height: 32, padding: "0 12px", borderRadius: 10, fontSize: 12 }}
-                            >
-                              {s.suspended ? "Réactiver" : "Suspendre"}
-                            </button>
-                          </form>
-                          <form action={toggleStructureActive} className="inline">
-                            <input type="hidden" name="id" value={s.id} />
-                            <input type="hidden" name="active" value={String(s.active)} />
-                            <button
-                              type="submit"
-                              className="text-xs font-medium text-muted underline-offset-2 hover:underline"
-                            >
-                              {s.active ? "Désactiver" : "Réactiver structure"}
-                            </button>
-                          </form>
-                        </div>
-                      </td>
-                    </tr>
-                  );
-                })}
-              </tbody>
-            </table>
-          </div>
-        )}
+        <AdminStructuresTable
+          structures={(structures ?? []).map((s) => ({
+            id: s.id,
+            name: s.name,
+            active: s.active,
+            created_at: s.created_at,
+            plan: s.plan,
+            subscription_ends_at: s.subscription_ends_at,
+            suspended: s.suspended,
+            registration_fee_paid: s.registration_fee_paid,
+          }))}
+          countMap={Object.fromEntries(countMap)}
+        />
       </section>
     </div>
   );

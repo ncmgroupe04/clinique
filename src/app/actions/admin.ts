@@ -105,3 +105,25 @@ export async function togglePlanActive(formData: FormData): Promise<void> {
 
   revalidatePath("/admin");
 }
+
+export async function deletePlan(formData: FormData): Promise<void> {
+  await requireRole("platform_admin");
+
+  const id = String(formData.get("id") ?? "");
+  if (!id) return;
+
+  const supabase = createServiceClient();
+  // Réaffecter les structures liées au plan Standard avant suppression
+  const { data: standard } = await supabase
+    .from("subscription_plans")
+    .select("id")
+    .neq("id", id)
+    .limit(1)
+    .maybeSingle();
+  if (standard?.id) {
+    await supabase.from("structures").update({ plan_id: standard.id }).eq("plan_id", id);
+  }
+  await supabase.from("subscription_plans").delete().eq("id", id);
+
+  revalidatePath("/admin");
+}
