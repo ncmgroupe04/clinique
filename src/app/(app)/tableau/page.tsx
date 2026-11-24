@@ -3,12 +3,12 @@ import { requireUser } from "@/lib/auth";
 export default async function TableauPage() {
   const user = await requireUser();
   return (
-    <div className="space-y-6">
+    <div className="flex flex-col gap-[26px]">
       <div>
-        <h1 className="text-2xl font-bold text-[#0B1F2A]">Tableau de bord</h1>
-        <p className="text-sm text-[#4B5F6B]">
+        <h1 className="scr-title">Tableau de bord</h1>
+        <p className="scr-sub">
           Connecté en tant que{" "}
-          <span className="font-medium text-[#0B7A6B]">{user.role}</span>.
+          <span className="font-medium text-accent">{user.role}</span>.
         </p>
       </div>
       <div className="card">

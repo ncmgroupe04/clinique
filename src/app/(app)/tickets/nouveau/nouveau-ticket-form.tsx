@@ -2,7 +2,6 @@
 
 import { useActionState, useState } from "react";
 import { createTicket, type CreateTicketState } from "@/app/actions/tickets";
-import { formatCfa, formatDateTime } from "@/lib/format";
 
 type Service = { id: string; name: string; price: number };
 
@@ -11,16 +10,25 @@ type Structure = {
   address?: string | null;
   phone?: string | null;
   header_text?: string | null;
+  paper_width_mm?: number | null;
 };
+
+function fcfa(value: number): string {
+  return `${value.toLocaleString("fr-FR")} F`;
+}
 
 export default function NouveauTicketForm({
   services,
   isAdmin,
   structure,
+  nextReceipt,
+  now,
 }: {
   services: Service[];
   isAdmin: boolean;
   structure: Structure | null;
+  nextReceipt: { year: number; number: number };
+  now: string;
 }) {
   const [state, action, pending] = useActionState<CreateTicketState, FormData>(createTicket, undefined);
   const [patientName, setPatientName] = useState("");
@@ -36,17 +44,12 @@ export default function NouveauTicketForm({
   const total = isAdmin && totalOverride !== null ? totalOverride : unitPrice;
   const reste = Math.max(0, total - advance);
 
-  const previewDate = new Date();
-  const previewDateTime = formatDateTime(previewDate.toISOString());
-  const previewNumber = String(1).padStart(3, "0");
   const serviceLabel = other ? otherLabel.trim() || "Autre service" : selected?.name ?? "—";
+  const paperWidth = structure?.paper_width_mm === 58 ? 58 : 80;
 
   return (
-    <form
-      action={action}
-      className="grid gap-6 lg:grid-cols-[minmax(0,1fr)_minmax(0,360px)] lg:gap-8 items-start"
-    >
-      <section className="card space-y-6">
+    <form action={action} className="flex flex-1 flex-col items-stretch gap-7 lg:flex-row">
+      <section className="card flex w-full min-w-0 flex-1 flex-col gap-6">
         <div>
           <label className="lbl" htmlFor="patient_name">
             Nom et prénom
@@ -57,16 +60,16 @@ export default function NouveauTicketForm({
             required
             value={patientName}
             onChange={(e) => setPatientName(e.target.value)}
-            className="input"
+            className="in in-lg"
           />
           {state?.errors?.patient_name && (
-            <p className="text-[#DC2626] text-sm mt-2">{state.errors.patient_name}</p>
+            <p className="mt-2 text-sm text-danger">{state.errors.patient_name}</p>
           )}
         </div>
 
         <div>
           <label className="lbl" htmlFor="service_id">
-            Service
+            Service (liste déroulante, le prix s’affiche seul)
           </label>
           <select
             id="service_id"
@@ -82,50 +85,54 @@ export default function NouveauTicketForm({
                 setTotalOverride(null);
               }
             }}
-            className="input"
+            className="in in-lg"
           >
             <option value="">— Choisir —</option>
             {services.map((s) => (
               <option key={s.id} value={s.id}>
-                {s.name} — {formatCfa(s.price)}
+                {s.name} · {fcfa(s.price)}
               </option>
             ))}
-            <option value="__other__">Autre service</option>
+            <option value="__other__">Autre service…</option>
           </select>
           {other && <input type="hidden" name="service_id" value="" />}
           {other && (
-            <>
-              <label className="lbl" htmlFor="other_label">
-                Libellé du service
-              </label>
-              <input
-                id="other_label"
-                name="other_label"
-                required
-                value={otherLabel}
-                onChange={(e) => setOtherLabel(e.target.value)}
-                className="input"
-              />
-              <label className="lbl" htmlFor="other_price">
-                Prix (F CFA)
-              </label>
-              <input
-                id="other_price"
-                name="other_price"
-                type="number"
-                min={0}
-                step={1}
-                required
-                value={otherPrice}
-                onChange={(e) => setOtherPrice(e.target.value)}
-                className="input"
-              />
-            </>
+            <div className="mt-4 grid gap-4 sm:grid-cols-2">
+              <div>
+                <label className="lbl" htmlFor="other_label">
+                  Libellé du service
+                </label>
+                <input
+                  id="other_label"
+                  name="other_label"
+                  required
+                  value={otherLabel}
+                  onChange={(e) => setOtherLabel(e.target.value)}
+                  className="in"
+                />
+              </div>
+              <div>
+                <label className="lbl" htmlFor="other_price">
+                  Prix (F CFA)
+                </label>
+                <input
+                  id="other_price"
+                  name="other_price"
+                  type="number"
+                  min={0}
+                  step={1}
+                  required
+                  value={otherPrice}
+                  onChange={(e) => setOtherPrice(e.target.value)}
+                  className="in"
+                />
+              </div>
+            </div>
           )}
         </div>
 
-        <div className="grid gap-4 sm:grid-cols-3">
-          <div>
+        <div className="flex flex-col gap-4 sm:flex-row">
+          <div className="flex-1">
             <label className="lbl" htmlFor="total">
               Montant total (selon le service)
             </label>
@@ -138,15 +145,12 @@ export default function NouveauTicketForm({
               readOnly={!isAdmin}
               value={isAdmin ? totalOverride ?? unitPrice : unitPrice}
               onChange={
-                isAdmin
-                  ? (e) => setTotalOverride(Number(e.target.value) || 0)
-                  : undefined
+                isAdmin ? (e) => setTotalOverride(Number(e.target.value) || 0) : undefined
               }
-              className="input"
-              style={isAdmin ? { background: "#F0F7F5" } : undefined}
+              className="in in-xl"
             />
           </div>
-          <div>
+          <div className="flex-1">
             <label className="lbl" htmlFor="advance">
               Avance
             </label>
@@ -158,10 +162,10 @@ export default function NouveauTicketForm({
               step={1}
               value={advance}
               onChange={(e) => setAdvance(Number(e.target.value) || 0)}
-              className="input"
+              className="in in-xl"
             />
           </div>
-          <div>
+          <div className="flex-1">
             <label className="lbl" htmlFor="reste">
               Reste (automatique)
             </label>
@@ -169,85 +173,94 @@ export default function NouveauTicketForm({
               id="reste"
               readOnly
               value={reste}
-              className="input"
-              style={{ borderColor: "#2B8A6E", background: "#EBF6F2", color: "#0B6B4F", fontWeight: 700 }}
+              className="in in-xl"
+              style={{
+                background: "#DFF3EF",
+                borderColor: "#0B7A6B",
+                color: "#0B5F54",
+                fontWeight: 800,
+              }}
             />
           </div>
         </div>
 
-        <div>
-          <label className="lbl" htmlFor="date">
-            Date prise sur l&apos;ordinateur
-          </label>
-          <input id="date" readOnly value={previewDateTime} className="input" />
+        <div className="mt-auto flex flex-wrap items-center justify-between gap-3 border-t border-border pt-[18px]">
+          <span className="text-[15px] font-semibold text-muted">
+            Date prise sur l’ordinateur
+          </span>
+          <span className="rounded-full bg-[#F2F5F7] px-[18px] py-2.5 text-[15px] font-bold">
+            {now}
+          </span>
         </div>
 
         <input type="hidden" name="quantity" value={1} />
 
         {state?.message && !state.ticketId && (
-          <p className="text-[#DC2626] text-sm">{state.message}</p>
+          <p className="text-sm text-danger">{state.message}</p>
         )}
       </section>
 
-      <section className="card space-y-6">
-        <div>
-          <span className="inline-flex items-center rounded-full bg-[#EBF0EE] px-4 py-2 text-[13px] font-medium text-[#122429]">
-            {previewDateTime}
-          </span>
-        </div>
-
-        <div>
-          <p className="text-[13px] font-semibold uppercase tracking-[0.08em] text-[#6A7A80]">
-            Aperçu du ticket thermique
-          </p>
-          <div className="mt-3 rounded-[24px] border border-[#E2E8E6] bg-[#FAFBFB] p-5">
-            <div className="text-center font-bold text-[#0F1F23]" style={{ fontSize: 18 }}>
-              {structure?.name}
-            </div>
-            {structure?.address && (
-              <div className="text-center text-xs text-[#6A7A80]">{structure.address}</div>
-            )}
-            {structure?.phone && (
-              <div className="text-center text-xs text-[#6A7A80]">Tél. {structure.phone}</div>
-            )}
-            <div className="border-t border-dashed border-[#C7D2CF] my-2" />
-            <div className="text-center font-bold" style={{ fontSize: 20, color: "#0B6B4F" }}>
-              N° {previewNumber}
-            </div>
-            <div className="mt-3 space-y-2">
-              <div className="flex justify-between text-sm">
-                <span className="text-[#4B5F6B]">Nom</span>
-                <span className="font-medium text-[#0B1F2A]">{patientName || "—"}</span>
-              </div>
-              <div className="flex justify-between text-sm">
-                <span className="text-[#4B5F6B]">Service</span>
-                <span className="font-medium text-[#0B1F2A]">{serviceLabel}</span>
-              </div>
-              <div className="flex justify-between text-sm">
-                <span className="text-[#4B5F6B]">Total</span>
-                <span className="font-medium text-[#0B1F2A]">{total.toLocaleString("fr-FR")} F</span>
-              </div>
-              <div className="flex justify-between text-sm">
-                <span className="text-[#4B5F6B]">Avance</span>
-                <span className="font-medium text-[#0B1F2A]">{advance.toLocaleString("fr-FR")} F</span>
-              </div>
-              <div className="flex justify-between text-sm font-bold uppercase">
-                <span style={{ color: "#0B6B4F" }}>Reste</span>
-                <span style={{ color: "#0B6B4F", fontWeight: 700 }}>
-                  {reste.toLocaleString("fr-FR")} F
-                </span>
-              </div>
-            </div>
-            <div className="border-t border-dashed border-[#C7D2CF] my-2" />
-            <div className="text-center text-xs text-[#6A7A80]">{previewDateTime}</div>
-            <div className="text-center text-xs text-[#6A7A80] mt-1">Merci de votre visite</div>
+      <aside className="flex w-full flex-col gap-[18px] lg:w-[380px] lg:shrink-0">
+        <section className="card flex flex-1 flex-col items-center gap-3">
+          <div className="text-xs font-bold uppercase tracking-[1px] text-muted">
+            Aperçu · Papier {paperWidth} mm
           </div>
 
-          <button type="submit" disabled={pending} className="btn-primary w-full">
-            {pending ? "Enregistrement…" : "Imprimer le ticket"}
-          </button>
-        </div>
-      </section>
+          <div
+            className="flex max-w-full flex-col gap-2.5 border border-border bg-[#FAFAF7] px-[18px] py-5 text-center text-[13px]"
+            style={{ width: paperWidth === 58 ? 230 : 290, fontFamily: "ui-monospace, Menlo, monospace" }}
+          >
+            <div className="text-sm font-extrabold">{structure?.name ?? "—"}</div>
+            {(structure?.address || structure?.phone) && (
+              <div className="text-[11px] text-muted">
+                {[structure.address, structure.phone && `Tél. ${structure.phone}`]
+                  .filter(Boolean)
+                  .join(" · ")}
+              </div>
+            )}
+
+            <div className="border-t-2 border-dashed border-[#B9C7CF]" />
+
+            <div className="text-[26px] font-extrabold text-accent">
+              Reçu {nextReceipt.year}-{String(nextReceipt.number).padStart(3, "0")}
+            </div>
+
+            <div className="row" style={{ fontSize: 13 }}>
+              <span>Nom</span>
+              <span style={{ color: "#0B1F2A", fontWeight: 600 }}>{patientName || "—"}</span>
+            </div>
+            <div className="row" style={{ fontSize: 13 }}>
+              <span>Service</span>
+              <span style={{ color: "#0B1F2A", fontWeight: 600 }}>{serviceLabel}</span>
+            </div>
+            <div className="row" style={{ fontSize: 13 }}>
+              <span>Total</span>
+              <span style={{ color: "#0B1F2A", fontWeight: 600 }}>{fcfa(total)}</span>
+            </div>
+            <div className="row" style={{ fontSize: 13 }}>
+              <span>Avance</span>
+              <span style={{ color: "#0B1F2A", fontWeight: 600 }}>{fcfa(advance)}</span>
+            </div>
+            <div className="row" style={{ fontSize: 15, fontWeight: 800 }}>
+              <span style={{ color: "#0B1F2A", fontWeight: 800 }}>RESTE</span>
+              <span style={{ color: "#0B1F2A", fontWeight: 800 }}>{fcfa(reste)}</span>
+            </div>
+
+            <div className="border-t-2 border-dashed border-[#B9C7CF]" />
+
+            <div>{now}</div>
+            <div className="text-xs text-muted">Merci de votre visite</div>
+          </div>
+        </section>
+
+        <button type="submit" disabled={pending} className="go">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+            <path d="M7 9V3h10v6M7 17H5a1 1 0 0 1-1-1v-6a1 1 0 0 1 1-1h14a1 1 0 0 1 1 1v6a1 1 0 0 1-1 1h-2" />
+            <rect x="7" y="14" width="10" height="7" />
+          </svg>
+          {pending ? "Enregistrement…" : "Imprimer le ticket"}
+        </button>
+      </aside>
     </form>
   );
 }

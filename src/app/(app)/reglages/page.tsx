@@ -2,6 +2,8 @@ import { redirect } from "next/navigation";
 import { connection } from "next/server";
 import { requireUser } from "@/lib/auth";
 import { createClient } from "@/lib/supabase/server";
+import { getNextReceipt } from "@/lib/receipts";
+import ScreenHeader from "../screen-header";
 import ReglagesForm from "./reglages-form";
 
 export default async function ReglagesPage() {
@@ -21,23 +23,26 @@ export default async function ReglagesPage() {
 
   if (!structure) redirect("/tableau");
 
+  const nextReceipt = await getNextReceipt(supabase, user.structureId);
+  const dateLabel = new Date().toLocaleDateString("fr-FR");
+
   return (
-    <div className="space-y-6">
-      <h1 className="text-2xl font-bold text-[#0B1F2A]">Réglages</h1>
-      <p className="text-sm text-[#4B5F6B]">
-        En-tête de la structure et format du papier thermique.
-      </p>
-      <div className="card">
-        <ReglagesForm
-          defaults={{
-            name: structure.name ?? "",
-            address: structure.address ?? "",
-            phone: structure.phone ?? "",
-            header_text: structure.header_text ?? "",
-            paper_width_mm: structure.paper_width_mm ?? 80,
-          }}
-        />
-      </div>
+    <div className="flex flex-1 flex-col gap-[26px]">
+      <ScreenHeader
+        title="Réglages · En-tête"
+        subtitle="À configurer en premier : l’en-tête s’imprime sur chaque ordonnance et chaque ticket."
+      />
+      <ReglagesForm
+        defaults={{
+          name: structure.name ?? "",
+          address: structure.address ?? "",
+          phone: structure.phone ?? "",
+          header_text: structure.header_text ?? "",
+          paper_width_mm: structure.paper_width_mm ?? 80,
+        }}
+        nextReceipt={nextReceipt}
+        dateLabel={dateLabel}
+      />
     </div>
   );
 }

@@ -2,6 +2,8 @@ import { redirect } from "next/navigation";
 import { connection } from "next/server";
 import { requireUser } from "@/lib/auth";
 import { createClient } from "@/lib/supabase/server";
+import { getNextReceipt } from "@/lib/receipts";
+import ScreenHeader from "../screen-header";
 import TarifsClient from "./tarifs-client";
 
 export default async function TarifsPage() {
@@ -19,14 +21,25 @@ export default async function TarifsPage() {
     .eq("structure_id", user.structureId)
     .order("created_at", { ascending: true });
 
+  const { data: structure } = await supabase
+    .from("structures")
+    .select("paper_width_mm")
+    .eq("id", user.structureId)
+    .maybeSingle();
+
+  const nextReceipt = await getNextReceipt(supabase, user.structureId);
+
   return (
-    <div className="space-y-6">
-      <h1 className="text-2xl font-bold text-[#0B1F2A]">Tarifs</h1>
-      <p className="text-sm text-[#4B5F6B]">
-        Services proposés par la structure. Un service désactivé n&apos;est plus
-        proposé à la saisie mais reste sur les anciens tickets.
-      </p>
-      <TarifsClient services={services ?? []} />
+    <div className="flex flex-1 flex-col gap-[26px]">
+      <ScreenHeader
+        title="Réglages · Tarifs"
+        subtitle="Chaque structure saisit ses propres services et leurs prix."
+      />
+      <TarifsClient
+        services={services ?? []}
+        paperWidth={structure?.paper_width_mm === 58 ? 58 : 80}
+        nextReceipt={nextReceipt}
+      />
     </div>
   );
 }

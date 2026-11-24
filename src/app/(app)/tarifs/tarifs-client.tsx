@@ -1,13 +1,13 @@
 "use client";
 
-import { useActionState, useState } from "react";
+import { useActionState, useRef, useState } from "react";
 import {
   createService,
   updateService,
   toggleService,
   type TarifState,
 } from "@/app/actions/tarifs";
-import { formatCfa } from "@/lib/format";
+import { updatePaperWidth } from "@/app/actions/settings";
 
 type Service = {
   id: string;
@@ -16,8 +16,21 @@ type Service = {
   active: boolean;
 };
 
-export default function TarifsClient({ services }: { services: Service[] }) {
+function fcfa(value: number): string {
+  return `${value.toLocaleString("fr-FR")} F`;
+}
+
+export default function TarifsClient({
+  services,
+  paperWidth,
+  nextReceipt,
+}: {
+  services: Service[];
+  paperWidth: number;
+  nextReceipt: { year: number; number: number };
+}) {
   const [editingId, setEditingId] = useState<string | null>(null);
+  const nameRef = useRef<HTMLInputElement>(null);
   const [createState, createAction, createPending] = useActionState<
     TarifState,
     FormData
@@ -28,165 +41,220 @@ export default function TarifsClient({ services }: { services: Service[] }) {
   );
 
   return (
-    <div className="space-y-6">
-      <section className="card">
-        <h2 className="text-lg font-bold text-[#0B1F2A] mb-4">
-          Ajouter un service
-        </h2>
-        <form action={createAction} className="flex flex-col sm:flex-row gap-3">
-          <input
-            name="name"
-            placeholder="Nom du service"
-            required
-            className="flex-1 input"
-          />
-          <input
-            name="price"
-            type="number"
-            min={0}
-            step={1}
-            placeholder="Prix (F CFA)"
-            required
-            className="sm:w-40 input"
-          />
+    <div className="flex flex-1 flex-col items-stretch gap-7 lg:flex-row">
+      <section className="card flex min-w-0 flex-1 flex-col">
+        <div className="mb-2 flex flex-wrap items-center justify-between gap-3">
+          <h2 className="text-lg font-extrabold">Services et prix</h2>
           <button
-            type="submit"
-            disabled={createPending}
-            className="btn-primary disabled:opacity-60"
+            type="button"
+            onClick={() => nameRef.current?.focus()}
+            className="go"
+            style={{ height: 48, width: "auto", padding: "0 22px", borderRadius: 14, fontSize: 15 }}
           >
-            {createPending ? "Ajout…" : "Ajouter un service"}
+            + Ajouter un service
           </button>
-        </form>
-        {createState?.message && (
-          <p
-            className={
-              createState.success
-                ? "text-[#0B7A6B] text-sm mt-3"
-                : "text-[#DC2626] text-sm mt-3"
-            }
-          >
-            {createState.message}
-          </p>
-        )}
-        {createState?.errors?.name && (
-          <p className="text-[#DC2626] text-sm mt-2">{createState.errors.name}</p>
-        )}
-        {createState?.errors?.price && (
-          <p className="text-[#DC2626] text-sm mt-2">{createState.errors.price}</p>
-        )}
-      </section>
+        </div>
 
-      <section className="card">
-        <h2 className="text-lg font-bold text-[#0B1F2A] mb-4">Tarifs</h2>
         {services.length === 0 ? (
-          <p className="text-[#4B5F6B] text-sm">Aucun service pour le moment.</p>
+          <p className="py-3 text-sm text-muted">Aucun service pour le moment.</p>
         ) : (
-          <ul className="divide-y divide-[#E2EAEF]">
+          <div>
             {services.map((s) => (
-              <li key={s.id} className="py-3">
+              <div key={s.id} className="ln">
                 {editingId === s.id ? (
-                  <form action={editAction} className="flex flex-col gap-2">
-                    <input type="hidden" name="id" value={s.id} />
-                    <input
-                      name="name"
-                      defaultValue={s.name}
-                      required
-                      className="input"
-                    />
-                    <input
-                      name="price"
-                      type="number"
-                      min={0}
-                      step={1}
-                      defaultValue={s.price}
-                      required
-                      className="input"
-                    />
-                    <div className="flex gap-2">
+                  <div className="flex w-full flex-col gap-3">
+                    <form action={editAction} className="flex flex-wrap items-end gap-3">
+                      <input type="hidden" name="id" value={s.id} />
+                      <div className="min-w-[180px] flex-1">
+                        <label className="lbl" htmlFor={`name-${s.id}`}>
+                          Nom du service
+                        </label>
+                        <input
+                          id={`name-${s.id}`}
+                          name="name"
+                          defaultValue={s.name}
+                          required
+                          className="in"
+                        />
+                      </div>
+                      <div style={{ width: 150 }}>
+                        <label className="lbl" htmlFor={`price-${s.id}`}>
+                          Prix (F CFA)
+                        </label>
+                        <input
+                          id={`price-${s.id}`}
+                          name="price"
+                          type="number"
+                          min={0}
+                          step={1}
+                          defaultValue={s.price}
+                          required
+                          className="in"
+                        />
+                      </div>
                       <button
                         type="submit"
                         disabled={editPending}
-                        className="btn-primary w-full sm:w-auto disabled:opacity-60"
+                        className="go"
+                        style={{ height: 52, width: "auto", padding: "0 24px", borderRadius: 14, fontSize: 15 }}
                       >
                         {editPending ? "…" : "Enregistrer"}
                       </button>
                       <button
                         type="button"
                         onClick={() => setEditingId(null)}
-                        className="btn-secondary text-sm"
+                        className="btn-secondary"
+                        style={{ height: 52 }}
                       >
                         Annuler
                       </button>
-                    </div>
-                    {editState?.message && editingId === s.id && (
+                    </form>
+
+                    <form action={toggleService}>
+                      <input type="hidden" name="id" value={s.id} />
+                      <input type="hidden" name="active" value={s.active ? "false" : "true"} />
+                      <button
+                        type="submit"
+                        className="text-sm font-medium text-muted underline-offset-2 hover:underline"
+                      >
+                        {s.active ? "Désactiver ce service" : "Réactiver ce service"}
+                      </button>
+                    </form>
+
+                    {editState?.message && (
                       <p
                         className={
-                          editState.success
-                            ? "text-[#0B7A6B] text-sm"
-                            : "text-[#DC2626] text-sm"
+                          editState.success ? "text-sm text-accent" : "text-sm text-danger"
                         }
                       >
                         {editState.message}
                       </p>
                     )}
-                  </form>
-                ) : (
-                  <div className="flex items-center justify-between gap-3">
-                    <div>
-                      <p className="font-medium text-[#0B1F2A]">{s.name}</p>
-                      <p className="text-sm text-[#4B5F6B]">
-                        {formatCfa(s.price)}
-                        {!s.active && (
-                          <span className="ml-2 text-xs text-[#DC2626]">
-                            (désactivé)
-                          </span>
-                        )}
-                      </p>
-                    </div>
-                    <div className="flex gap-2">
-                      <button
-                        type="button"
-                        onClick={() => setEditingId(s.id)}
-                        className="text-sm font-semibold text-[#0B7A6B]"
-                      >
-                        Modifier
-                      </button>
-                      <form action={toggleService}>
-                        <input type="hidden" name="id" value={s.id} />
-                        <input
-                          type="hidden"
-                          name="active"
-                          value={s.active ? "false" : "true"}
-                        />
-                        <button
-                          type="submit"
-                          className="text-sm font-medium text-[#4B5F6B]"
-                        >
-                          {s.active ? "Désactiver" : "Réactiver"}
-                        </button>
-                      </form>
-                    </div>
                   </div>
+                ) : (
+                  <>
+                    <div className="flex-1 font-bold">{s.name}</div>
+                    <b className="text-lg">{fcfa(s.price)}</b>
+                    <span
+                      className={`cd ${s.active ? "" : "off"}`}
+                      style={{ width: 70 }}
+                    >
+                      {s.active ? "Actif" : "Inactif"}
+                    </span>
+                    <button
+                      type="button"
+                      onClick={() => setEditingId(s.id)}
+                      aria-label={`Modifier ${s.name}`}
+                      className="x"
+                      style={{ width: "auto", padding: "0 16px", fontSize: 13, fontWeight: 600 }}
+                    >
+                      Modifier
+                    </button>
+                  </>
                 )}
-              </li>
+              </div>
             ))}
-          </ul>
+          </div>
         )}
-        {editState?.message && editingId === null && (
+
+        <form
+          action={createAction}
+          className="mt-3.5 flex flex-col gap-3 rounded-[18px] border-[1.5px] border-dashed border-accent bg-[#EEF8F6] p-[18px] sm:flex-row sm:items-end"
+        >
+          <div style={{ flex: 2 }}>
+            <label className="lbl" htmlFor="service-name">
+              Nom du service
+            </label>
+            <input
+              ref={nameRef}
+              id="service-name"
+              name="name"
+              placeholder="Échographie"
+              required
+              className="in"
+            />
+          </div>
+          <div style={{ flex: 1 }}>
+            <label className="lbl" htmlFor="service-price">
+              Prix (F CFA)
+            </label>
+            <input
+              id="service-price"
+              name="price"
+              type="number"
+              min={0}
+              step={1}
+              placeholder="10 000"
+              required
+              className="in"
+            />
+          </div>
+          <button
+            type="submit"
+            disabled={createPending}
+            className="go"
+            style={{ height: 52, width: "auto", padding: "0 24px", borderRadius: 14, fontSize: 15 }}
+          >
+            {createPending ? "Ajout…" : "Enregistrer"}
+          </button>
+        </form>
+
+        {createState?.message && (
           <p
             className={
-              editState.success
-                ? "text-[#0B7A6B] text-sm mt-3"
-                : "text-[#DC2626] text-sm mt-3"
+              createState.success ? "mt-3 text-sm text-accent" : "mt-3 text-sm text-danger"
             }
           >
-            {editState.message}
+            {createState.message}
           </p>
         )}
+        {createState?.errors?.name && (
+          <p className="mt-2 text-sm text-danger">{createState.errors.name}</p>
+        )}
+        {createState?.errors?.price && (
+          <p className="mt-2 text-sm text-danger">{createState.errors.price}</p>
+        )}
+
+        <div className="mt-auto pt-6 text-[13px] text-muted">
+          Changer un prix ne modifie jamais les anciens reçus.
+        </div>
       </section>
+
+      <div className="flex w-full flex-col gap-[18px] lg:w-[400px] lg:shrink-0">
+        <section className="card">
+          <h2 className="mb-3.5 text-lg font-extrabold">Impression du ticket</h2>
+          <span className="lbl">Largeur du papier thermique</span>
+          <form action={updatePaperWidth} className="flex gap-3">
+            <button
+              type="submit"
+              name="paper_width_mm"
+              value={80}
+              className={`chip ${paperWidth === 80 ? "on" : ""}`}
+            >
+              80 mm<span>Zone imprimable 72 mm · par défaut</span>
+            </button>
+            <button
+              type="submit"
+              name="paper_width_mm"
+              value={58}
+              className={`chip ${paperWidth === 58 ? "on" : ""}`}
+            >
+              58 mm<span>Zone imprimable 48 mm</span>
+            </button>
+          </form>
+        </section>
+
+        <section className="card">
+          <h2 className="mb-2.5 text-lg font-extrabold">Numérotation des reçus</h2>
+          <div className="text-[32px] font-extrabold tracking-[-0.5px] text-accent">
+            Reçu {nextReceipt.year}-{String(nextReceipt.number).padStart(3, "0")}
+          </div>
+          <p className="mt-2.5 text-sm leading-normal text-muted">
+            Le numéro repart à 001 chaque 1er janvier : Reçu {nextReceipt.year + 1}-001.
+            Recherche et filtre par année.
+          </p>
+        </section>
+      </div>
     </div>
   );
 }
-
-
-

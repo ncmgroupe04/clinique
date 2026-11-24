@@ -1,0 +1,56 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<title>Maquette de référence · reglages-tarifs</title>
+<!-- SOURCE DE VÉRITÉ visuelle. Écran fixe 1280x800. Reproduire à l'identique (couleurs, tailles, espacements, textes). -->
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@500;600;700;800&display=swap" rel="stylesheet">
+<style>
+body{margin:0}*{box-sizing:border-box}
+.card{background:#fff;border:1px solid #E2EAEF;border-radius:24px;padding:28px}
+.lbl{font-size:13px;font-weight:600;color:#4B5F6B;margin-bottom:8px;display:block}
+.in{width:100%;height:52px;border:1.5px solid #D5E0E6;border-radius:14px;padding:0 16px;font:600 16px "Plus Jakarta Sans",sans-serif;color:#0B1F2A;background:#fff}
+.chip{flex:1;display:flex;flex-direction:column;align-items:flex-start;gap:4px;padding:14px 18px;border:1.5px solid #D5E0E6;border-radius:16px;background:#fff;font:700 15px "Plus Jakarta Sans",sans-serif;color:#0B1F2A;cursor:pointer}
+.chip span{font-weight:500;color:#4B5F6B;font-size:13px}
+.chip.on{border-color:#0B7A6B;background:#DFF3EF}.chip.on span{color:#0B5F54}
+.nv{display:flex;flex-direction:column;align-items:center;gap:6px;width:76px;padding:12px 0;border:none;border-radius:18px;background:transparent;color:#B9CBD3;font:600 11px "Plus Jakarta Sans",sans-serif;cursor:pointer}
+.nv.on{background:#163545;color:#fff}
+.go{height:60px;border:none;border-radius:18px;background:#0B7A6B;color:#fff;font:700 17px "Plus Jakarta Sans",sans-serif;display:flex;align-items:center;justify-content:center;gap:10px;cursor:pointer}
+.row{display:flex;justify-content:space-between;font-size:14px;font-weight:600}.row span{color:#4B5F6B;font-weight:500}
+.ln{display:flex;align-items:center;gap:16px;padding:14px 0;border-top:1px solid #E2EAEF}
+.cd{width:58px;height:36px;border-radius:10px;background:#DFF3EF;color:#0B5F54;font-weight:800;font-size:13px;display:flex;align-items:center;justify-content:center}
+.x{margin-left:auto;width:44px;height:44px;border:none;border-radius:12px;background:#F2F5F7;color:#4B5F6B;display:flex;align-items:center;justify-content:center;cursor:pointer}
+</style>
+</head>
+<body>
+<div style="width:1280px;height:800px;display:flex;background:#EEF3F6;font-family:'Plus Jakarta Sans',Inter,sans-serif;color:#0B1F2A">
+<nav style="width:104px;background:#0B1F2A;display:flex;flex-direction:column;align-items:center;gap:10px;padding:28px 0">
+<div style="width:48px;height:48px;border-radius:16px;background:#0B7A6B;display:flex;align-items:center;justify-content:center;margin-bottom:22px"><svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.4" stroke-linecap="round" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg></div>
+<button class="nv "><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 9V6a1 1 0 0 1 1-1h16a1 1 0 0 1 1 1v3a2.5 2.5 0 0 0 0 5v3a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1v-3a2.5 2.5 0 0 0 0-5z"/></svg>Tickets</button>
+<button class="nv "><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 3h9l4 4v14H6z"/><path d="M9 12h7M9 16h7"/></svg>Ordonnances</button>
+<button class="nv"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg>Historique</button>
+<button class="nv on"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><circle cx="12" cy="12" r="3"/><path d="M12 3v3M12 18v3M3 12h3M18 12h3"/></svg>Réglages</button>
+</nav>
+<main style="flex:1;padding:36px 40px;display:flex;flex-direction:column;gap:26px">
+<header><h1 style="margin:0;font-size:32px;font-weight:800;letter-spacing:-0.5px">Réglages · Tarifs</h1><p style="margin:6px 0 0;font-size:15px;color:#4B5F6B;font-weight:500">Chaque structure saisit ses propres services et leurs prix.</p></header>
+<div style="display:flex;gap:28px;flex:1">
+<section class="card" style="flex:1;display:flex;flex-direction:column;gap:6px">
+<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px"><div style="font-size:18px;font-weight:800">Services et prix</div><button class="go" style="height:48px;padding:0 22px;border-radius:14px;font-size:15px">+ Ajouter un service</button></div>
+<div class="ln"><div style="flex:1"><b>Consultation</b></div><b style="font-size:18px">2 000 F</b><span class="cd" style="width:70px">Actif</span><button class="x" aria-label="Modifier" style="margin-left:0;width:auto;padding:0 16px;font:600 13px 'Plus Jakarta Sans',sans-serif">Modifier</button></div>
+<div class="ln"><div style="flex:1"><b>Visite prénatale</b></div><b style="font-size:18px">5 000 F</b><span class="cd" style="width:70px">Actif</span><button class="x" aria-label="Modifier" style="margin-left:0;width:auto;padding:0 16px;font:600 13px 'Plus Jakarta Sans',sans-serif">Modifier</button></div>
+<div style="margin-top:14px;padding:18px;border-radius:18px;background:#EEF8F6;border:1.5px dashed #0B7A6B;display:flex;gap:12px;align-items:flex-end">
+<div style="flex:2"><label class="lbl" for="sn">Nom du service</label><input id="sn" class="in" value="Échographie"></div>
+<div style="flex:1"><label class="lbl" for="sp">Prix (F CFA)</label><input id="sp" class="in" value="10 000"></div>
+<button class="go" style="height:52px;padding:0 24px;border-radius:14px;font-size:15px">Enregistrer</button></div>
+<div style="margin-top:auto;font-size:13px;color:#4B5F6B">Changer un prix ne modifie jamais les anciens reçus.</div>
+</section>
+<div style="width:400px;display:flex;flex-direction:column;gap:18px">
+<section class="card"><div style="font-size:18px;font-weight:800;margin-bottom:14px">Impression du ticket</div>
+<span class="lbl">Largeur du papier thermique</span>
+<div style="display:flex;gap:12px"><button class="chip on">80 mm<span>Zone imprimable 72 mm · par défaut</span></button><button class="chip">58 mm<span>Zone imprimable 48 mm</span></button></div></section>
+<section class="card"><div style="font-size:18px;font-weight:800;margin-bottom:10px">Numérotation des reçus</div>
+<div style="font-size:32px;font-weight:800;color:#0B7A6B;letter-spacing:-0.5px">Reçu 2026-001</div>
+<p style="margin:10px 0 0;font-size:14px;color:#4B5F6B;line-height:1.5">Le numéro repart à 001 chaque 1er janvier : Reçu 2027-001. Recherche et filtre par année.</p></section>
+</div></div></main></div>
+</body>
+</html>

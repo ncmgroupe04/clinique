@@ -47,3 +47,21 @@ export async function updateSettings(
   revalidatePath("/tableau");
   return { success: true, message: "Réglages enregistrés." };
 }
+
+export async function updatePaperWidth(formData: FormData): Promise<void> {
+  const user = await requireRole("structure_admin", "platform_admin");
+  if (!user.structureId) return;
+
+  const width = Number(formData.get("paper_width_mm"));
+  if (width !== 58 && width !== 80) return;
+
+  const supabase = await createClient();
+  await supabase
+    .from("structures")
+    .update({ paper_width_mm: width })
+    .eq("id", user.structureId);
+
+  revalidatePath("/tarifs");
+  revalidatePath("/reglages");
+  revalidatePath("/tickets/nouveau");
+}

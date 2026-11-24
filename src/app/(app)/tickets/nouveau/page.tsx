@@ -2,6 +2,9 @@ import { redirect } from "next/navigation";
 import { connection } from "next/server";
 import { requireUser } from "@/lib/auth";
 import { createClient } from "@/lib/supabase/server";
+import { getNextReceipt } from "@/lib/receipts";
+import { formatDateTime } from "@/lib/format";
+import ScreenHeader from "../../screen-header";
 import NouveauTicketForm from "./nouveau-ticket-form";
 
 export default async function NouveauTicketPage() {
@@ -22,28 +25,33 @@ export default async function NouveauTicketPage() {
 
   const { data: structure } = await supabase
     .from("structures")
-    .select("name, address, phone, header_text")
+    .select("name, address, phone, header_text, paper_width_mm")
     .eq("id", user.structureId)
     .maybeSingle();
 
+  const nextReceipt = await getNextReceipt(supabase, user.structureId);
+
+  const today = new Date();
+  const weekday = today.toLocaleDateString("fr-FR", { weekday: "long" });
+  const dateLabel = `${weekday.charAt(0).toUpperCase()}${weekday.slice(1)} ${today.toLocaleDateString(
+    "fr-FR",
+    { day: "numeric", month: "long", year: "numeric" },
+  )}`;
+
   return (
-    <div className="space-y-6">
-      <div>
-        <h1 className="text-2xl font-bold text-[#0B1F2A]">Nouveau ticket</h1>
-        <p className="text-sm text-[#4B5F6B]">
-          Caisse ·{" "}
-          {new Date().toLocaleDateString("fr-FR", {
-            weekday: "long",
-            day: "numeric",
-            month: "long",
-            year: "numeric",
-          })}
-        </p>
-      </div>
+    <div className="flex flex-1 flex-col gap-[26px]">
+      <ScreenHeader title="Nouveau ticket" subtitle={`Caisse · ${dateLabel}`}>
+        <div className="rounded-full border border-border bg-white px-[18px] py-2.5 text-sm font-semibold">
+          <span className="font-medium text-muted">Prochain reçu</span>{" "}
+          {nextReceipt.year}-{String(nextReceipt.number).padStart(3, "0")}
+        </div>
+      </ScreenHeader>
       <NouveauTicketForm
         services={services ?? []}
         isAdmin={user.role === "structure_admin"}
         structure={structure}
+        nextReceipt={nextReceipt}
+        now={formatDateTime(new Date().toISOString())}
       />
     </div>
   );

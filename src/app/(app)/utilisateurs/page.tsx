@@ -29,9 +29,9 @@ export default async function UtilisateursPage() {
   );
 
   return (
-    <div className="space-y-6">
-      <h1 className="text-2xl font-bold text-[#0B1F2A]">Utilisateurs</h1>
-      <p className="text-sm text-[#4B5F6B]">
+    <div className="flex flex-col gap-[26px]">
+      <h1 className="scr-title">Utilisateurs</h1>
+      <p className="scr-sub">
         Gérez les comptes de votre structure (caissiers, administrateurs).
       </p>
       <UtilisateursClient users={users} />

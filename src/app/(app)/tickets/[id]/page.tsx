@@ -55,7 +55,7 @@ export default async function TicketDetailPage({
       `}</style>
       <div className="space-y-4">
         <div className="no-print">
-          <h1 className="text-2xl font-bold text-[#0B1F2A]">
+          <h1 className="scr-title">
             {formatReceipt(ticket.year, ticket.number)}
           </h1>
         </div>

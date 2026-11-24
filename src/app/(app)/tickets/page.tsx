@@ -79,8 +79,8 @@ export default async function HistoriquePage({
   };
 
   return (
-    <div className="space-y-6">
-      <h1 className="text-2xl font-bold text-[#0B1F2A]">Historique et caisse</h1>
+    <div className="flex flex-col gap-[26px]">
+      <h1 className="scr-title">Historique et caisse</h1>
 
       {/* Filters */}
       <form method="GET" className="card grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4">
