@@ -41,7 +41,7 @@ export default async function AbonnementPage() {
               </p>
             </div>
             <div>
-              <p className="text-[13px] font-semibold text-muted">Frais d'inscription</p>
+              <p className="text-[13px] font-semibold text-muted">Frais d&apos;inscription</p>
               <p className="mt-1 text-lg font-bold text-ink">
                 {(plan?.registration_fee ?? 50000).toLocaleString("fr-FR")} F CFA
               </p>
@@ -76,9 +76,13 @@ export default async function AbonnementPage() {
             href={WAVE_LINK}
             target="_blank"
             rel="noopener noreferrer"
-            className="btn-primary text-center text-sm"
+            className="inline-flex w-full items-center justify-center gap-2"
+            style={{ height: 48, borderRadius: 14, background: "#0aa5d8", color: "#fff", fontWeight: 700, fontSize: 14, padding: "0 16px" }}
           >
-            Ouvrir le lien Wave
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+              <path d="M15 3h6v6M10 14L21 3M21 14v5a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5" />
+            </svg>
+            Ouvrir Wave
           </a>
           <p className="break-all text-center text-xs text-muted">{WAVE_LINK}</p>
         </section>

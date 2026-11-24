@@ -120,13 +120,13 @@ export default function SidebarNav({ role }: { role: Role }) {
       items.push({ href: "/tickets/historique", label: "Historique", icon: "history" });
       items.push({ href: "/factures", label: "Factures", icon: "invoice" });
       items.push({ href: "/ordonnances", label: "Ordonnances", icon: "ordonnance", badge: "Bientôt" });
-      items.push({ href: "/abonnement", label: "Abonnement", icon: "subscription" });
     }
     if (adminAccess) {
       items.push({ href: "/soins", label: "Soins", icon: "care" });
       items.push({ href: "/tarifs", label: "Tarifs", icon: "tag" });
       items.push({ href: "/utilisateurs", label: "Utilisateurs", icon: "users" });
       items.push({ href: "/reglages", label: "Réglages", icon: "settings" });
+      items.push({ href: "/abonnement", label: "Abonnement", icon: "subscription" });
     }
   }
 
