@@ -1,6 +1,8 @@
 "use client";
 
+import { useState } from "react";
 import Link from "next/link";
+import Pagination from "../pagination";
 
 type Invoice = {
   id: string;
@@ -17,13 +19,18 @@ function fcfa(v: number): string {
 }
 
 export default function FacturesClient({ invoices }: { invoices: Invoice[] }) {
+  const [page, setPage] = useState(1);
+  const PAGE_SIZE = 10;
+  const start = (page - 1) * PAGE_SIZE;
+  const visible = invoices.slice(start, start + PAGE_SIZE);
+
   return (
     <div className="space-y-2">
       {invoices.length === 0 ? (
         <p className="text-sm text-muted">Aucune facture.</p>
       ) : (
         <ul className="divide-y divide-border">
-          {invoices.map((inv) => (
+          {visible.map((inv) => (
             <li key={inv.id} className="flex items-center justify-between gap-3 py-3">
               <div className="min-w-0">
                 <p className="font-bold text-ink">
@@ -41,6 +48,7 @@ export default function FacturesClient({ invoices }: { invoices: Invoice[] }) {
           ))}
         </ul>
       )}
+      <Pagination total={invoices.length} page={page} pageSize={PAGE_SIZE} onPageChange={setPage} />
     </div>
   );
 }

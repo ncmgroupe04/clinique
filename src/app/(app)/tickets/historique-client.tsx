@@ -4,6 +4,7 @@ import { useActionState, useEffect, useState } from "react";
 import Link from "next/link";
 import { cancelTicketAction, restoreTicket } from "@/app/actions/tickets";
 import { formatCfa, formatReceipt, formatDateTime } from "@/lib/format";
+import Pagination from "../pagination";
 
 type Ticket = {
   id: string;
@@ -22,12 +23,17 @@ type Ticket = {
 
 export default function HistoriqueClient({ tickets }: { tickets: Ticket[] }) {
   const [cancelingId, setCancelingId] = useState<string | null>(null);
+  const [page, setPage] = useState(1);
+  const PAGE_SIZE = 10;
   const [state, action, pending] = useActionState(cancelTicketAction, undefined);
 
   useEffect(() => {
     // eslint-disable-next-line react-hooks/set-state-in-effect
     if (state?.success) setCancelingId(null);
   }, [state]);
+
+  const start = (page - 1) * PAGE_SIZE;
+  const visible = tickets.slice(start, start + PAGE_SIZE);
 
   return (
     <div className="card">
@@ -37,7 +43,7 @@ export default function HistoriqueClient({ tickets }: { tickets: Ticket[] }) {
         </p>
       ) : (
         <ul className="divide-y divide-[#E2EAEF]">
-          {tickets.map((t) => (
+          {visible.map((t) => (
             <li key={t.id} className="py-3 space-y-2">
               <div className="flex items-start justify-between gap-3">
                 <div className="flex-1 min-w-0">
@@ -122,6 +128,12 @@ export default function HistoriqueClient({ tickets }: { tickets: Ticket[] }) {
           ))}
         </ul>
       )}
+      <Pagination
+        total={tickets.length}
+        page={page}
+        pageSize={PAGE_SIZE}
+        onPageChange={(p) => { setPage(p); setCancelingId(null); }}
+      />
     </div>
   );
 }
