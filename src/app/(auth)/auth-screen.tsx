@@ -207,7 +207,7 @@ export default function AuthScreen({
               <div className="sm:col-span-2">
                 <label className="lbl" htmlFor="planId">Formule d&apos;abonnement</label>
                 <div className="relative">
-                  <select id="planId" name="planId" className="input appearance-none" style={{ paddingRight: 42 }} defaultValue="">
+                  <select id="planId" name="planId" className="input appearance-none" style={{ paddingRight: 42, textAlign: "center" }} defaultValue="">
                     <option value="">Choisir une formule (essai 7 jours offert)</option>
                     {plans.map((p) => (
                       <option key={p.id} value={p.id}>
