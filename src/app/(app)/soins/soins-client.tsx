@@ -1,9 +1,9 @@
 "use client";
 
 import { useActionState, useRef, useState } from "react";
-import { createCare, updateCare, toggleCare, type CareState } from "@/app/actions/cares";
+import { createCare, updateCare, toggleCare, deleteCare, type CareState } from "@/app/actions/cares";
 
-type Care = { id: string; name: string; price: number; active: boolean };
+type Care = { id: string; name: string; price: number; active: boolean; unit: string };
 
 function fcfa(value: number): string {
   return `${value.toLocaleString("fr-FR")} F`;
@@ -48,6 +48,15 @@ export default function SoinsClient({ cares }: { cares: Care[] }) {
                         <label className="lbl" htmlFor={`price-${c.id}`}>Prix (F CFA)</label>
                         <input id={`price-${c.id}`} name="price" type="number" min={0} step={1} defaultValue={c.price} required className="input" />
                       </div>
+                      <div style={{ width: 120 }}>
+                        <label className="lbl" htmlFor={`unit-${c.id}`}>Comptage</label>
+                        <select id={`unit-${c.id}`} name="unit" className="input" defaultValue={c.unit ?? "unité"}>
+                          <option value="unité">Unité</option>
+                          <option value="nuit">Nuit</option>
+                          <option value="jour">Jour</option>
+                          <option value="séance">Séance</option>
+                        </select>
+                      </div>
                       <button type="submit" disabled={editPending} className="go" style={{ height: 52, width: "auto", padding: "0 24px", borderRadius: 14, fontSize: 15 }}>
                         {editPending ? "…" : "Enregistrer"}
                       </button>
@@ -61,7 +70,9 @@ export default function SoinsClient({ cares }: { cares: Care[] }) {
                   </div>
                 ) : (
                   <>
-                    <div className="flex-1 font-bold">{c.name}</div>
+                    <div className="flex-1 font-bold">
+                      {c.name} {c.unit && c.unit !== "unité" && <span className="text-xs font-medium text-muted">({c.unit})</span>}
+                    </div>
                     <b className="text-lg">{fcfa(c.price)}</b>
                     <span className={`cd ${c.active ? "" : "off"}`} style={{ width: 70 }}>
                       {c.active ? "Actif" : "Inactif"}
@@ -76,6 +87,7 @@ export default function SoinsClient({ cares }: { cares: Care[] }) {
                         {c.active ? "Désactiver" : "Réactiver"}
                       </button>
                     </form>
+                    <DeleteCareButton id={c.id} />
                   </>
                 )}
               </div>
@@ -92,6 +104,15 @@ export default function SoinsClient({ cares }: { cares: Care[] }) {
             <label className="lbl" htmlFor="care-price">Prix (F CFA)</label>
             <input id="care-price" name="price" type="number" min={0} step={1} placeholder="1 000" required className="input" />
           </div>
+          <div style={{ flex: 0.6 }}>
+            <label className="lbl" htmlFor="care-unit">Comptage</label>
+            <select id="care-unit" name="unit" className="input" defaultValue="unité">
+              <option value="unité">Unité</option>
+              <option value="nuit">Nuit</option>
+              <option value="jour">Jour</option>
+              <option value="séance">Séance</option>
+            </select>
+          </div>
           <button type="submit" disabled={createPending} className="go" style={{ height: 52, width: "auto", padding: "0 24px", borderRadius: 14, fontSize: 15 }}>
             {createPending ? "Ajout…" : "Enregistrer"}
           </button>
@@ -102,5 +123,22 @@ export default function SoinsClient({ cares }: { cares: Care[] }) {
         )}
       </section>
     </div>
+  );
+}
+
+function DeleteCareButton({ id }: { id: string }) {
+  const [state, action, pending] = useActionState(deleteCare, {});
+  return (
+    <form action={action}>
+      <input type="hidden" name="id" value={id} />
+      <button
+        type="submit"
+        disabled={pending}
+        className="text-xs font-medium text-danger underline-offset-2 hover:underline"
+        title={state?.message}
+      >
+        {pending ? "…" : "Supprimer"}
+      </button>
+    </form>
   );
 }

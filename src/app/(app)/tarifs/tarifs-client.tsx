@@ -5,6 +5,7 @@ import {
   createService,
   updateService,
   toggleService,
+  deleteService,
   type TarifState,
 } from "@/app/actions/tarifs";
 import { updatePaperWidth } from "@/app/actions/settings";
@@ -155,6 +156,7 @@ export default function TarifsClient({
                     >
                       Modifier
                     </button>
+                    <DeleteServiceButton id={s.id} />
                   </>
                 )}
               </div>
@@ -269,5 +271,22 @@ export default function TarifsClient({
         </section>
       </div>
     </div>
+  );
+}
+
+function DeleteServiceButton({ id }: { id: string }) {
+  const [state, action, pending] = useActionState<TarifState, FormData>(deleteService, undefined);
+  return (
+    <form action={action}>
+      <input type="hidden" name="id" value={id} />
+      <button
+        type="submit"
+        disabled={pending}
+        className="text-xs font-medium text-danger underline-offset-2 hover:underline"
+        title={state?.message}
+      >
+        {pending ? "…" : "Supprimer"}
+      </button>
+    </form>
   );
 }

@@ -13,7 +13,7 @@ export default function ScreenHeader({
         <h1 className="scr-title">{title}</h1>
         {subtitle && <p className="scr-sub">{subtitle}</p>}
       </div>
-      {children && <div className="ml-auto flex flex-wrap items-end justify-end gap-3 mr-7">{children}</div>}
+      {children && <div className="ml-auto flex flex-wrap items-end justify-end gap-3">{children}</div>}
     </header>
   );
 }

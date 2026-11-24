@@ -4,8 +4,8 @@ import { useActionState, useState } from "react";
 import { createInvoice, type InvoiceState } from "@/app/actions/invoices";
 import { useRouter } from "next/navigation";
 
-type Care = { id: string; name: string; price: number };
-type Line = { careId: string; name: string; price: number; qty: number };
+type Care = { id: string; name: string; price: number; unit: string };
+type Line = { careId: string; name: string; price: number; qty: number; unit: string };
 
 function fcfa(v: number): string {
   return `${v.toLocaleString("fr-FR")} F`;
@@ -30,7 +30,7 @@ export default function FactureForm({ cares }: { cares: Care[] }) {
       if (existing) {
         return prev.map((l) => (l.careId === care.id ? { ...l, qty: l.qty + 1 } : l));
       }
-      return [...prev, { careId: care.id, name: care.name, price: care.price, qty: 1 }];
+      return [...prev, { careId: care.id, name: care.name, price: care.price, qty: 1, unit: care.unit ?? "unité" }];
     });
   };
 
@@ -77,7 +77,7 @@ export default function FactureForm({ cares }: { cares: Care[] }) {
               <option value="">Choisir un soin…</option>
               {cares.map((c) => (
                 <option key={c.id} value={c.id}>
-                  {c.name} — {fcfa(c.price)}
+                  {c.name} — {fcfa(c.price)}{c.unit && c.unit !== "unité" ? ` / ${c.unit}` : ""}
                 </option>
               ))}
             </select>
@@ -93,7 +93,7 @@ export default function FactureForm({ cares }: { cares: Care[] }) {
               <div key={l.careId} className="flex items-center gap-2 rounded-xl border border-border bg-bg p-2">
                 <div className="min-w-0 flex-1">
                   <p className="text-sm font-semibold text-ink">{l.name}</p>
-                  <p className="text-xs text-muted">{fcfa(l.price)} / unité</p>
+                  <p className="text-xs text-muted">{fcfa(l.price)} / {l.unit === "unité" ? "unité" : l.unit}</p>
                 </div>
                 <div className="flex items-center gap-1">
                   <button type="button" onClick={() => setQty(l.careId, l.qty - 1)} className="x" style={{ width: 32, height: 32, fontSize: 16 }}>−</button>
