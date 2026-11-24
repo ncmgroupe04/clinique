@@ -95,7 +95,10 @@ export default function SidebarNav({ role }: { role: Role }) {
 
   const items: Item[] = [];
   if (role === "platform_admin") {
-    items.push({ href: "/admin", label: "Structures", icon: "admin" });
+    items.push({ href: "/admin", label: "Tableau de bord", icon: "dashboard" });
+    items.push({ href: "/admin/inscriptions", label: "Inscriptions", icon: "users" });
+    items.push({ href: "/admin/formules", label: "Formules", icon: "tag" });
+    items.push({ href: "/admin/structures", label: "Structures", icon: "admin" });
   } else {
     items.push({ href: "/tableau", label: "Tableau de bord", icon: "dashboard" });
     if (ticketAccess) {
@@ -121,7 +124,7 @@ export default function SidebarNav({ role }: { role: Role }) {
 
   return (
     <aside className="print:hidden sticky top-0 flex h-screen w-[104px] shrink-0 flex-col items-center gap-1.5 overflow-hidden bg-ink pb-3 pt-4">
-      {ticketAccess && (
+      {ticketAccess && role !== "platform_admin" && (
         <>
           <Link
             href="/tickets/nouveau"

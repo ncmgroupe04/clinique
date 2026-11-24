@@ -1,3 +1,4 @@
+import { redirect } from "next/navigation";
 import { connection } from "next/server";
 import { requireUser } from "@/lib/auth";
 import { createClient } from "@/lib/supabase/server";
@@ -11,6 +12,7 @@ function fcfa(v: number): string {
 export default async function TableauPage() {
   await connection();
   const user = await requireUser();
+  if (user.role === "platform_admin") redirect("/admin");
 
   let tickets: { created_at: string; advance: number; total: number; status: string }[] = [];
   let invoices: { created_at: string; advance: number; total: number; status: string }[] = [];

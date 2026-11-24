@@ -3,11 +3,6 @@ import { connection } from "next/server";
 import { requireUser } from "@/lib/auth";
 import { createServiceClient } from "@/lib/supabase/server";
 import ScreenHeader from "../screen-header";
-import {
-  createPlan,
-  togglePlanActive,
-} from "@/app/actions/admin";
-import AdminStructuresTable, { DeletePlanButton } from "./admin-client";
 import BarChart, { type ChartDatum } from "./chart";
 
 export default async function AdminPage() {
@@ -25,12 +20,6 @@ export default async function AdminPage() {
     .from("subscription_plans")
     .select("*")
     .order("created_at", { ascending: true });
-
-  const { data: counts } = await supabase.from("tickets").select("structure_id");
-  const countMap = new Map<string, number>();
-  for (const t of counts ?? []) {
-    countMap.set(t.structure_id, (countMap.get(t.structure_id) ?? 0) + 1);
-  }
 
   const now = new Date();
   const planMap = new Map((plans ?? []).map((p) => [p.id, p]));
@@ -52,8 +41,8 @@ export default async function AdminPage() {
   return (
     <div className="flex flex-1 flex-col gap-[26px]">
       <ScreenHeader
-        title="Super Admin · Abonnements"
-        subtitle="Formule unique : 25 000 F CFA / mois + frais d'inscription 50 000 F CFA."
+        title="Tableau de bord · Super Admin"
+        subtitle="Abonnés, MRR/ARR, prévisions et formules — formule unique : 25 000 F CFA / mois + frais d'inscription 50 000 F CFA."
       />
 
       {/* KPIs */}
@@ -105,70 +94,6 @@ export default async function AdminPage() {
         />
       </div>
 
-      {/* Plans management */}
-      <section className="card">
-        <div className="mb-4 flex items-center justify-between">
-          <h2 className="text-lg font-extrabold">Formules d&apos;abonnement</h2>
-          <span className="text-sm font-semibold text-muted">{plans?.length ?? 0} formule(s)</span>
-        </div>
-        <ul className="divide-y divide-border">
-          {(plans ?? []).map((p) => (
-            <li key={p.id} className="flex flex-wrap items-center justify-between gap-3 py-2.5">
-              <div>
-                <p className="font-bold text-ink">{p.name}</p>
-                <p className="text-xs text-muted">
-                  {p.monthly_price.toLocaleString("fr-FR")} F/mois · inscription {p.registration_fee.toLocaleString("fr-FR")} F · {p.duration_days} jours
-                </p>
-              </div>
-              <div className="flex items-center gap-2">
-                <form action={togglePlanActive}>
-                  <input type="hidden" name="id" value={p.id} />
-                  <input type="hidden" name="active" value={String(p.active)} />
-                  <button
-                    type="submit"
-                    className={p.active ? "btn-secondary" : "btn-danger-solid"}
-                    style={{ height: 34, padding: "0 12px", borderRadius: 10, fontSize: 12, width: "auto" }}
-                  >
-                    {p.active ? "Active" : "Inactive"}
-                  </button>
-                </form>
-                <DeletePlanButton id={p.id} />
-              </div>
-            </li>
-          ))}
-        </ul>
-        <form action={createPlan} className="mt-4 grid grid-cols-1 gap-3 border-t border-border pt-4 md:grid-cols-4">
-          <input name="name" placeholder="Nom de la formule" required className="input" style={{ height: 38, fontSize: 14 }} />
-          <input name="monthly_price" type="number" min={0} placeholder="Prix mensuel (F)" required className="input" style={{ height: 38, fontSize: 14 }} />
-          <input name="registration_fee" type="number" min={0} placeholder="Frais inscription (F)" required className="input" style={{ height: 38, fontSize: 14 }} />
-          <input name="duration_days" type="number" min={1} defaultValue={30} placeholder="Durée (jours)" required className="input" style={{ height: 38, fontSize: 14 }} />
-          <div className="md:col-span-4 flex justify-end">
-            <button type="submit" className="go" style={{ height: 38, padding: "0 16px", borderRadius: 10, fontSize: 13, width: "auto" }}>
-              + Ajouter une formule
-            </button>
-          </div>
-        </form>
-      </section>
-
-      {/* Structures table with search & filters */}
-      <section className="card">
-        <div className="mb-4 flex items-center justify-between">
-          <h2 className="text-lg font-extrabold">Structures abonnées</h2>
-        </div>
-        <AdminStructuresTable
-          structures={(structures ?? []).map((s) => ({
-            id: s.id,
-            name: s.name,
-            active: s.active,
-            created_at: s.created_at,
-            plan: s.plan,
-            subscription_ends_at: s.subscription_ends_at,
-            suspended: s.suspended,
-            registration_fee_paid: s.registration_fee_paid,
-          }))}
-          countMap={Object.fromEntries(countMap)}
-        />
-      </section>
     </div>
   );
 }
