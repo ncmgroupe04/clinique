@@ -1,6 +1,7 @@
 "use server";
 
 import { redirect } from "next/navigation";
+import { headers } from "next/headers";
 import { createClient, createServiceClient } from "@/lib/supabase/server";
 import {
   signupSchema,
@@ -10,6 +11,33 @@ import {
 } from "@/lib/validations/auth";
 
 export type { SignupState, LoginState };
+
+export type ResetState =
+  | { errors?: Record<string, string[]>; message?: string; success?: boolean }
+  | undefined;
+
+export async function requestPasswordReset(
+  _prev: ResetState,
+  formData: FormData,
+): Promise<ResetState> {
+  const email = String(formData.get("email") ?? "").trim().toLowerCase();
+  if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+    return { errors: { email: ["Adresse e-mail invalide."] } };
+  }
+  const origin = (await headers()).get("origin") ?? "https://ticketordonnance.vercel.app";
+  const supabase = await createClient();
+  const { error } = await supabase.auth.resetPasswordForEmail(email, {
+    redirectTo: `${origin}/mot-de-passe-modifier`,
+  });
+  if (error) {
+    return { message: "Envoi impossible. Réessayez dans un instant." };
+  }
+  // Réponse identique même si l'adresse est inconnue (pas d'énumération de comptes).
+  return {
+    success: true,
+    message: "Si cette adresse est connue, un lien de réinitialisation vient de lui être envoyé.",
+  };
+}
 
 export async function signup(
   _prev: SignupState,

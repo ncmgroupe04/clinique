@@ -2,7 +2,14 @@
 
 import { useActionState, useState } from "react";
 import Link from "next/link";
-import { signup, login, type SignupState, type LoginState } from "@/app/actions/auth";
+import {
+  signup,
+  login,
+  requestPasswordReset,
+  type SignupState,
+  type LoginState,
+  type ResetState,
+} from "@/app/actions/auth";
 
 function EyeIcon({ visible }: { visible: boolean }) {
   return visible ? (
@@ -35,7 +42,7 @@ export default function AuthScreen({
   initialMode: "login" | "signup";
   plans?: PlanOption[];
 }) {
-  const [mode, setMode] = useState<"login" | "signup">(initialMode);
+  const [mode, setMode] = useState<"login" | "signup" | "reset">(initialMode);
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirm, setShowConfirm] = useState(false);
   const [values, setValues] = useState<Record<string, string>>({});
@@ -62,6 +69,7 @@ export default function AuthScreen({
   };
   const [signupState, signupAction, signupPending] = useActionState<SignupState, FormData>(signup, undefined);
   const [loginState, loginAction, loginPending] = useActionState<LoginState, FormData>(login, undefined);
+  const [resetState, resetAction, resetPending] = useActionState<ResetState, FormData>(requestPasswordReset, undefined);
 
   return (
     <main className="relative flex min-h-screen items-center justify-center overflow-hidden bg-bg px-4 py-8">
@@ -93,7 +101,7 @@ export default function AuthScreen({
           <button
             type="button"
             onClick={() => setMode("login")}
-            className={mode === "login" ? "go" : "btn-secondary"}
+            className={mode === "login" || mode === "reset" ? "go" : "btn-secondary"}
             style={{ height: 44, borderRadius: 12, fontSize: 13 }}
           >
             Connexion
@@ -108,7 +116,40 @@ export default function AuthScreen({
           </button>
         </div>
 
-        {mode === "login" ? (
+        {mode === "reset" ? (
+          <>
+            <h1 className="mb-2 text-2xl font-bold text-ink">Mot de passe oublié</h1>
+            <p className="mb-6 text-sm text-muted">
+              Saisissez l&apos;adresse e-mail de votre compte. Vous recevrez un lien pour choisir un nouveau mot de passe.
+            </p>
+            {resetState?.success && (
+              <p className="mb-4 rounded-xl bg-accent-light p-3 text-sm font-semibold text-accent">
+                {resetState.message}
+              </p>
+            )}
+            <form action={resetAction} className="space-y-5">
+              <div>
+                <label className="lbl" htmlFor="reset-email">E-mail <span className="text-danger">*</span></label>
+                <input id="reset-email" name="email" type="email" required className="input" onChange={set("email")} />
+                {hint("email") && <p className="mt-2 text-sm text-danger">{hint("email")}</p>}
+                {resetState?.errors?.email && <p className="mt-2 text-sm text-danger">{resetState.errors.email[0]}</p>}
+              </div>
+              {resetState?.message && !resetState.success && (
+                <p className="text-sm text-danger">{resetState.message}</p>
+              )}
+              <button type="submit" disabled={resetPending} className="btn-primary w-full">
+                {resetPending ? "Envoi…" : "Envoyer le lien"}
+              </button>
+            </form>
+            <button
+              type="button"
+              onClick={() => setMode("login")}
+              className="mt-5 text-sm font-semibold text-accent hover:underline"
+            >
+              ← Retour à la connexion
+            </button>
+          </>
+        ) : mode === "login" ? (
           <>
             <h1 className="mb-2 text-2xl font-bold text-ink">Connexion</h1>
             <p className="mb-6 text-sm text-muted">Accédez à votre espace structure.</p>
@@ -134,6 +175,15 @@ export default function AuthScreen({
                 </div>
                 {hint("password") && <p className="mt-2 text-sm text-danger">{hint("password")}</p>}
                 {loginState?.errors?.password && <p className="mt-2 text-sm text-danger">{loginState.errors.password}</p>}
+              </div>
+              <div className="-mt-3 text-right">
+                <button
+                  type="button"
+                  onClick={() => setMode("reset")}
+                  className="text-xs font-semibold text-accent hover:underline"
+                >
+                  Mot de passe oublié ?
+                </button>
               </div>
               {loginState?.message && <p className="text-sm text-danger">{loginState.message}</p>}
               <button type="submit" disabled={loginPending} className="btn-primary w-full">

@@ -2,7 +2,7 @@ import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
 import { updateSession } from "@/lib/supabase/proxy";
 
-const publicPaths = ["/connexion", "/inscription", "/cgu", "/confidentialite", "/cookies", "/formules"];
+const publicPaths = ["/connexion", "/inscription", "/mot-de-passe-modifier", "/cgu", "/confidentialite", "/cookies", "/formules"];
 
 export async function proxy(request: NextRequest) {
   const response = NextResponse.next({ request });
