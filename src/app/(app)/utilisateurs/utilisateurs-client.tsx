@@ -130,17 +130,19 @@ export default function UtilisateursClient({ users }: { users: User[] }) {
                     >
                       Mot de passe
                     </button>
-                    <form action={toggleUserActive}>
-                      <input type="hidden" name="user_id" value={u.id} />
-                      <input type="hidden" name="active" value={u.active ? "false" : "true"} />
-                      <button
-                        type="submit"
-                        className={u.active ? "btn-danger-solid" : "btn-secondary"}
-                        style={{ height: 34, padding: "0 12px", borderRadius: 10, fontSize: 12, width: "auto" }}
-                      >
-                        {u.active ? "Désactiver" : "Réactiver"}
-                      </button>
-                    </form>
+                    {u.role !== "structure_admin" && u.role !== "platform_admin" && (
+                      <form action={toggleUserActive}>
+                        <input type="hidden" name="user_id" value={u.id} />
+                        <input type="hidden" name="active" value={u.active ? "false" : "true"} />
+                        <button
+                          type="submit"
+                          className={u.active ? "btn-danger-solid" : "btn-secondary"}
+                          style={{ height: 34, padding: "0 12px", borderRadius: 10, fontSize: 12, width: "auto" }}
+                        >
+                          {u.active ? "Désactiver" : "Réactiver"}
+                        </button>
+                      </form>
+                    )}
                   </div>
                 </div>
 

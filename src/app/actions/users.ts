@@ -160,6 +160,14 @@ export async function toggleUserActive(formData: FormData): Promise<void> {
   if (!userId) return;
 
   const admin = createServiceClient();
+  // Un administrateur ne doit jamais être désactivé depuis l'interface.
+  const { data: target } = await admin
+    .from("profiles")
+    .select("role")
+    .eq("id", userId)
+    .maybeSingle();
+  if (!target || target.role === "structure_admin" || target.role === "platform_admin") return;
+
   await admin.from("profiles").update({ active }).eq("id", userId);
   revalidatePath("/utilisateurs");
 }
