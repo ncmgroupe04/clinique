@@ -72,3 +72,64 @@ Isolation stricte entre structures (RLS), mots de passe gérés par Supabase Aut
 
 ## 12. Questions ouvertes
 - Modèle économique : abonnement mensuel par structure (à définir plus tard).
+
+## 13. Évolutions prévues (hors périmètre V1)
+
+Ces deux évolutions sont **anticipées mais non développées** dans la version actuelle.
+Elles sont documentées ici pour cadrer les choix d'architecture dès maintenant
+(multi-tenant, stockage local, devise et langue) sans bloquer la mise en production.
+
+### 13.1 Mode hors ligne
+
+**Objectif** : permettre au caissier de continuer à créer des tickets lorsque la
+connexion Internet est instable ou absente (coupures fréquentes dans certaines zones).
+
+**Principe**
+- Le navigateur conserve une file d'attente locale des tickets créés hors ligne
+  (IndexedDB), avec les données minimales : patient, service, montant, avance, date.
+- Le numéro de reçu **ne peut pas** être attribué côté client : utiliser un numéro
+  temporaire local (ex. `TEMP-…`) et réattribuer le numéro définitif côté serveur
+  lors de la synchronisation. Le ticket imprimé hors ligne porte la mention
+  « À régulariser » jusqu'à la synchro.
+- À la reconnexion, la file est envoyée à l'API ; le serveur attribue les numéros
+  dans l'ordre, sans trou ni doublon, et met à jour l'historique.
+- Les réglages (en-tête, tarifs, papier) sont mis en cache en lecture seule.
+
+**Contraintes**
+- Aucune donnée de santé supplémentaire stockée sur l'appareil.
+- Journalisation des synchronisations et des conflits éventuels.
+- L'annulation d'un ticket hors ligne non encore synchronisé est simply supprimée
+  de la file locale (pas de trace serveur).
+
+**Critères d'acceptation**
+- Créer 10 tickets hors ligne puis se reconnecter : les 10 numéros sont attribués
+  sans trou et l'historique est complet.
+- Aucun doublon de numéro même si deux appareils se synchronisent en même temps.
+
+### 13.2 Extension vers la sous-région
+
+**Objectif** : ouvrir la plateforme à d'autres pays d'Afrique de l'Ouest
+(Mali, Burkina Faso, Côte d'Ivoire, Bénin, Togo, Guinée…).
+
+**Principe**
+- Introduire une table `countries` et une colonne `country_id` sur `structures`.
+- Rendre la **devise** configurable par pays (XOF pour la plupart des pays de
+  l'UEMOA, devise locale ailleurs) au lieu du F CFA codé en dur.
+- Rendre le **format de date** et la **langue de l'interface** configurables
+  (français par défaut, anglais à terme).
+- Adapter les mentions légales (CGU, confidentialité) au pays de la structure.
+- Hébergement et conformité : rester dans une région adaptée (Europe ou pays
+  cible selon les exigences locales de protection des données).
+
+**Contraintes**
+- Les numéros de reçu restent **par structure et par année** (pas par pays).
+- Aucune migration de données n'est prévue : chaque pays démarre avec ses propres
+  structures.
+- Le modèle d'abonnement et le moyen de paiement (Wave) doivent être revérifiés
+  pays par pays.
+
+**Critères d'acceptation**
+- Deux structures de pays différents peuvent coexister avec des devises distinctes
+  sans mélange de montants.
+- L'isolation multi-tenant reste stricte entre pays.
+
