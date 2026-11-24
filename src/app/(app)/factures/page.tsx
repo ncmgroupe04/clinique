@@ -44,15 +44,7 @@ export default async function FacturesPage() {
           + Nouvelle facture
         </Link>
       </ScreenHeader>
-      {/* Tabs Tickets / Factures */}
-      <div className="flex gap-2">
-        <Link href="/tickets/historique" className="btn-secondary" style={{ height: 40, padding: "0 20px", borderRadius: 14, fontSize: 14 }}>
-          Tickets
-        </Link>
-        <span className="btn-primary" style={{ height: 40, padding: "0 20px", borderRadius: 14, fontSize: 14, width: "auto" }}>
-          Factures
-        </span>
-      </div>
+      {/* Tickets tab removed */}
       <div className="card grid grid-cols-2 gap-4 lg:grid-cols-4">
         <div className="text-center"><p className="text-[13px] font-semibold text-muted">Factures aujourd&apos;hui</p><p className="mt-1 text-xl font-extrabold text-ink">{totals.count}</p></div>
         <div className="text-center"><p className="text-[13px] font-semibold text-muted">Total</p><p className="mt-1 text-xl font-extrabold text-ink">{totals.total.toLocaleString("fr-FR")} F</p></div>
