@@ -3,6 +3,7 @@ import { requireUser } from "@/lib/auth";
 import SidebarNav from "./sidebar-nav";
 import { createServiceClient } from "@/lib/supabase/server";
 import { redirect } from "next/navigation";
+import Link from "next/link";
 import LogoutButton from "./logout-button";
 
 export default async function AppLayout({
@@ -13,6 +14,7 @@ export default async function AppLayout({
   await connection();
   const user = await requireUser();
 
+  let renewalAlert: string | null = null;
   if (user.structureId) {
     const supabase = createServiceClient();
     const { data: structure } = await supabase
@@ -27,16 +29,44 @@ export default async function AppLayout({
     if (!structure || !structure.active || structure.suspended || expired) {
       redirect("/suspendu");
     }
+    if (structure?.subscription_ends_at && (user.role === "cashier" || user.role === "docteur")) {
+      const days = Math.ceil(
+        (new Date(structure.subscription_ends_at).getTime() - now.getTime()) / 86_400_000,
+      );
+      if (days <= 7) renewalAlert = days <= 0 ? "expired" : String(days);
+    }
   }
 
   return (
     <div className="flex min-h-screen bg-bg">
       <SidebarNav role={user.role} />
       <div className="flex min-w-0 flex-1 flex-col">
-        <header className="print:hidden flex items-center justify-end px-6 py-3 lg:px-10 lg:py-4">
+        <header className="print:hidden flex items-center justify-end gap-3 px-6 py-3 lg:px-10 lg:py-4">
+          <Link
+            href="/profil"
+            className="btn-secondary"
+            style={{ height: 48, padding: "0 16px", borderRadius: 14, fontSize: 13, display: "inline-flex", alignItems: "center", gap: 8 }}
+          >
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+              <circle cx="12" cy="8" r="4" /><path d="M4 21a8 8 0 0 1 16 0" />
+            </svg>
+            <span className="max-w-[160px] truncate">{user.fullName || "Profil"}</span>
+          </Link>
           <LogoutButton />
         </header>
-        <main className="flex min-w-0 flex-1 flex-col px-6 pb-6 lg:px-10 lg:pb-9">{children}</main>
+        <main className="flex min-w-0 flex-1 flex-col px-6 pb-6 lg:px-10 lg:pb-9">
+          {renewalAlert && (
+            <div className="mb-5 flex items-center gap-3 rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-danger">
+              <span className="text-lg">⚠</span>
+              <span>
+                {renewalAlert === "expired"
+                  ? "L'abonnement de la structure est expiré. Prévenez l'administrateur pour le renouveler."
+                  : `L'abonnement expire dans ${renewalAlert} jour(s). Prévenez l'administrateur pour le renouveler.`}
+              </span>
+            </div>
+          )}
+          {children}
+        </main>
       </div>
     </div>
   );

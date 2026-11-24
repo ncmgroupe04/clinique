@@ -208,7 +208,7 @@ export default function AuthScreen({
                 <label className="lbl" htmlFor="planId">Formule d&apos;abonnement</label>
                 <div className="relative">
                   <select id="planId" name="planId" className="input appearance-none" style={{ paddingRight: 42, textAlign: "center" }} defaultValue="">
-                    <option value="">Choisir une formule (essai 7 jours offert)</option>
+                    <option value="">Essai gratuit 7 jours (sans formule)</option>
                     {plans.map((p) => (
                       <option key={p.id} value={p.id}>
                         {p.name} — {p.monthly_price.toLocaleString("fr-FR")} F/mois

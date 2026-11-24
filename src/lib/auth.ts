@@ -9,6 +9,7 @@ export type CurrentUser = {
   email: string;
   role: Role;
   structureId: string | null;
+  fullName: string | null;
 };
 
 export const getCurrentUser = async (): Promise<CurrentUser | null> => {
@@ -20,7 +21,7 @@ export const getCurrentUser = async (): Promise<CurrentUser | null> => {
 
   const { data: profile } = await supabase
     .from("profiles")
-    .select("structure_id, role")
+    .select("structure_id, role, full_name")
     .eq("id", user.id)
     .maybeSingle();
 
@@ -30,6 +31,7 @@ export const getCurrentUser = async (): Promise<CurrentUser | null> => {
     email: user.email ?? "",
     role: profile.role as Role,
     structureId: profile.structure_id,
+    fullName: profile.full_name ?? null,
   };
 };
 

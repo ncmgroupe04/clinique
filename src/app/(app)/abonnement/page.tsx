@@ -41,12 +41,6 @@ export default async function AbonnementPage() {
               </p>
             </div>
             <div>
-              <p className="text-[13px] font-semibold text-muted">Frais d&apos;inscription</p>
-              <p className="mt-1 text-lg font-bold text-ink">
-                {(plan?.registration_fee ?? 50000).toLocaleString("fr-FR")} F CFA
-              </p>
-            </div>
-            <div>
               <p className="text-[13px] font-semibold text-muted">Échéance</p>
               <p className="mt-1 text-lg font-bold text-ink">
                 {structure?.subscription_ends_at
