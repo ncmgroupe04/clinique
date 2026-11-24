@@ -34,7 +34,7 @@ export default function UtilisateursClient({ users }: { users: User[] }) {
   const [resetId, setResetId] = useState<string | null>(null);
 
   return (
-    <div className="mx-auto w-full max-w-4xl space-y-5">
+    <div className="w-full space-y-5">
       <div className="card">
         <div className="mb-3 flex items-center justify-between border-b border-border pb-3">
           <div>
@@ -103,7 +103,7 @@ export default function UtilisateursClient({ users }: { users: User[] }) {
         ) : (
           <ul className="divide-y divide-border">
             {users.map((u) => (
-              <li key={u.id} className="py-5">
+              <li key={u.id} className="py-2.5">
                 <div className="flex flex-wrap items-center justify-between gap-2">
                   <p className="min-w-0 text-sm">
                     <span className="font-semibold text-ink">{u.full_name || "—"}</span>
