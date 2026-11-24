@@ -84,7 +84,7 @@ export async function toggleCare(formData: FormData): Promise<void> {
   const supabase = await createClient();
   await supabase
     .from("cares")
-    .update({ active: !active })
+    .update({ active })
     .eq("id", id)
     .eq("structure_id", user.structureId);
   revalidatePath("/soins");

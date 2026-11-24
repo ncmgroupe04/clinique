@@ -118,17 +118,6 @@ export default function HistoriqueClient({ tickets }: { tickets: Ticket[] }) {
                   </button>
                 </form>
               )}
-              {state?.message && cancelingId === null && (
-                <p
-                  className={
-                    state.success
-                      ? "text-[#0B7A6B] text-xs"
-                      : "text-[#DC2626] text-xs"
-                  }
-                >
-                  {state.message}
-                </p>
-              )}
             </li>
           ))}
         </ul>

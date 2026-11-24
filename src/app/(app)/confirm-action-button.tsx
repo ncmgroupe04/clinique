@@ -1,6 +1,6 @@
 "use client";
 
-import { useRef, useState } from "react";
+import { useTransition, useState } from "react";
 
 export default function ConfirmActionButton({
   label,
@@ -22,7 +22,16 @@ export default function ConfirmActionButton({
   hiddenInputs?: { name: string; value: string }[];
 }) {
   const [open, setOpen] = useState(false);
-  const formRef = useRef<HTMLFormElement>(null);
+  const [pending, startTransition] = useTransition();
+
+  const confirm = () => {
+    const fd = new FormData();
+    hiddenInputs.forEach((h) => fd.set(h.name, h.value));
+    startTransition(async () => {
+      await formAction(fd);
+      setOpen(false);
+    });
+  };
 
   return (
     <>
@@ -52,19 +61,15 @@ export default function ConfirmActionButton({
               >
                 Annuler
               </button>
-              <form ref={formRef} action={formAction}>
-                {hiddenInputs.map((h) => (
-                  <input key={h.name} type="hidden" name={h.name} value={h.value} />
-                ))}
-                <button
-                  type="submit"
-                  className="btn-danger-solid"
-                  style={{ height: 40, padding: "0 18px", borderRadius: 12, fontSize: 13, width: "auto" }}
-                  onClick={() => setOpen(false)}
-                >
-                  {confirmLabel}
-                </button>
-              </form>
+              <button
+                type="button"
+                disabled={pending}
+                className="btn-danger-solid"
+                style={{ height: 40, padding: "0 18px", borderRadius: 12, fontSize: 13, width: "auto" }}
+                onClick={confirm}
+              >
+                {pending ? "…" : confirmLabel}
+              </button>
             </div>
           </div>
         </div>
