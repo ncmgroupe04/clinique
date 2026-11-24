@@ -51,7 +51,7 @@ export default function AuthScreen({
     if (name === "phone" && !/^\d{9}$/.test(v.trim())) return "Exactement 9 chiffres requis.";
     if (name === "email" && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(v)) return "Adresse e-mail invalide : le symbole @ est requis.";
     if (name === "password") {
-      if (v.length < 8) return "8 caractères minimum.";
+      if (v.length < 12) return "12 caractères minimum.";
       if (!/[A-Z]/.test(v)) return "Au moins une majuscule.";
       if (!/[a-z]/.test(v)) return "Au moins une minuscule.";
       if (!/[0-9]/.test(v)) return "Au moins un chiffre.";

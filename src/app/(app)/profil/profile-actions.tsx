@@ -44,7 +44,7 @@ export default function ProfileActions({ fullName }: { fullName: string }) {
       {panel === "password" ? (
         <form action={pwdAction} className="space-y-2 rounded-xl border border-border p-3">
           <label className="lbl" htmlFor="profile-pwd">Nouveau mot de passe</label>
-          <input id="profile-pwd" name="password" type="password" minLength={8} required className="input" />
+          <input id="profile-pwd" name="password" type="password" minLength={12} required className="input" />
           {pwdState?.message && <p className={`text-xs ${pwdState.success ? "text-accent" : "text-danger"}`}>{pwdState.message}</p>}
           <div className="flex gap-2">
             <Btn label="Changer" className="btn-primary" />

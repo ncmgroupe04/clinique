@@ -163,8 +163,16 @@ pas bloquer les choix d'architecture actuels (multi-tenant, devise, langue).
 
 ## Sécurité
 
-- Isolation multi-tenant par `structure_id` + Row Level Security.
+- Isolation multi-tenant par `structure_id` + Row Level Security **forcée sur toutes les tables**.
+- Rôle `anon` **fermé** : aucune table lisible, aucune fonction exécutable, aucun schéma `app` accessible.
+- Fonctions `SECURITY DEFINER` déplacées dans le schéma interne `app` ; le schéma exposé
+  `public` ne contient que des wrappers `SECURITY INVOKER` sans privilège.
+- Par défaut (droits supprimés aussi pour les futures tables), aucun accès anonyme à la BD.
 - Aucune clé `service_role` côté navigateur.
+- Politique de mot de passe : **12 caractères minimum**, majuscule, minuscule, chiffre et symbole.
+- Rotation des tokens de rafraîchissement et changement d'e-mail sécurisé activés.
+- **À faire après passage au plan Supabase Pro** : activer « Leaked password protection »
+  (HaveIBeenPwned) dans *Authentication → Providers → Email*. Indisponible sur le plan Free.
 - Anti force brute : 5 tentatives de connexion par minute et par e-mail.
 - Pas de suppression de ticket (annulation avec motif, restauration possible).
 - Prix copié sur le ticket/facture à la création.

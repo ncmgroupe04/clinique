@@ -30,13 +30,13 @@ export async function changePassword(
   const user = await requireUser();
   const next = String(formData.get("password") ?? "");
   if (
-    next.length < 8 ||
+    next.length < 12 ||
     !/[A-Z]/.test(next) ||
     !/[a-z]/.test(next) ||
     !/[0-9]/.test(next) ||
     !/[^A-Za-z0-9]/.test(next)
   ) {
-    return { message: "8 caractères minimum, majuscule, minuscule, chiffre et caractère spécial." };
+    return { message: "12 caractères minimum, majuscule, minuscule, chiffre et caractère spécial." };
   }
 
   const admin = createServiceClient();

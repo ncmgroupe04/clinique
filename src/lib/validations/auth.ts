@@ -4,7 +4,7 @@ export const signupSchema = z.object({
   email: z.string().email("Adresse e-mail invalide.").trim(),
   password: z
     .string()
-    .min(8, "Au moins 8 caractères.")
+    .min(12, "Au moins 12 caractères.")
     .regex(/[A-Z]/, "Au moins une majuscule.")
     .regex(/[a-z]/, "Au moins une minuscule.")
     .regex(/[0-9]/, "Au moins un chiffre.")
