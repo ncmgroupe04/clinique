@@ -34,7 +34,7 @@ export default function FacturesClient({ invoices }: { invoices: Invoice[] }) {
             <li key={inv.id} className="flex items-center justify-between gap-3 py-3">
               <div className="min-w-0">
                 <p className="font-bold text-ink">
-                  Facture {inv.year}-{String(inv.number).padStart(3, "0")}
+                  Facture {inv.year}-{String(inv.number).padStart(4, "0")}
                   {inv.status === "annule" && <span className="ml-2 text-xs text-danger">(annulée)</span>}
                 </p>
                 <p className="text-xs text-muted">

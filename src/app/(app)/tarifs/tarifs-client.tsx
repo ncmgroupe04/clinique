@@ -264,10 +264,10 @@ export default function TarifsClient({
         <section className="card">
           <h2 className="mb-2.5 text-lg font-extrabold">Numérotation des reçus</h2>
           <div className="text-[32px] font-extrabold tracking-[-0.5px] text-accent">
-            Reçu {nextReceipt.year}-{String(nextReceipt.number).padStart(3, "0")}
+            Reçu {nextReceipt.year}-{String(nextReceipt.number).padStart(4, "0")}
           </div>
           <p className="mt-2.5 text-sm leading-normal text-muted">
-            Le numéro repart à 001 chaque 1er janvier : Reçu {nextReceipt.year + 1}-001.
+            Le numéro repart à 0001 chaque 1er janvier : Reçu {nextReceipt.year + 1}-0001.
             Recherche et filtre par année.
           </p>
         </section>

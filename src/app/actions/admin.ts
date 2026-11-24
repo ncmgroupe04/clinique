@@ -1,6 +1,6 @@
 "use server";
 
-import { revalidatePath } from "next/cache";
+import { revalidatePath, revalidateTag } from "next/cache";
 import { requireRole } from "@/lib/auth";
 import { createServiceClient } from "@/lib/supabase/server";
 
@@ -91,6 +91,7 @@ export async function createPlan(formData: FormData): Promise<void> {
   });
 
   revalidatePath("/admin");
+  revalidateTag("plans", "max");
 }
 
 export async function togglePlanActive(formData: FormData): Promise<void> {
@@ -104,6 +105,7 @@ export async function togglePlanActive(formData: FormData): Promise<void> {
   await supabase.from("subscription_plans").update({ active: !active }).eq("id", id);
 
   revalidatePath("/admin");
+  revalidateTag("plans", "max");
 }
 
 export async function validateRegistration(formData: FormData): Promise<void> {
@@ -156,4 +158,5 @@ export async function deletePlan(formData: FormData): Promise<void> {
   await supabase.from("subscription_plans").delete().eq("id", id);
 
   revalidatePath("/admin");
+  revalidateTag("plans", "max");
 }

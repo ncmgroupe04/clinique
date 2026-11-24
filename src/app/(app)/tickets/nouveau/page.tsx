@@ -96,7 +96,7 @@ export default async function NouveauTicketPage({
       <ScreenHeader title="Nouveau ticket" subtitle="Étape 2 sur 2 · Patient et paiement">
         <div className="rounded-full border border-border bg-white px-[18px] py-2.5 text-sm font-semibold">
           <span className="font-medium text-muted">Prochain reçu</span>{" "}
-          {nextReceipt.year}-{String(nextReceipt.number).padStart(3, "0")}
+          {nextReceipt.year}-{String(nextReceipt.number).padStart(4, "0")}
         </div>
       </ScreenHeader>
       <TicketStep

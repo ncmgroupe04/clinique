@@ -46,7 +46,7 @@ export default async function FactureDetailPage({ params }: { params: Promise<{ 
         }
       `}</style>
       <div className="no-print flex items-center justify-between">
-        <h1 className="scr-title">{`Facture ${invoice.year}-${String(invoice.number).padStart(3, "0")}`}</h1>
+        <h1 className="scr-title">{`Facture ${invoice.year}-${String(invoice.number).padStart(4, "0")}`}</h1>
         <Link href="/factures" className="btn-secondary">← Retour</Link>
       </div>
 
@@ -59,7 +59,7 @@ export default async function FactureDetailPage({ params }: { params: Promise<{ 
         </div>
         <div className="border-t border-dashed border-gray-400 my-2" />
         <p className="text-center font-bold" style={{ fontSize: "20px" }}>
-          {`Facture ${invoice.year}-${String(invoice.number).padStart(3, "0")}`}
+          {`Facture ${invoice.year}-${String(invoice.number).padStart(4, "0")}`}
         </p>
         {invoice.print_count > 0 && (
           <p className="text-center font-bold text-red-600" style={{ fontSize: "14px" }}>DUPLICATA</p>

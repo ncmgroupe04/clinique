@@ -194,7 +194,7 @@ export default function TicketStep({
             <div className="border-t-2 border-dashed border-[#B9C7CF]" />
 
             <div className="text-[26px] font-extrabold text-accent">
-              Reçu {nextReceipt.year}-{String(nextReceipt.number).padStart(3, "0")}
+              Reçu {nextReceipt.year}-{String(nextReceipt.number).padStart(4, "0")}
             </div>
 
             <div className="row" style={{ fontSize: 13 }}>

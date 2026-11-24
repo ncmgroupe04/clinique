@@ -3,7 +3,7 @@ export function formatCfa(value: number): string {
 }
 
 export function formatReceipt(year: number, number: number): string {
-  return `Reçu ${year}-${String(number).padStart(3, "0")}`;
+  return `Reçu ${year}-${String(number).padStart(4, "0")}`;
 }
 
 export function formatDateTime(iso: string): string {

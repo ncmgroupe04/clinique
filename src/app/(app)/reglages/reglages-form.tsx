@@ -29,7 +29,7 @@ export default function ReglagesForm({
   const [phone, setPhone] = useState(defaults.phone);
   const [contact, setContact] = useState(defaults.header_text);
 
-  const receiptNumber = `${nextReceipt.year}-${String(nextReceipt.number).padStart(3, "0")}`;
+  const receiptNumber = `${nextReceipt.year}-${String(nextReceipt.number).padStart(4, "0")}`;
 
   return (
     <div className="flex flex-1 flex-col items-stretch gap-7 lg:flex-row">
@@ -93,7 +93,7 @@ export default function ReglagesForm({
         <div className="flex flex-wrap items-center justify-between gap-3 rounded-[14px] bg-[#F2F5F7] px-[18px] py-3.5 text-sm font-semibold">
           <span className="font-medium text-muted">Numérotation</span>
           <span>
-            Automatique · Reçu {receiptNumber}, repart à 001 chaque année
+            Automatique · Reçu {receiptNumber}, repart à 0001 chaque année
           </span>
         </div>
 
