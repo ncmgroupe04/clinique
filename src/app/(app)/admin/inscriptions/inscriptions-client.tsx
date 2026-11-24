@@ -13,6 +13,9 @@ type Inscription = {
   registration_fee_paid: boolean;
   subscription_ends_at: string | null;
   email: string;
+  address?: string | null;
+  phone?: string | null;
+  headerText?: string | null;
 };
 
 const TABS = [
@@ -120,6 +123,9 @@ export default function InscriptionsClient({ structures }: { structures: Inscrip
             <div className="mt-3 space-y-2 text-sm">
               <div className="row"><span>Structure</span><span className="font-bold">{detail.name}</span></div>
               <div className="row"><span>E-mail</span><span className="font-medium">{detail.email || "—"}</span></div>
+              <div className="row"><span>Téléphone</span><span className="font-medium">{detail.phone || "—"}</span></div>
+              <div className="row"><span>Adresse</span><span className="font-medium">{detail.address || "—"}</span></div>
+              <div className="row"><span>Autres informations</span><span className="font-medium">{detail.headerText || "—"}</span></div>
               <div className="row"><span>Date d&apos;inscription</span><span className="font-medium">{new Date(detail.created_at).toLocaleDateString("fr-FR")}</span></div>
               <div className="row"><span>Paiement inscription</span><span className={detail.registration_fee_paid ? "text-accent font-bold" : "text-danger font-bold"}>{detail.registration_fee_paid ? "Payé" : "Non payé"}</span></div>
               <div className="row"><span>Statut</span><span className="font-medium">{detail.active && !detail.suspended ? "Actif" : "Inactif"}</span></div>

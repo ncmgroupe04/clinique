@@ -13,7 +13,7 @@ export default async function InscriptionsPage() {
   const supabase = createServiceClient();
   const { data: structures } = await supabase
     .from("structures")
-    .select("id, name, created_at, active, suspended, registration_fee_paid, subscription_ends_at")
+    .select("id, name, created_at, active, suspended, registration_fee_paid, subscription_ends_at, address, phone, header_text")
     .order("created_at", { ascending: false });
 
   const enriched = await Promise.all(

@@ -20,11 +20,15 @@ export async function signup(
     password: formData.get("password"),
     structureName: formData.get("structureName"),
     fullName: formData.get("fullName"),
+    address: formData.get("address") ?? "",
+    phone: formData.get("phone") ?? "",
+    headerText: formData.get("headerText") ?? "",
+    confirmPassword: formData.get("confirmPassword") ?? "",
   });
   if (!parsed.success) {
     return { errors: parsed.error.flatten().fieldErrors };
   }
-  const { email, password, structureName, fullName } = parsed.data;
+  const { email, password, structureName, fullName, address, phone, headerText } = parsed.data;
 
   const supabase = await createClient();
   const { data, error } = await supabase.auth.signUp({ email, password });
@@ -39,7 +43,12 @@ export async function signup(
     const admin = createServiceClient();
     const { data: structure, error: structError } = await admin
       .from("structures")
-      .insert({ name: structureName })
+      .insert({
+        name: structureName,
+        address: address || null,
+        phone: phone || null,
+        header_text: headerText || null,
+      })
       .select("id")
       .single();
     if (structError || !structure) throw structError ?? new Error("structure");
@@ -86,8 +95,23 @@ export async function login(
     return { errors: parsed.error.flatten().fieldErrors };
   }
   const supabase = await createClient();
+  const email = parsed.data.email.toLowerCase();
+  const admin = createServiceClient();
+
+  // Anti force brute : 5 tentatives maximum par minute et par e-mail.
+  const since = new Date(Date.now() - 60_000).toISOString();
+  const { data: recent } = await admin
+    .from("login_attempts")
+    .select("id")
+    .eq("email", email)
+    .gte("created_at", since);
+  if ((recent?.length ?? 0) >= 5) {
+    return { message: "Trop de tentatives de connexion. Réessayez dans une minute." };
+  }
+
   const { error } = await supabase.auth.signInWithPassword(parsed.data);
   if (error) {
+    await admin.from("login_attempts").insert({ email });
     console.error("[login] Supabase error:", error.message, error.status);
     // On ne révèle pas si c'est l'e-mail ou le mot de passe qui est faux,
     // mais on remonte les autres erreurs (réseau, config, etc.) pour aider au diagnostic.
@@ -99,6 +123,7 @@ export async function login(
     }
     return { message: `Connexion impossible : ${error.message}` };
   }
+  await admin.from("login_attempts").delete().eq("email", email);
   redirect("/tableau");
 }
 

@@ -5,8 +5,11 @@ test("création d'un ticket en deux étapes et affichage du reçu", async ({ pag
   await page.goto("/inscription");
   await page.fill("#structureName", "Clinique Ticket");
   await page.fill("#fullName", "Caissier Ticket");
+  await page.fill("#address", "Touba");
+  await page.fill("#phone", "770000000");
   await page.fill("#email", email);
-  await page.fill("#password", "Motdepasse1");
+  await page.fill("#password", "Motdepasse1@");
+  await page.fill("#confirmPassword", "Motdepasse1@");
   await page.click('button[type="submit"]');
   await page.waitForURL("**/tableau", { timeout: 15_000 });
 

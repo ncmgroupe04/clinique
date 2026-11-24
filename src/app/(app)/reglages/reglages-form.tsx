@@ -93,7 +93,7 @@ export default function ReglagesForm({
         <div className="flex flex-wrap items-center justify-between gap-3 rounded-[14px] bg-[#F2F5F7] px-[18px] py-3.5 text-sm font-semibold">
           <span className="font-medium text-muted">Numérotation</span>
           <span>
-            Automatique · Reçu {nextReceipt.year}-001, repart à 001 chaque année
+            Automatique · Reçu {receiptNumber}, repart à 001 chaque année
           </span>
         </div>
 

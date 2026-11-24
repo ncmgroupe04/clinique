@@ -5,11 +5,20 @@ export const signupSchema = z.object({
   password: z
     .string()
     .min(8, "Au moins 8 caractères.")
-    .regex(/[a-zA-Z]/, "Au moins une lettre.")
+    .regex(/[A-Z]/, "Au moins une majuscule.")
+    .regex(/[a-z]/, "Au moins une minuscule.")
     .regex(/[0-9]/, "Au moins un chiffre.")
+    .regex(/[^A-Za-z0-9]/, "Au moins un caractère spécial.")
     .trim(),
-  structureName: z.string().min(2, "Nom de la structure requis.").trim(),
-  fullName: z.string().min(2, "Nom et prénom requis.").trim(),
+  structureName: z.string().min(2, "Nom de la structure trop court (2 caractères minimum).").trim(),
+  fullName: z.string().min(3, "Nom et prénom trop courts (3 caractères minimum).").trim(),
+  address: z.string().min(5, "Adresse trop courte (5 caractères minimum).").max(300).trim(),
+  phone: z.string().min(8, "Téléphone trop court (8 caractères minimum).").max(40).trim(),
+  headerText: z.string().max(500).trim().optional().or(z.literal("")),
+  confirmPassword: z.string().trim().optional().or(z.literal("")),
+}).refine((data) => !data.confirmPassword || data.password === data.confirmPassword, {
+  message: "Les mots de passe ne correspondent pas.",
+  path: ["confirmPassword"],
 });
 
 export const loginSchema = z.object({
