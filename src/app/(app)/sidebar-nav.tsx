@@ -5,7 +5,7 @@ import { usePathname } from "next/navigation";
 
 type Role = "platform_admin" | "structure_admin" | "cashier" | "docteur";
 
-function Icon({ name }: { name: "ticket" | "history" | "tag" | "users" | "settings" | "admin" | "care" | "invoice" | "dashboard" | "ordonnance" | "subscription" }) {
+function Icon({ name }: { name: "ticket" | "history" | "tag" | "users" | "settings" | "admin" | "care" | "invoice" | "dashboard" | "ordonnance" | "subscription" | "journal" }) {
   const common = {
     width: 20,
     height: 20,
@@ -97,10 +97,17 @@ function Icon({ name }: { name: "ticket" | "history" | "tag" | "users" | "settin
           <path d="M2 10h20" />
         </svg>
       );
+    case "journal":
+      return (
+        <svg {...common}>
+          <path d="M6 3h9l4 4v14H6z" />
+          <path d="M9 12h6M9 16h6M9 8h3" />
+        </svg>
+      );
   }
 }
 
-type Item = { href: string; label: string; icon: "ticket" | "history" | "tag" | "users" | "settings" | "admin" | "care" | "invoice" | "dashboard" | "ordonnance" | "subscription"; badge?: string };
+type Item = { href: string; label: string; icon: "ticket" | "history" | "tag" | "users" | "settings" | "admin" | "care" | "invoice" | "dashboard" | "ordonnance" | "subscription" | "journal"; badge?: string };
 
 export default function SidebarNav({ role }: { role: Role }) {
   const pathname = usePathname();
@@ -113,6 +120,7 @@ export default function SidebarNav({ role }: { role: Role }) {
     items.push({ href: "/admin/inscriptions", label: "Inscriptions", icon: "users" });
     items.push({ href: "/admin/formules", label: "Formules", icon: "tag" });
     items.push({ href: "/admin/structures", label: "Structures", icon: "admin" });
+    items.push({ href: "/journal", label: "Journal", icon: "journal" });
   } else {
     items.push({ href: "/tableau", label: "Tableau de bord", icon: "dashboard" });
     if (ticketAccess) {
@@ -129,6 +137,7 @@ export default function SidebarNav({ role }: { role: Role }) {
       items.push({ href: "/utilisateurs", label: "Utilisateurs", icon: "users" });
       items.push({ href: "/reglages", label: "Réglages", icon: "settings" });
       items.push({ href: "/abonnement", label: "Abonnement", icon: "subscription" });
+      items.push({ href: "/journal", label: "Journal", icon: "journal" });
     }
   }
 

@@ -3,6 +3,7 @@
 import { revalidatePath } from "next/cache";
 import { requireRole } from "@/lib/auth";
 import { createClient, createServiceClient } from "@/lib/supabase/server";
+import { logAudit } from "@/lib/audit";
 import * as z from "zod";
 
 const careSchema = z.object({
@@ -39,6 +40,12 @@ export async function createCare(
     unit: parsed.data.unit,
   });
   if (error) return { message: "Création impossible." };
+  await logAudit({
+    structureId: user.structureId,
+    userId: user.id,
+    action: "care_created",
+    details: { name: parsed.data.name, price: parsed.data.price },
+  });
 
   revalidatePath("/soins");
   return { success: true, message: "Soin ajouté." };
@@ -68,6 +75,12 @@ export async function updateCare(
     .eq("id", id)
     .eq("structure_id", user.structureId);
   if (error) return { message: "Mise à jour impossible." };
+  await logAudit({
+    structureId: user.structureId,
+    userId: user.id,
+    action: "care_updated",
+    details: { care_id: id, name: parsed.data.name, price: parsed.data.price },
+  });
 
   revalidatePath("/soins");
   return { success: true, message: "Soin modifié." };
@@ -87,6 +100,12 @@ export async function toggleCare(formData: FormData): Promise<void> {
     .update({ active })
     .eq("id", id)
     .eq("structure_id", user.structureId);
+  await logAudit({
+    structureId: user.structureId,
+    userId: user.id,
+    action: active ? "care_activated" : "care_deactivated",
+    details: { care_id: id },
+  });
   revalidatePath("/soins");
 }
 
@@ -122,6 +141,12 @@ export async function deleteCare(
 
   const { error } = await admin.from("cares").delete().eq("id", id);
   if (error) return { message: "Suppression impossible." };
+  await logAudit({
+    structureId: user.structureId,
+    userId: user.id,
+    action: "care_deleted",
+    details: { care_id: id, name: care.name },
+  });
 
   revalidatePath("/soins");
   return { success: true };

@@ -4,6 +4,7 @@ import { z } from "zod";
 import { revalidatePath } from "next/cache";
 import { requireRole } from "@/lib/auth";
 import { createClient, createServiceClient } from "@/lib/supabase/server";
+import { logAudit } from "@/lib/audit";
 import {
   createServiceSchema,
   updateServiceSchema,
@@ -34,6 +35,12 @@ export async function createService(
     price: parsed.data.price,
   });
   if (error) return { message: "Ajout impossible." };
+  await logAudit({
+    structureId: user.structureId,
+    userId: user.id,
+    action: "service_created",
+    details: { name: parsed.data.name, price: parsed.data.price },
+  });
 
   revalidatePath("/tarifs");
   return { success: true, message: "Service ajouté." };
@@ -43,7 +50,7 @@ export async function updateService(
   _prev: TarifState,
   formData: FormData,
 ): Promise<TarifState> {
-  await requireRole("structure_admin", "platform_admin");
+  const user = await requireRole("structure_admin", "platform_admin");
 
   const parsed = updateServiceSchema.safeParse({
     id: formData.get("id"),
@@ -60,13 +67,19 @@ export async function updateService(
     .update({ name: parsed.data.name, price: parsed.data.price })
     .eq("id", parsed.data.id);
   if (error) return { message: "Modification impossible." };
+  await logAudit({
+    structureId: user.structureId,
+    userId: user.id,
+    action: "service_updated",
+    details: { service_id: parsed.data.id, name: parsed.data.name, price: parsed.data.price },
+  });
 
   revalidatePath("/tarifs");
   return { success: true, message: "Service modifié." };
 }
 
 export async function toggleService(formData: FormData): Promise<void> {
-  await requireRole("structure_admin", "platform_admin");
+  const user = await requireRole("structure_admin", "platform_admin");
 
   const id = formData.get("id");
   const active = formData.get("active") === "true";
@@ -78,6 +91,12 @@ export async function toggleService(formData: FormData): Promise<void> {
     .from("services")
     .update({ active })
     .eq("id", parsed.data);
+  await logAudit({
+    structureId: user.structureId,
+    userId: user.id,
+    action: active ? "service_activated" : "service_deactivated",
+    details: { service_id: parsed.data },
+  });
 
   revalidatePath("/tarifs");
 }
@@ -114,6 +133,12 @@ export async function deleteService(
 
   const { error } = await admin.from("services").delete().eq("id", id);
   if (error) return { message: "Suppression impossible." };
+  await logAudit({
+    structureId: user.structureId,
+    userId: user.id,
+    action: "service_deleted",
+    details: { service_id: id, name: service.name },
+  });
 
   revalidatePath("/tarifs");
   return { success: true, message: "Service supprimé." };

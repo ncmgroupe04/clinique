@@ -3,6 +3,7 @@
 import { revalidatePath } from "next/cache";
 import { requireRole } from "@/lib/auth";
 import { createServiceClient } from "@/lib/supabase/server";
+import { logAudit } from "@/lib/audit";
 import { settingsSchema, type SettingsState } from "@/lib/validations/settings";
 
 export type { SettingsState };
@@ -43,6 +44,12 @@ export async function updateSettings(
   if (error) {
     return { message: "Enregistrement impossible." };
   }
+  await logAudit({
+    structureId: user.structureId,
+    userId: user.id,
+    action: "settings_updated",
+    details: { name: parsed.data.name, paper_width_mm: parsed.data.paper_width_mm },
+  });
 
   revalidatePath("/reglages");
   revalidatePath("/tableau");
@@ -64,6 +71,12 @@ export async function updatePaperWidth(formData: FormData): Promise<void> {
     .from("structures")
     .update({ paper_width_mm: paperWidth, print_format: printFormat })
     .eq("id", user.structureId);
+  await logAudit({
+    structureId: user.structureId,
+    userId: user.id,
+    action: "print_format_updated",
+    details: { print_format: printFormat },
+  });
 
   revalidatePath("/tarifs");
   revalidatePath("/reglages");

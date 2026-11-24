@@ -3,6 +3,7 @@
 import { revalidatePath } from "next/cache";
 import { requireRole } from "@/lib/auth";
 import { createClient, createServiceClient } from "@/lib/supabase/server";
+import { logAudit } from "@/lib/audit";
 import { createUserSchema, updateUserSchema, resetPasswordSchema, type UserState } from "@/lib/validations/users";
 
 export type { UserState };
@@ -58,6 +59,12 @@ export async function createUser(
     return { message: "Création du profil impossible." };
   }
 
+  await logAudit({
+    structureId,
+    userId: user.id,
+    action: "user_created",
+    details: { target_id: newUserId, email: d.email, role: d.role, full_name: d.full_name },
+  });
   revalidatePath("/utilisateurs");
   return { success: true, message: "Compte créé." };
 }
@@ -106,6 +113,12 @@ export async function updateUser(
 
   // Update profile name.
   await admin.from("profiles").update({ full_name: d.full_name }).eq("id", d.user_id);
+  await logAudit({
+    structureId: user.structureId,
+    userId: user.id,
+    action: "user_updated",
+    details: { target_id: d.user_id, email: d.email, full_name: d.full_name },
+  });
 
   revalidatePath("/utilisateurs");
   return { success: true, message: "Compte mis à jour." };
@@ -149,12 +162,18 @@ export async function resetUserPassword(
     return { message: error.message ?? "Réinitialisation impossible." };
   }
 
+  await logAudit({
+    structureId: user.structureId,
+    userId: user.id,
+    action: "user_password_reset",
+    details: { target_id: d.user_id },
+  });
   revalidatePath("/utilisateurs");
   return { success: true, message: "Mot de passe réinitialisé." };
 }
 
 export async function toggleUserActive(formData: FormData): Promise<void> {
-  await requireRole("structure_admin", "platform_admin");
+  const user = await requireRole("structure_admin", "platform_admin");
   const userId = String(formData.get("user_id") ?? "");
   const active = formData.get("active") === "true";
   if (!userId) return;
@@ -163,11 +182,17 @@ export async function toggleUserActive(formData: FormData): Promise<void> {
   // Un administrateur ne doit jamais être désactivé depuis l'interface.
   const { data: target } = await admin
     .from("profiles")
-    .select("role")
+    .select("role, structure_id")
     .eq("id", userId)
     .maybeSingle();
   if (!target || target.role === "structure_admin" || target.role === "platform_admin") return;
 
   await admin.from("profiles").update({ active }).eq("id", userId);
+  await logAudit({
+    structureId: user.structureId ?? target.structure_id,
+    userId: user.id,
+    action: active ? "user_activated" : "user_deactivated",
+    details: { target_id: userId },
+  });
   revalidatePath("/utilisateurs");
 }

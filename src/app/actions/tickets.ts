@@ -6,6 +6,7 @@ import { requireRole } from "@/lib/auth";
 import { createClient, createServiceClient } from "@/lib/supabase/server";
 import { createTicketSchema, type CreateTicketState } from "@/lib/validations/tickets";
 import { assertDocumentQuota } from "@/lib/quotas";
+import { logAudit } from "@/lib/audit";
 
 export type { CreateTicketState };
 
@@ -138,11 +139,11 @@ export async function restoreTicket(formData: FormData): Promise<void> {
     .eq("id", ticketId)
     .eq("structure_id", user.structureId);
 
-  await supabase.from("audit_log").insert({
-    structure_id: user.structureId,
-    user_id: user.id,
+  await logAudit({
+    structureId: user.structureId,
+    userId: user.id,
     action: "ticket_restore",
-    ticket_id: ticketId,
+    ticketId,
   });
 
   revalidatePath("/tickets");

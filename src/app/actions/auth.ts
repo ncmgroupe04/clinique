@@ -3,6 +3,7 @@
 import { redirect } from "next/navigation";
 import { headers } from "next/headers";
 import { createClient, createServiceClient } from "@/lib/supabase/server";
+import { logAudit } from "@/lib/audit";
 import {
   signupSchema,
   loginSchema,
@@ -32,6 +33,10 @@ export async function requestPasswordReset(
   if (error) {
     return { message: "Envoi impossible. Réessayez dans un instant." };
   }
+  await logAudit({
+    action: "password_reset_requested",
+    details: { email },
+  });
   // Réponse identique même si l'adresse est inconnue (pas d'énumération de comptes).
   return {
     success: true,
@@ -96,6 +101,13 @@ export async function signup(
     });
     if (profileError) throw profileError;
 
+    await logAudit({
+      structureId: structure.id,
+      userId,
+      action: "signup",
+      details: { email, plan_id: planId || null, structure: structureName },
+    });
+
     // Two example services (modifiable by the structure).
     await admin.from("services").insert([
       { structure_id: structure.id, name: "Consultation", price: 5000 },
@@ -144,9 +156,13 @@ export async function login(
     return { message: "Trop de tentatives de connexion. Réessayez dans une minute." };
   }
 
-  const { error } = await supabase.auth.signInWithPassword(parsed.data);
+  const { data, error } = await supabase.auth.signInWithPassword(parsed.data);
   if (error) {
     await admin.from("login_attempts").insert({ email });
+    await logAudit({
+      action: "login_failed",
+      details: { email, reason: error.message },
+    });
     console.error("[login] Supabase error:", error.message, error.status);
     // On ne révèle pas si c'est l'e-mail ou le mot de passe qui est faux,
     // mais on remonte les autres erreurs (réseau, config, etc.) pour aider au diagnostic.
@@ -159,11 +175,37 @@ export async function login(
     return { message: `Connexion impossible : ${error.message}` };
   }
   await admin.from("login_attempts").delete().eq("email", email);
+  const { data: profile } = await admin
+    .from("profiles")
+    .select("structure_id, role")
+    .eq("id", data.user.id)
+    .maybeSingle();
+  await logAudit({
+    structureId: profile?.structure_id ?? null,
+    userId: data.user.id,
+    action: "login",
+    details: { email, role: profile?.role ?? null },
+  });
   redirect("/tableau");
 }
 
 export async function logout() {
   const supabase = await createClient();
+  const { data } = await supabase.auth.getUser();
+  if (data.user) {
+    const admin = createServiceClient();
+    const { data: profile } = await admin
+      .from("profiles")
+      .select("structure_id")
+      .eq("id", data.user.id)
+      .maybeSingle();
+    await logAudit({
+      structureId: profile?.structure_id ?? null,
+      userId: data.user.id,
+      action: "logout",
+      details: { email: data.user.email ?? null },
+    });
+  }
   await supabase.auth.signOut();
   redirect("/connexion");
 }

@@ -3,9 +3,10 @@
 import { revalidatePath, revalidateTag } from "next/cache";
 import { requireRole } from "@/lib/auth";
 import { createServiceClient } from "@/lib/supabase/server";
+import { logAudit } from "@/lib/audit";
 
 export async function toggleStructureActive(formData: FormData): Promise<void> {
-  await requireRole("platform_admin");
+  const user = await requireRole("platform_admin");
 
   const id = String(formData.get("id") ?? "");
   const active = formData.get("active") === "true";
@@ -16,12 +17,18 @@ export async function toggleStructureActive(formData: FormData): Promise<void> {
     .from("structures")
     .update({ active: !active })
     .eq("id", id);
+  await logAudit({
+    structureId: id,
+    userId: user.id,
+    action: active ? "structure_deactivated" : "structure_activated",
+    details: { structure_id: id },
+  });
 
   revalidatePath("/admin");
 }
 
 export async function updateSubscription(formData: FormData): Promise<void> {
-  await requireRole("platform_admin");
+  const user = await requireRole("platform_admin");
 
   const id = String(formData.get("id") ?? "");
   if (!id) return;
@@ -37,12 +44,18 @@ export async function updateSubscription(formData: FormData): Promise<void> {
       subscription_ends_at: endsAt.toISOString(),
     })
     .eq("id", id);
+  await logAudit({
+    structureId: id,
+    userId: user.id,
+    action: "subscription_updated",
+    details: { structure_id: id, plan: "standard", duration_days: 30 },
+  });
 
   revalidatePath("/admin");
 }
 
 export async function toggleSuspended(formData: FormData): Promise<void> {
-  await requireRole("platform_admin");
+  const user = await requireRole("platform_admin");
 
   const id = String(formData.get("id") ?? "");
   const suspended = formData.get("suspended") === "true";
@@ -53,12 +66,18 @@ export async function toggleSuspended(formData: FormData): Promise<void> {
     .from("structures")
     .update({ suspended: !suspended })
     .eq("id", id);
+  await logAudit({
+    structureId: id,
+    userId: user.id,
+    action: suspended ? "structure_unsuspended" : "structure_suspended",
+    details: { structure_id: id },
+  });
 
   revalidatePath("/admin");
 }
 
 export async function toggleRegistrationFee(formData: FormData): Promise<void> {
-  await requireRole("platform_admin");
+  const user = await requireRole("platform_admin");
 
   const id = String(formData.get("id") ?? "");
   const paid = formData.get("paid") === "true";
@@ -69,12 +88,18 @@ export async function toggleRegistrationFee(formData: FormData): Promise<void> {
     .from("structures")
     .update({ registration_fee_paid: !paid })
     .eq("id", id);
+  await logAudit({
+    structureId: id,
+    userId: user.id,
+    action: paid ? "registration_fee_invalidated" : "registration_fee_validated",
+    details: { structure_id: id },
+  });
 
   revalidatePath("/admin");
 }
 
 export async function createPlan(formData: FormData): Promise<void> {
-  await requireRole("platform_admin");
+  const user = await requireRole("platform_admin");
 
   const name = String(formData.get("name") ?? "").trim();
   const monthlyPrice = Number(formData.get("monthly_price"));
@@ -101,6 +126,11 @@ export async function createPlan(formData: FormData): Promise<void> {
     max_documents_per_month: isUnlimited ? null : maxDocuments,
     features,
   });
+  await logAudit({
+    userId: user.id,
+    action: "plan_created",
+    details: { name, monthly_price: monthlyPrice, is_public: isPublic },
+  });
 
   revalidatePath("/admin");
   revalidateTag("plans", "max");
@@ -110,7 +140,7 @@ export async function updatePlan(
   _prev: { message?: string; success?: boolean },
   formData: FormData,
 ): Promise<{ message?: string; success?: boolean }> {
-  await requireRole("platform_admin");
+  const user = await requireRole("platform_admin");
   const id = String(formData.get("id") ?? "");
   const name = String(formData.get("name") ?? "").trim();
   if (!id || !name) return { message: "Champs requis." };
@@ -141,6 +171,11 @@ export async function updatePlan(
     })
     .eq("id", id);
   if (error) return { message: "Mise à jour impossible." };
+  await logAudit({
+    userId: user.id,
+    action: "plan_updated",
+    details: { plan_id: id, name, monthly_price: monthlyPrice },
+  });
 
   revalidatePath("/admin/formules");
   revalidateTag("plans", "max");
@@ -148,7 +183,7 @@ export async function updatePlan(
 }
 
 export async function togglePlanActive(formData: FormData): Promise<void> {
-  await requireRole("platform_admin");
+  const user = await requireRole("platform_admin");
 
   const id = String(formData.get("id") ?? "");
   const active = formData.get("active") === "true";
@@ -156,13 +191,18 @@ export async function togglePlanActive(formData: FormData): Promise<void> {
 
   const supabase = createServiceClient();
   await supabase.from("subscription_plans").update({ active: !active }).eq("id", id);
+  await logAudit({
+    userId: user.id,
+    action: active ? "plan_deactivated" : "plan_activated",
+    details: { plan_id: id },
+  });
 
   revalidatePath("/admin");
   revalidateTag("plans", "max");
 }
 
 export async function validateRegistration(formData: FormData): Promise<void> {
-  await requireRole("platform_admin");
+  const user = await requireRole("platform_admin");
   const id = String(formData.get("id") ?? "");
   console.log("validateRegistration id=", id);
   if (!id) return;
@@ -175,24 +215,36 @@ export async function validateRegistration(formData: FormData): Promise<void> {
     .update({ registration_fee_paid: true, active: true, suspended: false, subscription_ends_at: endsAt.toISOString() })
     .eq("id", id);
   console.log("validateRegistration error=", error?.message);
+  await logAudit({
+    structureId: id,
+    userId: user.id,
+    action: "registration_validated",
+    details: { structure_id: id, subscription_ends_at: endsAt.toISOString() },
+  });
 
   revalidatePath("/admin/inscriptions");
   revalidatePath("/admin");
 }
 
 export async function rejectRegistration(formData: FormData): Promise<void> {
-  await requireRole("platform_admin");
+  const user = await requireRole("platform_admin");
   const id = String(formData.get("id") ?? "");
   if (!id) return;
 
   const supabase = createServiceClient();
   await supabase.from("structures").update({ active: false, suspended: true }).eq("id", id);
+  await logAudit({
+    structureId: id,
+    userId: user.id,
+    action: "registration_rejected",
+    details: { structure_id: id },
+  });
 
   revalidatePath("/admin/inscriptions");
   revalidatePath("/admin");
 }
 export async function deletePlan(formData: FormData): Promise<void> {
-  await requireRole("platform_admin");
+  const user = await requireRole("platform_admin");
 
   const id = String(formData.get("id") ?? "");
   if (!id) return;
@@ -209,6 +261,11 @@ export async function deletePlan(formData: FormData): Promise<void> {
     await supabase.from("structures").update({ plan_id: standard.id }).eq("plan_id", id);
   }
   await supabase.from("subscription_plans").delete().eq("id", id);
+  await logAudit({
+    userId: user.id,
+    action: "plan_deleted",
+    details: { plan_id: id },
+  });
 
   revalidatePath("/admin");
   revalidateTag("plans", "max");

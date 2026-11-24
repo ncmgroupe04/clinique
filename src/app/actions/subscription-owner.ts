@@ -3,6 +3,7 @@
 import { revalidatePath } from "next/cache";
 import { requireRole } from "@/lib/auth";
 import { createServiceClient } from "@/lib/supabase/server";
+import { logAudit } from "@/lib/audit";
 
 export type RenewalState = { message?: string; success?: boolean } | undefined;
 
@@ -22,6 +23,12 @@ export async function declareRenewalPayment(
     .update({ renewal_requested: true, renewal_reference: reference })
     .eq("id", user.structureId);
   if (error) return { message: "Enregistrement impossible." };
+  await logAudit({
+    structureId: user.structureId,
+    userId: user.id,
+    action: "renewal_payment_declared",
+    details: { reference },
+  });
 
   revalidatePath("/abonnement");
   return { success: true, message: "Paiement déclaré. Votre abonnement sera validé après vérification." };

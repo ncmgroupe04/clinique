@@ -3,6 +3,7 @@
 import { revalidatePath } from "next/cache";
 import { requireUser } from "@/lib/auth";
 import { createServiceClient } from "@/lib/supabase/server";
+import { logAudit } from "@/lib/audit";
 
 export type ProfileState = { message?: string; success?: boolean } | undefined;
 
@@ -17,6 +18,12 @@ export async function updateProfileName(
   const admin = createServiceClient();
   const { error } = await admin.from("profiles").update({ full_name: fullName }).eq("id", user.id);
   if (error) return { message: "Mise à jour impossible." };
+  await logAudit({
+    structureId: user.structureId,
+    userId: user.id,
+    action: "profile_updated",
+    details: { full_name: fullName },
+  });
 
   revalidatePath("/profil");
   revalidatePath("/tableau");
@@ -42,6 +49,11 @@ export async function changePassword(
   const admin = createServiceClient();
   const { error } = await admin.auth.admin.updateUserById(user.id, { password: next });
   if (error) return { message: "Changement impossible." };
+  await logAudit({
+    structureId: user.structureId,
+    userId: user.id,
+    action: "password_changed",
+  });
 
   return { success: true, message: "Mot de passe modifié." };
 }
