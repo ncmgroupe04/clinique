@@ -24,22 +24,34 @@ export async function updateSubscription(formData: FormData): Promise<void> {
   await requireRole("platform_admin");
 
   const id = String(formData.get("id") ?? "");
-  const plan = String(formData.get("plan") ?? "essai");
-  const days = Number(formData.get("days") ?? 30);
-  const suspended = formData.get("suspended") === "true";
   if (!id) return;
 
   const endsAt = new Date();
-  endsAt.setDate(endsAt.getDate() + (Number.isFinite(days) ? days : 30));
+  endsAt.setDate(endsAt.getDate() + 30);
 
   const supabase = createServiceClient();
   await supabase
     .from("structures")
     .update({
-      plan,
+      plan: "standard",
       subscription_ends_at: endsAt.toISOString(),
-      suspended,
     })
+    .eq("id", id);
+
+  revalidatePath("/admin");
+}
+
+export async function toggleRegistrationFee(formData: FormData): Promise<void> {
+  await requireRole("platform_admin");
+
+  const id = String(formData.get("id") ?? "");
+  const paid = formData.get("paid") === "true";
+  if (!id) return;
+
+  const supabase = createServiceClient();
+  await supabase
+    .from("structures")
+    .update({ registration_fee_paid: !paid })
     .eq("id", id);
 
   revalidatePath("/admin");

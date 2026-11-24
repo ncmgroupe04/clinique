@@ -3,13 +3,12 @@ import { connection } from "next/server";
 import { requireUser } from "@/lib/auth";
 import { createServiceClient } from "@/lib/supabase/server";
 import ScreenHeader from "../screen-header";
-import { toggleStructureActive, updateSubscription, toggleSuspended } from "@/app/actions/admin";
-
-const PLAN_LABEL: Record<string, string> = {
-  essai: "Essai",
-  mensuel: "Mensuel",
-  annuel: "Annuel",
-};
+import {
+  toggleStructureActive,
+  updateSubscription,
+  toggleSuspended,
+  toggleRegistrationFee,
+} from "@/app/actions/admin";
 
 export default async function AdminPage() {
   await connection();
@@ -19,7 +18,7 @@ export default async function AdminPage() {
   const supabase = createServiceClient();
   const { data: structures } = await supabase
     .from("structures")
-    .select("id, name, active, created_at, plan, subscription_ends_at, suspended")
+    .select("id, name, active, created_at, plan, subscription_ends_at, suspended, registration_fee_paid")
     .order("created_at", { ascending: false });
 
   const { data: counts } = await supabase.from("tickets").select("structure_id");
@@ -34,7 +33,7 @@ export default async function AdminPage() {
     <div className="flex flex-1 flex-col gap-[26px]">
       <ScreenHeader
         title="Super Admin · Abonnements"
-        subtitle="Gestion des structures et de leurs formules d'abonnement."
+        subtitle="Formule unique : 25 000 F CFA / mois + frais d'inscription 50 000 F CFA."
       />
       <section className="card">
         <div className="mb-4 flex items-center justify-between">
@@ -51,8 +50,8 @@ export default async function AdminPage() {
               <thead>
                 <tr className="border-b border-border text-left text-xs font-bold uppercase tracking-wide text-muted">
                   <th className="py-2 pr-3">Structure</th>
-                  <th className="py-2 pr-3">Formule</th>
-                  <th className="py-2 pr-3">Échéance</th>
+                  <th className="py-2 pr-3">Inscription (50 000 F)</th>
+                  <th className="py-2 pr-3">Échéance mensuelle</th>
                   <th className="py-2 pr-3">Statut</th>
                   <th className="py-2 pr-3">Tickets</th>
                   <th className="py-2 pr-3">Actions</th>
@@ -73,7 +72,18 @@ export default async function AdminPage() {
                   return (
                     <tr key={s.id} className="border-b border-border last:border-0">
                       <td className="py-3 pr-3 font-bold text-ink">{s.name}</td>
-                      <td className="py-3 pr-3">{PLAN_LABEL[s.plan] ?? s.plan}</td>
+                      <td className="py-3 pr-3">
+                        <form action={toggleRegistrationFee} className="inline">
+                          <input type="hidden" name="id" value={s.id} />
+                          <input type="hidden" name="paid" value={String(s.registration_fee_paid)} />
+                          <button
+                            type="submit"
+                            className={s.registration_fee_paid ? "text-accent font-semibold" : "text-danger font-semibold"}
+                          >
+                            {s.registration_fee_paid ? "Payée" : "Non payée"}
+                          </button>
+                        </form>
+                      </td>
                       <td className="py-3 pr-3">
                         {endsAt ? endsAt.toLocaleDateString("fr-FR") : "—"}
                       </td>
@@ -81,6 +91,16 @@ export default async function AdminPage() {
                       <td className="py-3 pr-3">{countMap.get(s.id) ?? 0}</td>
                       <td className="py-3 pr-3">
                         <div className="flex flex-wrap items-center gap-2">
+                          <form action={updateSubscription} className="inline">
+                            <input type="hidden" name="id" value={s.id} />
+                            <button
+                              type="submit"
+                              className="go"
+                              style={{ height: 32, padding: "0 12px", borderRadius: 10, fontSize: 12, width: "auto" }}
+                            >
+                              + 30 jours
+                            </button>
+                          </form>
                           <form action={toggleSuspended} className="inline">
                             <input type="hidden" name="id" value={s.id} />
                             <input type="hidden" name="suspended" value={String(s.suspended)} />
@@ -92,34 +112,6 @@ export default async function AdminPage() {
                               {s.suspended ? "Réactiver" : "Suspendre"}
                             </button>
                           </form>
-                          <form action={updateSubscription} className="flex items-center gap-2">
-                            <input type="hidden" name="id" value={s.id} />
-                            <select
-                              name="plan"
-                              defaultValue={s.plan}
-                              className="input"
-                              style={{ height: 32, width: 110, fontSize: 12 }}
-                            >
-                              <option value="essai">Essai</option>
-                              <option value="mensuel">Mensuel</option>
-                              <option value="annuel">Annuel</option>
-                            </select>
-                            <input
-                              name="days"
-                              type="number"
-                              min={1}
-                              defaultValue={30}
-                              className="input"
-                              style={{ height: 32, width: 70, fontSize: 12 }}
-                            />
-                            <button
-                              type="submit"
-                              className="go"
-                              style={{ height: 32, padding: "0 12px", borderRadius: 10, fontSize: 12, width: "auto" }}
-                            >
-                              Prolonger
-                            </button>
-                          </form>
                           <form action={toggleStructureActive} className="inline">
                             <input type="hidden" name="id" value={s.id} />
                             <input type="hidden" name="active" value={String(s.active)} />
@@ -127,7 +119,7 @@ export default async function AdminPage() {
                               type="submit"
                               className="text-xs font-medium text-muted underline-offset-2 hover:underline"
                             >
-                              {s.active ? "Désactiver la structure" : "Réactiver la structure"}
+                              {s.active ? "Désactiver" : "Réactiver structure"}
                             </button>
                           </form>
                         </div>
