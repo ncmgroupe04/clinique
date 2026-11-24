@@ -52,17 +52,21 @@ export default function AuthScreen({ initialMode }: { initialMode: "login" | "si
         <svg width="100%" height="100%" className="h-full w-full">
           <defs>
             <pattern id="health-cross" width="120" height="120" patternUnits="userSpaceOnUse">
-              <path d="M60 44v32M44 60h32" stroke="#0b7a6b" strokeWidth="3" strokeLinecap="round" opacity="0.12" />
+              <path d="M60 44v32M44 60h32" stroke="#0b7a6b" strokeWidth="3" strokeLinecap="round" opacity="0.16" />
             </pattern>
           </defs>
           <rect width="100%" height="100%" fill="url(#health-cross)" />
-          <path d="M0 120h180l24-42 22 82 26-58 20 18h260" fill="none" stroke="#0b7a6b" strokeWidth="3" opacity="0.22" />
-          <path d="M0 760h220l26-48 24 92 28-66 24 24h250" fill="none" stroke="#0b7a6b" strokeWidth="3" opacity="0.22" />
-          <circle cx="180" cy="180" r="90" fill="#0b7a6b" opacity="0.09" />
-          <circle cx="1500" cy="620" r="130" fill="#0b7a6b" opacity="0.09" />
-          <g opacity="0.18" stroke="#0b7a6b" strokeWidth="3" fill="none">
-            <rect x="1300" y="120" width="90" height="40" rx="20" transform="rotate(-25 1345 140)" />
-            <line x1="1345" y1="120" x2="1345" y2="160" transform="rotate(-25 1345 140)" />
+          <path d="M0 140h180l24-46 22 90 26-62 20 20h260" fill="none" stroke="#0b7a6b" strokeWidth="4" opacity="0.30" />
+          <path d="M0 800h220l26-54 24 104 28-74 24 26h260" fill="none" stroke="#0b7a6b" strokeWidth="4" opacity="0.30" />
+          <circle cx="180" cy="180" r="110" fill="#0b7a6b" opacity="0.13" />
+          <circle cx="1500" cy="620" r="150" fill="#0b7a6b" opacity="0.13" />
+          <g opacity="0.26" stroke="#0b7a6b" strokeWidth="4" fill="none">
+            <rect x="1300" y="120" width="100" height="44" rx="22" transform="rotate(-25 1350 142)" />
+            <line x1="1350" y1="120" x2="1350" y2="164" transform="rotate(-25 1350 142)" />
+          </g>
+          <g opacity="0.22" stroke="#0b7a6b" strokeWidth="4" fill="none">
+            <path d="M120 640v70M85 675h70" />
+            <circle cx="120" cy="675" r="44" />
           </g>
         </svg>
       </div>
