@@ -33,7 +33,7 @@ export default async function AppLayout({
     <div className="flex min-h-screen bg-bg">
       <SidebarNav role={user.role} />
       <div className="flex min-w-0 flex-1 flex-col">
-        <header className="flex items-center justify-end px-6 py-3 lg:px-10 lg:py-4">
+        <header className="print:hidden flex items-center justify-end px-6 py-3 lg:px-10 lg:py-4">
           <LogoutButton />
         </header>
         <main className="flex min-w-0 flex-1 flex-col px-6 pb-6 lg:px-10 lg:pb-9">{children}</main>

@@ -29,20 +29,56 @@ const STATUS_OPTIONS = [
 ];
 
 export function DeletePlanButton({ id }: { id: string }) {
+  const [open, setOpen] = useState(false);
   return (
-    <form action={deletePlan} className="inline">
-      <input type="hidden" name="id" value={id} />
+    <>
       <button
-        type="submit"
+        type="button"
+        onClick={() => setOpen(true)}
         className="btn-danger-solid"
         style={{ height: 34, padding: "0 12px", borderRadius: 10, fontSize: 12, width: "auto" }}
-        onClick={(e) => {
-          if (!window.confirm("Supprimer cette formule ?")) e.preventDefault();
-        }}
       >
         Supprimer
       </button>
-    </form>
+      {open && (
+        <div
+          className="fixed inset-0 z-50 flex items-center justify-center p-4"
+          style={{ background: "rgba(11, 31, 42, 0.55)" }}
+          onClick={() => setOpen(false)}
+        >
+          <div
+            className="card w-full max-w-md"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <h3 className="text-lg font-extrabold text-ink">Supprimer la formule ?</h3>
+            <p className="mt-2 text-sm text-muted">
+              Cette action est définitive. Les structures utilisant cette formule seront
+              rattachées à une autre formule.
+            </p>
+            <div className="mt-5 flex justify-end gap-2">
+              <button
+                type="button"
+                onClick={() => setOpen(false)}
+                className="btn-secondary"
+                style={{ height: 40, padding: "0 18px", borderRadius: 12, fontSize: 13 }}
+              >
+                Annuler
+              </button>
+              <form action={deletePlan}>
+                <input type="hidden" name="id" value={id} />
+                <button
+                  type="submit"
+                  className="btn-danger-solid"
+                  style={{ height: 40, padding: "0 18px", borderRadius: 12, fontSize: 13, width: "auto" }}
+                >
+                  Supprimer
+                </button>
+              </form>
+            </div>
+          </div>
+        </div>
+      )}
+    </>
   );
 }
 
