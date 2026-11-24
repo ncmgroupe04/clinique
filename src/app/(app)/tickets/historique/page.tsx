@@ -168,6 +168,7 @@ export default async function HistoriquePage({
         <button
           type="submit"
           className="btn-primary w-full px-6 sm:w-auto"
+          style={{ height: 52, borderRadius: 14 }}
         >
           Filtrer
         </button>

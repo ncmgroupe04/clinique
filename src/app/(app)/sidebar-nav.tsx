@@ -96,7 +96,7 @@ export default function SidebarNav({ role }: { role: Role }) {
   };
 
   return (
-    <aside className="print:hidden sticky top-0 flex h-screen w-[104px] shrink-0 flex-col items-center gap-2.5 overflow-y-auto bg-ink py-7">
+    <aside className="print:hidden sticky top-0 flex h-screen w-[104px] shrink-0 flex-col items-center gap-2.5 overflow-y-auto bg-ink pb-4 pt-7">
       {ticketAccess && (
         <>
           <Link
@@ -129,14 +129,15 @@ export default function SidebarNav({ role }: { role: Role }) {
       <form action={logout} className="mt-auto pt-4">
         <button
           type="submit"
+          aria-label="Déconnexion"
           className="nv"
-          style={{ width: 100, flexDirection: "row", alignItems: "center", gap: 6, padding: "10px 2px", fontSize: 11, color: "#E3EDF2" }}
+          style={{ width: 64, height: 64, justifyContent: "center", alignItems: "center", padding: 0, borderRadius: 18, color: "#fff" }}
         >
-          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true" style={{ flexShrink: 0 }}>
+          <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true" style={{ flexShrink: 0 }}>
             <path d="M14 4h4a1 1 0 0 1 1 1v14a1 1 0 0 1-1 1h-4" />
             <path d="M10 8l-4 4 4 4M6 12h9" />
           </svg>
-          <span>Déconnexion</span>
+          <span className="sr-only">Déconnexion</span>
         </button>
       </form>
     </aside>
