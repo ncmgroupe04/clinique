@@ -16,7 +16,15 @@ function EyeIcon({ visible }: { visible: boolean }) {
   );
 }
 
-export default function AuthScreen({ initialMode }: { initialMode: "login" | "signup" }) {
+type PlanOption = { id: string; name: string; monthly_price: number; registration_fee: number };
+
+export default function AuthScreen({
+  initialMode,
+  plans = [],
+}: {
+  initialMode: "login" | "signup";
+  plans?: PlanOption[];
+}) {
   const [mode, setMode] = useState<"login" | "signup">(initialMode);
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirm, setShowConfirm] = useState(false);
@@ -147,38 +155,44 @@ export default function AuthScreen({ initialMode }: { initialMode: "login" | "si
                 {hint("email") && <p className="mt-2 text-sm text-danger">{hint("email")}</p>}
                 {signupState?.errors?.email && <p className="mt-2 text-sm text-danger">{signupState.errors.email}</p>}
               </div>
+              <div>
+                <label className="lbl" htmlFor="phone">Téléphone <span className="text-danger">*</span></label>
+                <input id="phone" name="phone" minLength={9} maxLength={9} required className="input" placeholder="77 000 00 00" onChange={set("phone")} />
+                {hint("phone") && <p className="mt-2 text-sm text-danger">{hint("phone")}</p>}
+                {signupState?.errors?.phone && <p className="mt-2 text-sm text-danger">{signupState.errors.phone}</p>}
+              </div>
               <div className="sm:col-span-2 grid grid-cols-1 gap-x-5 sm:grid-cols-2">
-              <div>
-                <label className="lbl" htmlFor="password">Mot de passe <span className="text-danger">*</span></label>
-                <div className="relative">
-                  <input id="password" name="password" type={showPassword ? "text" : "password"} required className="input" style={{ paddingRight: 44 }} onChange={set("password")} />
-                  <button
-                    type="button"
-                    onClick={() => setShowPassword((v) => !v)}
-                    aria-label={showPassword ? "Masquer le mot de passe" : "Afficher le mot de passe"}
-                    className="absolute right-2 top-1/2 -translate-y-1/2 flex h-8 w-8 items-center justify-center rounded-lg text-muted hover:bg-bg"
-                  >
-                    <EyeIcon visible={showPassword} />
-                  </button>
+                <div>
+                  <label className="lbl" htmlFor="password">Mot de passe <span className="text-danger">*</span></label>
+                  <div className="relative">
+                    <input id="password" name="password" type={showPassword ? "text" : "password"} required className="input" style={{ paddingRight: 44 }} onChange={set("password")} />
+                    <button
+                      type="button"
+                      onClick={() => setShowPassword((v) => !v)}
+                      aria-label={showPassword ? "Masquer le mot de passe" : "Afficher le mot de passe"}
+                      className="absolute right-2 top-1/2 -translate-y-1/2 flex h-8 w-8 items-center justify-center rounded-lg text-muted hover:bg-bg"
+                    >
+                      <EyeIcon visible={showPassword} />
+                    </button>
+                  </div>
+                  {hint("password") && <p className="mt-2 text-sm text-danger">{hint("password")}</p>}
+                  {signupState?.errors?.password && <p className="mt-2 text-sm text-danger">{signupState.errors.password}</p>}
                 </div>
-                {hint("password") && <p className="mt-2 text-sm text-danger">{hint("password")}</p>}
-                {signupState?.errors?.password && <p className="mt-2 text-sm text-danger">{signupState.errors.password}</p>}
-              </div>
-              <div>
-                <label className="lbl" htmlFor="confirmPassword">Confirmer le mot de passe <span className="text-danger">*</span></label>
-                <div className="relative">
-                  <input id="confirmPassword" name="confirmPassword" type={showConfirm ? "text" : "password"} required className="input" style={{ paddingRight: 44 }} />
-                  <button
-                    type="button"
-                    onClick={() => setShowConfirm((v) => !v)}
-                    aria-label={showConfirm ? "Masquer la confirmation" : "Afficher la confirmation"}
-                    className="absolute right-2 top-1/2 -translate-y-1/2 flex h-8 w-8 items-center justify-center rounded-lg text-muted hover:bg-bg"
-                  >
-                    <EyeIcon visible={showConfirm} />
-                  </button>
+                <div>
+                  <label className="lbl" htmlFor="confirmPassword">Confirmer le mot de passe <span className="text-danger">*</span></label>
+                  <div className="relative">
+                    <input id="confirmPassword" name="confirmPassword" type={showConfirm ? "text" : "password"} required className="input" style={{ paddingRight: 44 }} />
+                    <button
+                      type="button"
+                      onClick={() => setShowConfirm((v) => !v)}
+                      aria-label={showConfirm ? "Masquer la confirmation" : "Afficher la confirmation"}
+                      className="absolute right-2 top-1/2 -translate-y-1/2 flex h-8 w-8 items-center justify-center rounded-lg text-muted hover:bg-bg"
+                    >
+                      <EyeIcon visible={showConfirm} />
+                    </button>
+                  </div>
+                  {signupState?.errors?.confirmPassword && <p className="mt-2 text-sm text-danger">{signupState.errors.confirmPassword}</p>}
                 </div>
-                {signupState?.errors?.confirmPassword && <p className="mt-2 text-sm text-danger">{signupState.errors.confirmPassword}</p>}
-              </div>
               </div>
               <div>
                 <label className="lbl" htmlFor="address">Adresse <span className="text-danger">*</span></label>
@@ -187,19 +201,27 @@ export default function AuthScreen({ initialMode }: { initialMode: "login" | "si
                 {signupState?.errors?.address && <p className="mt-2 text-sm text-danger">{signupState.errors.address}</p>}
               </div>
               <div>
-                <label className="lbl" htmlFor="phone">Téléphone <span className="text-danger">*</span></label>
-                <input id="phone" name="phone" minLength={9} maxLength={9} required className="input" placeholder="77 000 00 00" onChange={set("phone")} />
-                {hint("phone") && <p className="mt-2 text-sm text-danger">{hint("phone")}</p>}
-                {signupState?.errors?.phone && <p className="mt-2 text-sm text-danger">{signupState.errors.phone}</p>}
-              </div>
-              <div>
                 <label className="lbl" htmlFor="headerText">Autres informations</label>
                 <input id="headerText" name="headerText" className="input" placeholder="Informations complémentaires" />
               </div>
+              <div className="sm:col-span-2 relative">
+                <label className="lbl" htmlFor="planId">Formule d&apos;abonnement</label>
+                <select id="planId" name="planId" className="input appearance-none" style={{ paddingRight: 42 }} defaultValue="">
+                  <option value="">Choisir une formule (essai 7 jours offert)</option>
+                  {plans.map((p) => (
+                    <option key={p.id} value={p.id}>
+                      {p.name} — {p.monthly_price.toLocaleString("fr-FR")} F/mois · inscription {p.registration_fee.toLocaleString("fr-FR")} F
+                    </option>
+                  ))}
+                </select>
+                <svg className="pointer-events-none absolute top-1/2 -translate-y-1/2" style={{ right: 16 }} width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#0b7a6b" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+                  <path d="m6 9 6 6 6-6" />
+                </svg>
+              </div>
               {signupState?.message && !signupState.success && (
-                <p className="text-sm text-danger">{signupState.message}</p>
+                <p className="text-sm text-danger sm:col-span-2">{signupState.message}</p>
               )}
-              <button type="submit" disabled={signupPending} className="btn-primary w-full">
+              <button type="submit" disabled={signupPending} className="btn-primary w-full sm:col-span-2">
                 {signupPending ? "Création…" : "Créer la structure"}
               </button>
             </form>

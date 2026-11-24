@@ -16,6 +16,7 @@ export const signupSchema = z.object({
   phone: z.string().regex(/^\d{9}$/, "Le téléphone doit contenir exactement 9 chiffres."),
   headerText: z.string().max(500).trim().optional().or(z.literal("")),
   confirmPassword: z.string().trim().optional().or(z.literal("")),
+  planId: z.string().uuid().optional().or(z.literal("")),
 }).refine((data) => !data.confirmPassword || data.password === data.confirmPassword, {
   message: "Les mots de passe ne correspondent pas.",
   path: ["confirmPassword"],

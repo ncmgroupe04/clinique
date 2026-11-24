@@ -24,11 +24,12 @@ export async function signup(
     phone: formData.get("phone") ?? "",
     headerText: formData.get("headerText") ?? "",
     confirmPassword: formData.get("confirmPassword") ?? "",
+    planId: formData.get("planId") ?? "",
   });
   if (!parsed.success) {
     return { errors: parsed.error.flatten().fieldErrors };
   }
-  const { email, password, structureName, fullName, address, phone, headerText } = parsed.data;
+  const { email, password, structureName, fullName, address, phone, headerText, planId } = parsed.data;
 
   const supabase = await createClient();
   const { data, error } = await supabase.auth.signUp({ email, password });
@@ -41,6 +42,8 @@ export async function signup(
   // Create structure + profile using service role (bypasses RLS for bootstrap).
   try {
     const admin = createServiceClient();
+    const trialEnds = new Date();
+    trialEnds.setDate(trialEnds.getDate() + 7);
     const { data: structure, error: structError } = await admin
       .from("structures")
       .insert({
@@ -48,6 +51,10 @@ export async function signup(
         address: address || null,
         phone: phone || null,
         header_text: headerText || null,
+        active: true,
+        registration_fee_paid: false,
+        subscription_ends_at: trialEnds.toISOString(),
+        plan_id: planId || null,
       })
       .select("id")
       .single();
