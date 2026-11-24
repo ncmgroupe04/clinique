@@ -24,100 +24,109 @@ const roleLabel: Record<string, string> = {
   platform_admin: "Admin plateforme",
 };
 
+const fieldStyle = { height: 38, fontSize: 14, borderRadius: 10, padding: "0 12px" };
+const smallBtn = { height: 34, padding: "0 14px", borderRadius: 10, fontSize: 12, width: "auto" };
+
 export default function UtilisateursClient({ users }: { users: User[] }) {
-  const [state, action, pending] = useActionState<UserState, FormData>(
-    createUser,
-    undefined,
-  );
+  const [state, action, pending] = useActionState<UserState, FormData>(createUser, undefined);
   const [showForm, setShowForm] = useState(false);
   const [editingId, setEditingId] = useState<string | null>(null);
   const [resetId, setResetId] = useState<string | null>(null);
 
   return (
-    <div className="space-y-6">
+    <div className="mx-auto w-full max-w-4xl space-y-5">
       <div className="card">
-        <div className="flex items-center justify-between mb-4">
-          <h2 className="text-lg font-bold text-[#0B1F2A]">Comptes</h2>
+        <div className="mb-3 flex items-center justify-between border-b border-border pb-3">
+          <div>
+            <h2 className="text-base font-bold text-ink">Comptes</h2>
+            <p className="text-xs text-muted">Gérez les comptes de votre structure (caissiers, administrateurs).</p>
+          </div>
           <button
             type="button"
-            onClick={() => setShowForm((v) => !v)}
-            className="btn-secondary text-sm"
+            onClick={() => { setShowForm((v) => !v); setEditingId(null); setResetId(null); }}
+            className="btn-secondary text-xs"
+            style={smallBtn}
           >
             {showForm ? "Annuler" : "Ajouter un compte"}
           </button>
         </div>
 
         {showForm && (
-          <form action={action} className="space-y-3 mb-6 border-t border-[#E2EAEF] pt-4">
+          <form action={action} className="grid grid-cols-1 gap-3.5 md:grid-cols-2">
             <div>
-              <label className="lbl" htmlFor="full_name">Nom et prénom</label>
-              <input id="full_name" name="full_name" required className="input" />
+              <label className="lbl !mb-1 !text-xs" htmlFor="full_name">Nom et prénom</label>
+              <input id="full_name" name="full_name" required className="input" style={fieldStyle} />
               {state?.errors?.full_name && (
-                <p className="text-[#DC2626] text-sm mt-2">{state.errors.full_name}</p>
+                <p className="mt-1 text-xs text-danger">{state.errors.full_name}</p>
               )}
             </div>
             <div>
-              <label className="lbl" htmlFor="email">E-mail</label>
-              <input id="email" name="email" type="email" required className="input" />
+              <label className="lbl !mb-1 !text-xs" htmlFor="email">E-mail</label>
+              <input id="email" name="email" type="email" required className="input" style={fieldStyle} />
               {state?.errors?.email && (
-                <p className="text-[#DC2626] text-sm mt-2">{state.errors.email}</p>
+                <p className="mt-1 text-xs text-danger">{state.errors.email}</p>
               )}
             </div>
             <div>
-              <label className="lbl" htmlFor="password">Mot de passe</label>
-              <input id="password" name="password" type="password" required className="input" />
+              <label className="lbl !mb-1 !text-xs" htmlFor="password">Mot de passe</label>
+              <input id="password" name="password" type="password" required className="input" style={fieldStyle} />
               {state?.errors?.password && (
-                <p className="text-[#DC2626] text-sm mt-2">{state.errors.password}</p>
+                <p className="mt-1 text-xs text-danger">{state.errors.password}</p>
               )}
             </div>
             <div>
-              <label className="lbl" htmlFor="role">Rôle</label>
-              <select id="role" name="role" required className="input" defaultValue="cashier">
+              <label className="lbl !mb-1 !text-xs" htmlFor="role">Rôle</label>
+              <select id="role" name="role" required className="input" style={fieldStyle} defaultValue="cashier">
                 <option value="cashier">Caissier (tickets)</option>
                 <option value="docteur">Docteur (lecture)</option>
                 <option value="structure_admin">Administrateur de structure</option>
               </select>
             </div>
-            {state?.message && (
-              <p className={state.success ? "text-[#0B7A6B] text-sm" : "text-[#DC2626] text-sm"}>
-                {state.message}
-              </p>
-            )}
-            <button type="submit" disabled={pending} className="btn-primary w-full">
-              {pending ? "Création…" : "Créer le compte"}
-            </button>
+            <div className="flex items-center justify-end gap-2 md:col-span-2">
+              {state?.message && (
+                <p className={`mr-auto text-xs ${state.success ? "text-accent" : "text-danger"}`}>
+                  {state.message}
+                </p>
+              )}
+              <button type="button" onClick={() => setShowForm(false)} className="btn-secondary text-xs" style={smallBtn}>
+                Annuler
+              </button>
+              <button type="submit" disabled={pending} className="btn-primary text-xs" style={smallBtn}>
+                {pending ? "Création…" : "Créer le compte"}
+              </button>
+            </div>
           </form>
         )}
 
         {users.length === 0 ? (
-          <p className="text-[#4B5F6B] text-sm">Aucun utilisateur.</p>
+          <p className="text-sm text-muted">Aucun utilisateur.</p>
         ) : (
-          <ul className="divide-y divide-[#E2EAEF]">
+          <ul className="divide-y divide-border">
             {users.map((u) => (
-              <li key={u.id} className="py-3 space-y-2">
-                <div className="flex items-center justify-between gap-3">
-                  <div className="min-w-0">
-                    <p className="font-medium text-[#0B1F2A]">
-                      {u.full_name || "—"}
-                      {!u.active && <span className="ml-2 text-xs text-[#DC2626]">(désactivé)</span>}
-                    </p>
-                    <p className="text-xs text-[#4B5F6B]">{u.email}</p>
-                    <p className="text-xs text-[#4B5F6B]">{roleLabel[u.role] ?? u.role}</p>
-                  </div>
-                  <div className="flex items-center gap-2">
+              <li key={u.id} className="py-2.5">
+                <div className="flex flex-wrap items-center justify-between gap-2">
+                  <p className="min-w-0 text-sm">
+                    <span className="font-semibold text-ink">{u.full_name || "—"}</span>
+                    <span className="mx-1.5 text-border">·</span>
+                    <span className="text-muted">{u.email}</span>
+                    <span className="mx-1.5 text-border">·</span>
+                    <span className="text-muted">{roleLabel[u.role] ?? u.role}</span>
+                    {!u.active && <span className="ml-2 text-xs font-semibold text-danger">(désactivé)</span>}
+                  </p>
+                  <div className="flex items-center gap-1.5">
                     <button
                       type="button"
-                      onClick={() => setEditingId(editingId === u.id ? null : u.id)}
+                      onClick={() => { setEditingId(editingId === u.id ? null : u.id); setResetId(null); }}
                       className="btn-secondary text-xs"
-                      style={{ height: 32, padding: "0 12px", borderRadius: 10 }}
+                      style={smallBtn}
                     >
                       Modifier
                     </button>
                     <button
                       type="button"
-                      onClick={() => setResetId(resetId === u.id ? null : u.id)}
+                      onClick={() => { setResetId(resetId === u.id ? null : u.id); setEditingId(null); }}
                       className="btn-secondary text-xs"
-                      style={{ height: 32, padding: "0 12px", borderRadius: 10 }}
+                      style={smallBtn}
                     >
                       Mot de passe
                     </button>
@@ -126,7 +135,8 @@ export default function UtilisateursClient({ users }: { users: User[] }) {
                       <input type="hidden" name="active" value={u.active ? "false" : "true"} />
                       <button
                         type="submit"
-                        className="text-sm font-medium text-[#4B5F6B] hover:underline"
+                        className={u.active ? "btn-danger-solid" : "btn-secondary"}
+                        style={{ height: 34, padding: "0 12px", borderRadius: 10, fontSize: 12, width: "auto" }}
                       >
                         {u.active ? "Désactiver" : "Réactiver"}
                       </button>
@@ -155,46 +165,25 @@ function EditUserForm({ user, onClose }: { user: User; onClose: () => void }) {
     if (state?.success) onClose();
   }, [state, onClose]);
   return (
-    <form action={action} className="space-y-3 border-t border-[#E2EAEF] pt-3">
+    <form action={action} className="mt-3 grid grid-cols-1 gap-3 border-t border-border pt-3 md:grid-cols-2">
       <input type="hidden" name="user_id" value={user.id} />
       <div>
-        <label className="lbl" htmlFor={`name-${user.id}`}>Nom et prénom</label>
-        <input
-          id={`name-${user.id}`}
-          name="full_name"
-          defaultValue={user.full_name ?? ""}
-          required
-          className="input"
-        />
-        {state?.errors?.full_name && (
-          <p className="text-[#DC2626] text-sm mt-2">{state.errors.full_name}</p>
-        )}
+        <label className="lbl !mb-1 !text-xs" htmlFor={`name-${user.id}`}>Nom et prénom</label>
+        <input id={`name-${user.id}`} name="full_name" defaultValue={user.full_name ?? ""} required className="input" style={fieldStyle} />
+        {state?.errors?.full_name && <p className="mt-1 text-xs text-danger">{state.errors.full_name}</p>}
       </div>
       <div>
-        <label className="lbl" htmlFor={`email-${user.id}`}>E-mail</label>
-        <input
-          id={`email-${user.id}`}
-          name="email"
-          type="email"
-          defaultValue={user.email}
-          required
-          className="input"
-        />
-        {state?.errors?.email && (
-          <p className="text-[#DC2626] text-sm mt-2">{state.errors.email}</p>
-        )}
+        <label className="lbl !mb-1 !text-xs" htmlFor={`email-${user.id}`}>E-mail</label>
+        <input id={`email-${user.id}`} name="email" type="email" defaultValue={user.email} required className="input" style={fieldStyle} />
+        {state?.errors?.email && <p className="mt-1 text-xs text-danger">{state.errors.email}</p>}
       </div>
-      {state?.message && (
-        <p className={state.success ? "text-[#0B7A6B] text-sm" : "text-[#DC2626] text-sm"}>
-          {state.message}
-        </p>
-      )}
-      <div className="flex gap-2">
-        <button type="submit" disabled={pending} className="btn-primary" style={{ height: 40, borderRadius: 10 }}>
+      <div className="flex items-center justify-end gap-2 md:col-span-2">
+        {state?.message && (
+          <p className={`mr-auto text-xs ${state.success ? "text-accent" : "text-danger"}`}>{state.message}</p>
+        )}
+        <button type="button" onClick={onClose} className="btn-secondary text-xs" style={smallBtn}>Annuler</button>
+        <button type="submit" disabled={pending} className="btn-primary text-xs" style={smallBtn}>
           {pending ? "Enregistrement…" : "Enregistrer"}
-        </button>
-        <button type="button" onClick={onClose} className="btn-secondary" style={{ height: 40, borderRadius: 10 }}>
-          Annuler
         </button>
       </div>
     </form>
@@ -207,32 +196,20 @@ function ResetPasswordForm({ userId, onClose }: { userId: string; onClose: () =>
     if (state?.success) onClose();
   }, [state, onClose]);
   return (
-    <form action={action} className="space-y-3 border-t border-[#E2EAEF] pt-3">
+    <form action={action} className="mt-3 grid grid-cols-1 gap-3 border-t border-border pt-3 md:grid-cols-2">
       <input type="hidden" name="user_id" value={userId} />
       <div>
-        <label className="lbl" htmlFor={`pwd-${userId}`}>Nouveau mot de passe</label>
-        <input
-          id={`pwd-${userId}`}
-          name="password"
-          type="password"
-          required
-          className="input"
-        />
-        {state?.errors?.password && (
-          <p className="text-[#DC2626] text-sm mt-2">{state.errors.password}</p>
-        )}
+        <label className="lbl !mb-1 !text-xs" htmlFor={`pwd-${userId}`}>Nouveau mot de passe</label>
+        <input id={`pwd-${userId}`} name="password" type="password" required className="input" style={fieldStyle} />
+        {state?.errors?.password && <p className="mt-1 text-xs text-danger">{state.errors.password}</p>}
       </div>
-      {state?.message && (
-        <p className={state.success ? "text-[#0B7A6B] text-sm" : "text-[#DC2626] text-sm"}>
-          {state.message}
-        </p>
-      )}
-      <div className="flex gap-2">
-        <button type="submit" disabled={pending} className="btn-primary" style={{ height: 40, borderRadius: 10 }}>
+      <div className="flex items-center justify-end gap-2 md:col-span-2">
+        {state?.message && (
+          <p className={`mr-auto text-xs ${state.success ? "text-accent" : "text-danger"}`}>{state.message}</p>
+        )}
+        <button type="button" onClick={onClose} className="btn-secondary text-xs" style={smallBtn}>Annuler</button>
+        <button type="submit" disabled={pending} className="btn-primary text-xs" style={smallBtn}>
           {pending ? "Réinitialisation…" : "Réinitialiser"}
-        </button>
-        <button type="button" onClick={onClose} className="btn-secondary" style={{ height: 40, borderRadius: 10 }}>
-          Annuler
         </button>
       </div>
     </form>
