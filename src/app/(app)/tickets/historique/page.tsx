@@ -91,16 +91,6 @@ export default async function HistoriquePage({
         </Link>
       </ScreenHeader>
 
-      {/* Tabs Tickets / Factures */}
-      <div className="flex gap-2">
-        <span className="btn-primary" style={{ height: 40, padding: "0 20px", borderRadius: 14, fontSize: 14, width: "auto" }}>
-          Tickets
-        </span>
-        <Link href="/factures" className="btn-secondary" style={{ height: 40, padding: "0 20px", borderRadius: 14, fontSize: 14 }}>
-          Factures
-        </Link>
-      </div>
-
       {/* Filters */}
       <form
         method="GET"

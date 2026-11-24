@@ -94,10 +94,10 @@ body {
 .nv.on { background: #163545; color: #fff; }
 
 /* Logout: icon by default, label on hover */
-.nv-logout { width: 140px; height: 64px; flex-direction: row; justify-content: center; align-items: center; gap: 8px; padding: 0; border-radius: 18px; color: #ef4444; font-weight: 800; background: rgba(220, 38, 38, 0.12); transition: background 0.15s ease; }
+.nv-logout { width: 190px; height: 60px; flex-direction: row; justify-content: center; align-items: center; gap: 10px; padding: 0; border-radius: 18px; color: #ef4444; font-weight: 800; background: rgba(220, 38, 38, 0.12); transition: background 0.15s ease; }
 .nv-logout:hover { background: rgba(220, 38, 38, 0.22); }
-.nv-logout .logout-label { display: inline; font-size: 13px; font-weight: 800; white-space: nowrap; }
-.nv-logout .logout-icon { display: inline; }
+.nv-logout .logout-label { display: inline; font-size: 15px; font-weight: 800; white-space: nowrap; }
+.nv-logout .logout-icon { display: inline; width: 28px; height: 28px; }
 
 .go {
   height: 60px;
