@@ -35,6 +35,29 @@ export default async function AdminPage() {
         title="Super Admin · Abonnements"
         subtitle="Formule unique : 25 000 F CFA / mois + frais d'inscription 50 000 F CFA."
       />
+      {(() => {
+        const total = structures?.length ?? 0;
+        const active = structures?.filter((s) => s.active && !s.suspended && (s.subscription_ends_at ? new Date(s.subscription_ends_at) >= now : true)).length ?? 0;
+        const suspended = structures?.filter((s) => s.suspended).length ?? 0;
+        const expired = structures?.filter((s) => s.subscription_ends_at && new Date(s.subscription_ends_at) < now).length ?? 0;
+        const paidReg = structures?.filter((s) => s.registration_fee_paid).length ?? 0;
+        return (
+          <div className="card grid grid-cols-2 gap-4 lg:grid-cols-5">
+            {[
+              { label: "Structures", value: String(total) },
+              { label: "Actives", value: String(active) },
+              { label: "Suspendues", value: String(suspended) },
+              { label: "Expirées", value: String(expired) },
+              { label: "Inscriptions payées", value: String(paidReg) },
+            ].map((s) => (
+              <div key={s.label} className="text-center">
+                <p className="text-[13px] font-semibold text-muted">{s.label}</p>
+                <p className="mt-1 text-xl font-extrabold text-ink">{s.value}</p>
+              </div>
+            ))}
+          </div>
+        );
+      })()}
       <section className="card">
         <div className="mb-4 flex items-center justify-between">
           <h2 className="text-lg font-extrabold">Structures abonnées</h2>
