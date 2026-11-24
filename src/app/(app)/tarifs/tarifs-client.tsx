@@ -117,19 +117,6 @@ export default function TarifsClient({
                       </button>
                     </form>
 
-                    <ConfirmActionButton
-                      label={s.active ? "Désactiver ce service" : "Réactiver ce service"}
-                      confirmTitle={s.active ? "Désactiver ce service ?" : "Réactiver ce service ?"}
-                      confirmMessage={s.active ? "Le service ne sera plus proposé à la vente." : "Le service sera à nouveau disponible."}
-                      formAction={toggleService}
-                      hiddenInputs={[
-                        { name: "id", value: s.id },
-                        { name: "active", value: s.active ? "false" : "true" },
-                      ]}
-                      buttonClassName="text-sm font-medium text-muted underline-offset-2 hover:underline"
-                      buttonStyle={{ padding: "0 6px" }}
-                    />
-
                     {editState?.message && (
                       <p
                         className={
@@ -159,6 +146,18 @@ export default function TarifsClient({
                     >
                       Modifier
                     </button>
+                    <ConfirmActionButton
+                      label={s.active ? "Désactiver ce service" : "Réactiver ce service"}
+                      confirmTitle={s.active ? "Désactiver ce service ?" : "Réactiver ce service ?"}
+                      confirmMessage={s.active ? "Le service ne sera plus proposé à la vente." : "Le service sera à nouveau disponible."}
+                      formAction={toggleService}
+                      hiddenInputs={[
+                        { name: "id", value: s.id },
+                        { name: "active", value: s.active ? "false" : "true" },
+                      ]}
+                      buttonClassName="text-sm font-medium text-muted underline-offset-2 hover:underline"
+                      buttonStyle={{ padding: "0 6px" }}
+                    />
                     <DeleteServiceButton id={s.id} />
                   </>
                 )}

@@ -1,6 +1,6 @@
 "use client";
 
-import { useActionState, useState } from "react";
+import { useActionState, useEffect, useState } from "react";
 import Link from "next/link";
 import { cancelTicketAction } from "@/app/actions/tickets";
 import { formatCfa, formatReceipt, formatDateTime } from "@/lib/format";
@@ -23,6 +23,11 @@ type Ticket = {
 export default function HistoriqueClient({ tickets }: { tickets: Ticket[] }) {
   const [cancelingId, setCancelingId] = useState<string | null>(null);
   const [state, action, pending] = useActionState(cancelTicketAction, undefined);
+
+  useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect
+    if (state?.success) setCancelingId(null);
+  }, [state]);
 
   return (
     <div className="card">
