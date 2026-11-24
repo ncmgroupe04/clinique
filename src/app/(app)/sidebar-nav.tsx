@@ -5,7 +5,7 @@ import { usePathname } from "next/navigation";
 
 type Role = "platform_admin" | "structure_admin" | "cashier" | "docteur";
 
-function Icon({ name }: { name: "ticket" | "history" | "tag" | "users" | "settings" | "admin" | "care" | "invoice" }) {
+function Icon({ name }: { name: "ticket" | "history" | "tag" | "users" | "settings" | "admin" | "care" | "invoice" | "dashboard" }) {
   const common = {
     width: 24,
     height: 24,
@@ -74,10 +74,19 @@ function Icon({ name }: { name: "ticket" | "history" | "tag" | "users" | "settin
           <path d="M9 11h7M9 15h7M9 19h4" />
         </svg>
       );
+    case "dashboard":
+      return (
+        <svg {...common}>
+          <rect x="3" y="3" width="7" height="9" rx="1" />
+          <rect x="14" y="3" width="7" height="5" rx="1" />
+          <rect x="14" y="12" width="7" height="9" rx="1" />
+          <rect x="3" y="16" width="7" height="5" rx="1" />
+        </svg>
+      );
   }
 }
 
-type Item = { href: string; label: string; icon: "ticket" | "history" | "tag" | "users" | "settings" | "admin" | "care" | "invoice" };
+type Item = { href: string; label: string; icon: "ticket" | "history" | "tag" | "users" | "settings" | "admin" | "care" | "invoice" | "dashboard" };
 
 export default function SidebarNav({ role }: { role: Role }) {
   const pathname = usePathname();
@@ -88,6 +97,7 @@ export default function SidebarNav({ role }: { role: Role }) {
   if (role === "platform_admin") {
     items.push({ href: "/admin", label: "Structures", icon: "admin" });
   } else {
+    items.push({ href: "/tableau", label: "Tableau de bord", icon: "dashboard" });
     if (ticketAccess) {
       items.push({ href: "/tickets", label: "Tickets", icon: "ticket" });
       items.push({ href: "/tickets/historique", label: "Historique", icon: "history" });
@@ -116,9 +126,9 @@ export default function SidebarNav({ role }: { role: Role }) {
           <Link
             href="/tickets/nouveau"
             aria-label="Nouveau ticket"
-            className="mb-2 flex h-14 w-14 shrink-0 items-center justify-center rounded-[18px] bg-accent shadow-[0_0_0_4px_#163545]"
+            className="mb-2 flex h-12 w-12 shrink-0 items-center justify-center rounded-[16px] bg-accent shadow-[0_0_0_4px_#163545]"
           >
-            <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="#fff" strokeWidth="2.4" strokeLinecap="round" aria-hidden="true">
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#fff" strokeWidth="2.4" strokeLinecap="round" aria-hidden="true">
               <path d="M12 5v14M5 12h14" />
             </svg>
           </Link>
