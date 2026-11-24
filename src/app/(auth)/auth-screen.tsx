@@ -144,9 +144,13 @@ export default function AuthScreen({
             <button
               type="button"
               onClick={() => setMode("login")}
-              className="mt-5 text-sm font-semibold text-accent hover:underline"
+              className="btn-secondary mt-5 flex w-full items-center justify-center gap-2"
+              style={{ height: 48, borderRadius: 12, fontSize: 13 }}
             >
-              ← Retour à la connexion
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+                <path d="M19 12H5M12 19l-7-7 7-7" />
+              </svg>
+              Retour à la connexion
             </button>
           </>
         ) : mode === "login" ? (
