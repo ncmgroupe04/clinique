@@ -7,8 +7,8 @@ type Role = "platform_admin" | "structure_admin" | "cashier" | "docteur";
 
 function Icon({ name }: { name: "ticket" | "history" | "tag" | "users" | "settings" | "admin" | "care" | "invoice" | "dashboard" }) {
   const common = {
-    width: 24,
-    height: 24,
+    width: 20,
+    height: 20,
     viewBox: "0 0 24 24",
     fill: "none",
     stroke: "currentColor",
@@ -120,23 +120,23 @@ export default function SidebarNav({ role }: { role: Role }) {
   };
 
   return (
-    <aside className="print:hidden sticky top-0 flex h-screen w-[104px] shrink-0 flex-col items-center gap-2.5 overflow-y-auto bg-ink pb-4 pt-7">
+    <aside className="print:hidden sticky top-0 flex h-screen w-[104px] shrink-0 flex-col items-center gap-1.5 overflow-hidden bg-ink pb-3 pt-4">
       {ticketAccess && (
         <>
           <Link
             href="/tickets/nouveau"
             aria-label="Nouveau ticket"
-            className="mb-2 flex h-12 w-12 shrink-0 items-center justify-center rounded-[16px] bg-accent shadow-[0_0_0_4px_#163545]"
+            className="mb-1 flex h-12 w-12 shrink-0 items-center justify-center rounded-[16px] bg-accent shadow-[0_0_0_4px_#163545]"
           >
             <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#fff" strokeWidth="2.4" strokeLinecap="round" aria-hidden="true">
               <path d="M12 5v14M5 12h14" />
             </svg>
           </Link>
-          <div className="mb-3.5 text-[11px] font-bold text-white">Nouveau ticket</div>
+          <div className="mb-2 text-[10px] font-bold text-white">Nouveau ticket</div>
         </>
       )}
 
-      <nav className="flex flex-col items-center gap-2.5">
+      <nav className="flex flex-col items-center gap-1">
         {items.map((item) => (
           <Link
             key={item.href}
