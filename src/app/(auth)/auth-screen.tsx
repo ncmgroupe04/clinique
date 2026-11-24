@@ -3,6 +3,7 @@
 import { useActionState, useState } from "react";
 import Link from "next/link";
 import { signup, login, type SignupState, type LoginState } from "@/app/actions/auth";
+import { PLAN_FEATURES } from "@/lib/plan-features";
 
 function EyeIcon({ visible }: { visible: boolean }) {
   return visible ? (
@@ -16,7 +17,17 @@ function EyeIcon({ visible }: { visible: boolean }) {
   );
 }
 
-type PlanOption = { id: string; name: string; monthly_price: number; is_unlimited: boolean; max_cashiers: number | null; max_docteurs: number | null };
+type PlanOption = {
+  id: string;
+  name: string;
+  monthly_price: number;
+  duration_days: number;
+  max_cashiers: number | null;
+  max_docteurs: number | null;
+  is_unlimited: boolean;
+  max_documents_per_month: number | null;
+  features: string[];
+};
 
 export default function AuthScreen({
   initialMode,
