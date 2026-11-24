@@ -17,7 +17,7 @@ export default function PrintButton({ invoiceId }: { invoiceId: string }) {
           window.print();
         });
       }}
-      className="go"
+      className="btn-primary mx-auto w-full max-w-[280px] disabled:opacity-60"
     >
       <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
         <path d="M7 9V3h10v6M7 17H5a1 1 0 0 1-1-1v-6a1 1 0 0 1 1-1h14a1 1 0 0 1 1 1v6a1 1 0 0 1-1 1h-2" />

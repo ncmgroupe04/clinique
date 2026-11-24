@@ -37,7 +37,7 @@ export default async function FactureDetailPage({ params }: { params: Promise<{ 
   return (
     <div className="space-y-4">
       <style>{`
-        @page { size: A4; margin: 12mm; }
+        @page { size: A4 portrait; margin: 12mm; }
         @media print {
           body { background: #fff; }
           .no-print { display: none !important; }
