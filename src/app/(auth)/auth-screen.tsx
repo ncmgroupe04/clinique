@@ -46,8 +46,27 @@ export default function AuthScreen({ initialMode }: { initialMode: "login" | "si
   const [loginState, loginAction, loginPending] = useActionState<LoginState, FormData>(login, undefined);
 
   return (
-    <main className="flex min-h-screen items-center justify-center px-4 py-8">
-      <div className="card w-full max-w-md">
+    <main className="relative flex min-h-screen items-center justify-center overflow-hidden bg-bg px-4 py-8">
+      {/* Motifs santé en arrière-plan (croix, pouls, pastilles) */}
+      <div className="pointer-events-none absolute inset-0" aria-hidden="true">
+        <svg width="100%" height="100%" className="h-full w-full">
+          <defs>
+            <pattern id="health-cross" width="120" height="120" patternUnits="userSpaceOnUse">
+              <path d="M60 44v32M44 60h32" stroke="#0b7a6b" strokeWidth="3" strokeLinecap="round" opacity="0.12" />
+            </pattern>
+          </defs>
+          <rect width="100%" height="100%" fill="url(#health-cross)" />
+          <path d="M0 120h180l24-42 22 82 26-58 20 18h260" fill="none" stroke="#0b7a6b" strokeWidth="3" opacity="0.22" />
+          <path d="M0 760h220l26-48 24 92 28-66 24 24h250" fill="none" stroke="#0b7a6b" strokeWidth="3" opacity="0.22" />
+          <circle cx="180" cy="180" r="90" fill="#0b7a6b" opacity="0.09" />
+          <circle cx="1500" cy="620" r="130" fill="#0b7a6b" opacity="0.09" />
+          <g opacity="0.18" stroke="#0b7a6b" strokeWidth="3" fill="none">
+            <rect x="1300" y="120" width="90" height="40" rx="20" transform="rotate(-25 1345 140)" />
+            <line x1="1345" y1="120" x2="1345" y2="160" transform="rotate(-25 1345 140)" />
+          </g>
+        </svg>
+      </div>
+      <div className="card relative z-10 w-full max-w-md">
         <div className="mb-6 grid grid-cols-2 gap-2">
           <button
             type="button"
