@@ -216,20 +216,35 @@ export default function AuthScreen({
                 <input id="headerText" name="headerText" className="input" placeholder="Informations complémentaires" />
               </div>
               <div className="sm:col-span-2">
-                <label className="lbl" htmlFor="planId">Formule d&apos;abonnement</label>
-                <div className="relative">
-                  <select id="planId" name="planId" className="input appearance-none" style={{ paddingRight: 42, textAlign: "center" }} defaultValue="">
-                    <option value="">Essai gratuit 7 jours (sans formule)</option>
-                    {plans.map((p) => (
-                      <option key={p.id} value={p.id}>
-                        {p.name} — {p.monthly_price.toLocaleString("fr-FR")} F/mois
-                      {p.is_unlimited ? " · illimité" : ` · ${p.max_cashiers ?? 0} caissier(s), ${p.max_docteurs ?? 0} docteur(s)`}
-                      </option>
-                    ))}
-                  </select>
-                  <svg className="pointer-events-none absolute right-4 top-1/2 -translate-y-1/2" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#0b7a6b" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
-                    <path d="m6 9 6 6 6-6" />
-                  </svg>
+                <label className="lbl">Formule d&apos;abonnement</label>
+                <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
+                  <label className="flex cursor-pointer items-start gap-3 rounded-xl border-2 border-border bg-white p-3 has-[:checked]:border-accent has-[:checked]:bg-accent-light">
+                    <input type="radio" name="planId" value="" defaultChecked className="mt-1 accent-accent" />
+                    <span className="min-w-0 flex-1">
+                      <span className="block text-sm font-extrabold text-ink">Essai gratuit 7 jours</span>
+                      <span className="text-xs text-muted">Sans formule · 0 F</span>
+                      <Link href="/formules" className="mt-1 block text-xs font-semibold text-accent hover:underline">Voir les détails →</Link>
+                    </span>
+                  </label>
+                  {plans.map((p) => (
+                    <label key={p.id} className="flex cursor-pointer items-start gap-3 rounded-xl border-2 border-border bg-white p-3 has-[:checked]:border-accent has-[:checked]:bg-accent-light">
+                      <input type="radio" name="planId" value={p.id} className="mt-1 accent-accent" />
+                      <span className="min-w-0 flex-1">
+                        <span className="block text-sm font-extrabold text-ink">
+                          {p.name} · {p.monthly_price.toLocaleString("fr-FR")} F/mois
+                        </span>
+                        <span className="block text-xs text-muted">
+                          {p.is_unlimited ? "Utilisateurs illimités" : `${p.max_cashiers ?? 0} caissier(s), ${p.max_docteurs ?? 0} docteur(s)`}
+                          {" · "}
+                          {p.max_documents_per_month ? `${p.max_documents_per_month.toLocaleString("fr-FR")} documents/mois` : "Documents illimités"}
+                        </span>
+                        <span className="mt-1 block text-[11px] text-muted">
+                          {(p.features ?? []).map((f: string) => PLAN_FEATURES.find((x) => x.value === f)?.label ?? f).join(" · ")}
+                        </span>
+                        <Link href={`/formules#${p.name.toLowerCase().replace(/\s+/g, "-")}`} className="mt-1 block text-xs font-semibold text-accent hover:underline">Voir les détails →</Link>
+                      </span>
+                    </label>
+                  ))}
                 </div>
               </div>
               {signupState?.message && !signupState.success && (
