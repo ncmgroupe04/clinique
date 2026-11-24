@@ -2,7 +2,7 @@
 
 import { useActionState, useEffect, useState } from "react";
 import Link from "next/link";
-import { cancelTicketAction } from "@/app/actions/tickets";
+import { cancelTicketAction, restoreTicket } from "@/app/actions/tickets";
 import { formatCfa, formatReceipt, formatDateTime } from "@/lib/format";
 
 type Ticket = {
@@ -77,6 +77,17 @@ export default function HistoriqueClient({ tickets }: { tickets: Ticket[] }) {
                     >
                       Annuler le ticket
                     </button>
+                  )}
+                  {t.status === "annule" && (
+                    <form action={restoreTicket}>
+                      <input type="hidden" name="ticket_id" value={t.id} />
+                      <button
+                        type="submit"
+                        className="text-sm font-semibold text-[#0B7A6B]"
+                      >
+                        Rétablir
+                      </button>
+                    </form>
                   )}
                 </div>
               </div>

@@ -108,3 +108,37 @@ export async function cancelTicketAction(
   revalidatePath(`/tickets/${ticketId}`);
   return { success: true, message: "Ticket annulé." };
 }
+
+export async function restoreTicket(formData: FormData): Promise<void> {
+  const user = await requireRole("structure_admin", "platform_admin");
+  if (!user.structureId) return;
+
+  const ticketId = String(formData.get("ticket_id") ?? "");
+  if (!ticketId) return;
+
+  const supabase = await createClient();
+  const { data: ticket } = await supabase
+    .from("tickets")
+    .select("id, status")
+    .eq("id", ticketId)
+    .eq("structure_id", user.structureId)
+    .maybeSingle();
+  if (!ticket || ticket.status !== "annule") return;
+
+  await supabase
+    .from("tickets")
+    .update({ status: "actif" })
+    .eq("id", ticketId)
+    .eq("structure_id", user.structureId);
+
+  await supabase.from("audit_log").insert({
+    structure_id: user.structureId,
+    user_id: user.id,
+    action: "ticket_restore",
+    ticket_id: ticketId,
+  });
+
+  revalidatePath("/tickets");
+  revalidatePath("/tickets/historique");
+  revalidatePath(`/tickets/${ticketId}`);
+}
