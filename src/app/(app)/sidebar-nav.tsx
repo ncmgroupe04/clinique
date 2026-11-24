@@ -5,7 +5,7 @@ import { usePathname } from "next/navigation";
 
 type Role = "platform_admin" | "structure_admin" | "cashier" | "docteur";
 
-function Icon({ name }: { name: "ticket" | "history" | "tag" | "users" | "settings" | "admin" | "care" | "invoice" | "dashboard" }) {
+function Icon({ name }: { name: "ticket" | "history" | "tag" | "users" | "settings" | "admin" | "care" | "invoice" | "dashboard" | "ordonnance" | "subscription" }) {
   const common = {
     width: 20,
     height: 20,
@@ -83,10 +83,24 @@ function Icon({ name }: { name: "ticket" | "history" | "tag" | "users" | "settin
           <rect x="3" y="16" width="7" height="5" rx="1" />
         </svg>
       );
+    case "ordonnance":
+      return (
+        <svg {...common}>
+          <path d="M6 3h9l4 4v14H6z" />
+          <path d="M12 9v6M9 12h6" />
+        </svg>
+      );
+    case "subscription":
+      return (
+        <svg {...common}>
+          <rect x="2" y="5" width="20" height="14" rx="2" />
+          <path d="M2 10h20" />
+        </svg>
+      );
   }
 }
 
-type Item = { href: string; label: string; icon: "ticket" | "history" | "tag" | "users" | "settings" | "admin" | "care" | "invoice" | "dashboard" };
+type Item = { href: string; label: string; icon: "ticket" | "history" | "tag" | "users" | "settings" | "admin" | "care" | "invoice" | "dashboard" | "ordonnance" | "subscription"; badge?: string };
 
 export default function SidebarNav({ role }: { role: Role }) {
   const pathname = usePathname();
@@ -105,6 +119,8 @@ export default function SidebarNav({ role }: { role: Role }) {
       items.push({ href: "/tickets", label: "Tickets", icon: "ticket" });
       items.push({ href: "/tickets/historique", label: "Historique", icon: "history" });
       items.push({ href: "/factures", label: "Factures", icon: "invoice" });
+      items.push({ href: "/ordonnances", label: "Ordonnances", icon: "ordonnance", badge: "Bientôt" });
+      items.push({ href: "/abonnement", label: "Abonnement", icon: "subscription" });
     }
     if (adminAccess) {
       items.push({ href: "/soins", label: "Soins", icon: "care" });
@@ -149,6 +165,7 @@ export default function SidebarNav({ role }: { role: Role }) {
           >
             <Icon name={item.icon} />
             {item.label}
+            {item.badge && <span className="text-[8px] text-accent font-bold">{item.badge}</span>}
           </Link>
         ))}
       </nav>
