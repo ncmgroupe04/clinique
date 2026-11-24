@@ -6,7 +6,7 @@ import { logout } from "@/app/actions/auth";
 
 type Role = "platform_admin" | "structure_admin" | "cashier" | "docteur";
 
-function Icon({ name }: { name: "ticket" | "history" | "tag" | "users" | "settings" }) {
+function Icon({ name }: { name: "ticket" | "history" | "tag" | "users" | "settings" | "admin" }) {
   const common = {
     width: 24,
     height: 24,
@@ -53,10 +53,19 @@ function Icon({ name }: { name: "ticket" | "history" | "tag" | "users" | "settin
           <path d="M12 3v3M12 18v3M3 12h3M18 12h3" />
         </svg>
       );
+    case "admin":
+      return (
+        <svg {...common}>
+          <rect x="3" y="3" width="7" height="7" rx="1" />
+          <rect x="14" y="3" width="7" height="7" rx="1" />
+          <rect x="3" y="14" width="7" height="7" rx="1" />
+          <rect x="14" y="14" width="7" height="7" rx="1" />
+        </svg>
+      );
   }
 }
 
-type Item = { href: string; label: string; icon: "ticket" | "history" | "tag" | "users" | "settings" };
+type Item = { href: string; label: string; icon: "ticket" | "history" | "tag" | "users" | "settings" | "admin" };
 
 export default function SidebarNav({ role }: { role: Role }) {
   const pathname = usePathname();
@@ -64,14 +73,18 @@ export default function SidebarNav({ role }: { role: Role }) {
   const adminAccess = role === "structure_admin" || role === "platform_admin";
 
   const items: Item[] = [];
-  if (ticketAccess) {
-    items.push({ href: "/tickets", label: "Tickets", icon: "ticket" });
-    items.push({ href: "/tickets/historique", label: "Historique", icon: "history" });
-  }
-  if (adminAccess) {
-    items.push({ href: "/tarifs", label: "Tarifs", icon: "tag" });
-    items.push({ href: "/utilisateurs", label: "Utilisateurs", icon: "users" });
-    items.push({ href: "/reglages", label: "Réglages", icon: "settings" });
+  if (role === "platform_admin") {
+    items.push({ href: "/admin", label: "Structures", icon: "admin" });
+  } else {
+    if (ticketAccess) {
+      items.push({ href: "/tickets", label: "Tickets", icon: "ticket" });
+      items.push({ href: "/tickets/historique", label: "Historique", icon: "history" });
+    }
+    if (adminAccess) {
+      items.push({ href: "/tarifs", label: "Tarifs", icon: "tag" });
+      items.push({ href: "/utilisateurs", label: "Utilisateurs", icon: "users" });
+      items.push({ href: "/reglages", label: "Réglages", icon: "settings" });
+    }
   }
 
   const isActive = (href: string) => {
@@ -84,16 +97,20 @@ export default function SidebarNav({ role }: { role: Role }) {
 
   return (
     <aside className="print:hidden sticky top-0 flex h-screen w-[104px] shrink-0 flex-col items-center gap-2.5 overflow-y-auto bg-ink py-7">
-      <Link
-        href="/tickets/nouveau"
-        aria-label="Nouveau ticket"
-        className="mb-2 flex h-14 w-14 shrink-0 items-center justify-center rounded-[18px] bg-accent shadow-[0_0_0_4px_#163545]"
-      >
-        <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="#fff" strokeWidth="2.4" strokeLinecap="round" aria-hidden="true">
-          <path d="M12 5v14M5 12h14" />
-        </svg>
-      </Link>
-      <div className="mb-3.5 text-[11px] font-bold text-white">Nouveau ticket</div>
+      {ticketAccess && (
+        <>
+          <Link
+            href="/tickets/nouveau"
+            aria-label="Nouveau ticket"
+            className="mb-2 flex h-14 w-14 shrink-0 items-center justify-center rounded-[18px] bg-accent shadow-[0_0_0_4px_#163545]"
+          >
+            <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="#fff" strokeWidth="2.4" strokeLinecap="round" aria-hidden="true">
+              <path d="M12 5v14M5 12h14" />
+            </svg>
+          </Link>
+          <div className="mb-3.5 text-[11px] font-bold text-white">Nouveau ticket</div>
+        </>
+      )}
 
       <nav className="flex flex-col items-center gap-2.5">
         {items.map((item) => (
