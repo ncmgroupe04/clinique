@@ -8,7 +8,7 @@ import SoinsClient from "./soins-client";
 export default async function SoinsPage() {
   await connection();
   const user = await requireUser();
-  if (user.role !== "structure_admin" && user.role !== "platform_admin" && user.role !== "cashier") {
+  if (user.role !== "structure_admin" && user.role !== "platform_admin") {
     redirect("/tableau");
   }
   if (!user.structureId) redirect("/tableau");

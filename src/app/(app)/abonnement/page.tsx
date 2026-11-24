@@ -11,6 +11,7 @@ const WAVE_LINK = "https://pay.wave.com/m/M_RllSqNXcTsCF/c/sn/";
 export default async function AbonnementPage() {
   await connection();
   const user = await requireUser();
+  if (user.role !== "structure_admin" && user.role !== "platform_admin") redirect("/tableau");
   if (!user.structureId) redirect("/tableau");
 
   const supabase = await createClient();
