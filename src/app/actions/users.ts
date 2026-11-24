@@ -105,7 +105,7 @@ export async function updateUser(
   }
 
   // Update profile name.
-  await supabase.from("profiles").update({ full_name: d.full_name }).eq("id", d.user_id);
+  await admin.from("profiles").update({ full_name: d.full_name }).eq("id", d.user_id);
 
   revalidatePath("/utilisateurs");
   return { success: true, message: "Compte mis à jour." };
@@ -159,7 +159,7 @@ export async function toggleUserActive(formData: FormData): Promise<void> {
   const active = formData.get("active") === "true";
   if (!userId) return;
 
-  const supabase = await createClient();
-  await supabase.from("profiles").update({ active }).eq("id", userId);
+  const admin = createServiceClient();
+  await admin.from("profiles").update({ active }).eq("id", userId);
   revalidatePath("/utilisateurs");
 }

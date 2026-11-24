@@ -1,6 +1,6 @@
 "use client";
 
-import { useActionState, useState } from "react";
+import { useActionState, useEffect, useState } from "react";
 import {
   createUser,
   toggleUserActive,
@@ -151,6 +151,9 @@ export default function UtilisateursClient({ users }: { users: User[] }) {
 
 function EditUserForm({ user, onClose }: { user: User; onClose: () => void }) {
   const [state, action, pending] = useActionState<UserState, FormData>(updateUser, undefined);
+  useEffect(() => {
+    if (state?.success) onClose();
+  }, [state, onClose]);
   return (
     <form action={action} className="space-y-3 border-t border-[#E2EAEF] pt-3">
       <input type="hidden" name="user_id" value={user.id} />
@@ -200,6 +203,9 @@ function EditUserForm({ user, onClose }: { user: User; onClose: () => void }) {
 
 function ResetPasswordForm({ userId, onClose }: { userId: string; onClose: () => void }) {
   const [state, action, pending] = useActionState<UserState, FormData>(resetUserPassword, undefined);
+  useEffect(() => {
+    if (state?.success) onClose();
+  }, [state, onClose]);
   return (
     <form action={action} className="space-y-3 border-t border-[#E2EAEF] pt-3">
       <input type="hidden" name="user_id" value={userId} />

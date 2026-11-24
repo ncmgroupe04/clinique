@@ -1,6 +1,6 @@
 "use client";
 
-import { useActionState, useRef, useState } from "react";
+import { useActionState, useRef, useState, useEffect } from "react";
 import {
   createService,
   updateService,
@@ -39,6 +39,11 @@ export default function TarifsClient({
     updateService,
     undefined,
   );
+
+  useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect
+    if (editState?.success) setEditingId(null);
+  }, [editState]);
 
   return (
     <div className="flex flex-1 flex-col items-stretch gap-7 lg:flex-row">
