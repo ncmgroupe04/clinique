@@ -2,11 +2,10 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { logout } from "@/app/actions/auth";
 
 type Role = "platform_admin" | "structure_admin" | "cashier" | "docteur";
 
-function Icon({ name }: { name: "ticket" | "history" | "tag" | "users" | "settings" | "admin" }) {
+function Icon({ name }: { name: "ticket" | "history" | "tag" | "users" | "settings" | "admin" | "care" | "invoice" }) {
   const common = {
     width: 24,
     height: 24,
@@ -62,10 +61,23 @@ function Icon({ name }: { name: "ticket" | "history" | "tag" | "users" | "settin
           <rect x="14" y="14" width="7" height="7" rx="1" />
         </svg>
       );
+    case "care":
+      return (
+        <svg {...common}>
+          <path d="M12 3v18M3 12h18" />
+        </svg>
+      );
+    case "invoice":
+      return (
+        <svg {...common}>
+          <path d="M6 3h9l4 4v14H6z" />
+          <path d="M9 11h7M9 15h7M9 19h4" />
+        </svg>
+      );
   }
 }
 
-type Item = { href: string; label: string; icon: "ticket" | "history" | "tag" | "users" | "settings" | "admin" };
+type Item = { href: string; label: string; icon: "ticket" | "history" | "tag" | "users" | "settings" | "admin" | "care" | "invoice" };
 
 export default function SidebarNav({ role }: { role: Role }) {
   const pathname = usePathname();
@@ -79,8 +91,10 @@ export default function SidebarNav({ role }: { role: Role }) {
     if (ticketAccess) {
       items.push({ href: "/tickets", label: "Tickets", icon: "ticket" });
       items.push({ href: "/tickets/historique", label: "Historique", icon: "history" });
+      items.push({ href: "/factures", label: "Factures", icon: "invoice" });
     }
     if (adminAccess) {
+      items.push({ href: "/soins", label: "Soins", icon: "care" });
       items.push({ href: "/tarifs", label: "Tarifs", icon: "tag" });
       items.push({ href: "/utilisateurs", label: "Utilisateurs", icon: "users" });
       items.push({ href: "/reglages", label: "Réglages", icon: "settings" });
@@ -125,20 +139,6 @@ export default function SidebarNav({ role }: { role: Role }) {
           </Link>
         ))}
       </nav>
-
-      <form action={logout} className="mt-auto pt-4">
-        <button
-          type="submit"
-          aria-label="Déconnexion"
-          className="nv nv-logout"
-        >
-          <svg className="logout-icon" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true" style={{ flexShrink: 0 }}>
-            <path d="M14 4h4a1 1 0 0 1 1 1v14a1 1 0 0 1-1 1h-4" />
-            <path d="M10 8l-4 4 4 4M6 12h9" />
-          </svg>
-          <span className="logout-label">Déconnexion</span>
-        </button>
-      </form>
     </aside>
   );
 }

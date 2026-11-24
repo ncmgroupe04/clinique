@@ -3,6 +3,7 @@ import { requireUser } from "@/lib/auth";
 import SidebarNav from "./sidebar-nav";
 import { createServiceClient } from "@/lib/supabase/server";
 import { redirect } from "next/navigation";
+import LogoutButton from "./logout-button";
 
 export default async function AppLayout({
   children,
@@ -31,7 +32,12 @@ export default async function AppLayout({
   return (
     <div className="flex min-h-screen bg-bg">
       <SidebarNav role={user.role} />
-      <main className="flex min-w-0 flex-1 flex-col px-6 py-6 lg:px-10 lg:py-9">{children}</main>
+      <div className="flex min-w-0 flex-1 flex-col">
+        <header className="flex items-center justify-end px-6 py-3 lg:px-10 lg:py-4">
+          <LogoutButton />
+        </header>
+        <main className="flex min-w-0 flex-1 flex-col px-6 pb-6 lg:px-10 lg:pb-9">{children}</main>
+      </div>
     </div>
   );
 }
