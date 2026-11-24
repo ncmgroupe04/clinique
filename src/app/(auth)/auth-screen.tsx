@@ -56,8 +56,8 @@ export default function AuthScreen({ initialMode }: { initialMode: "login" | "si
             </pattern>
           </defs>
           <rect width="100%" height="100%" fill="url(#health-cross)" />
-          <path d="M0 140h180l24-46 22 90 26-62 20 20h260" fill="none" stroke="#0b7a6b" strokeWidth="4" opacity="0.30" />
-          <path d="M0 800h220l26-54 24 104 28-74 24 26h260" fill="none" stroke="#0b7a6b" strokeWidth="4" opacity="0.30" />
+          <path className="health-pulse" d="M0 140h180l24-46 22 90 26-62 20 20h260" fill="none" stroke="#0b7a6b" strokeWidth="4" opacity="0.30" />
+          <path className="health-pulse health-pulse-2" d="M0 800h220l26-54 24 104 28-74 24 26h260" fill="none" stroke="#0b7a6b" strokeWidth="4" opacity="0.30" />
           <circle cx="180" cy="180" r="110" fill="#0b7a6b" opacity="0.13" />
           <circle cx="1500" cy="620" r="150" fill="#0b7a6b" opacity="0.13" />
           <g opacity="0.26" stroke="#0b7a6b" strokeWidth="4" fill="none">
@@ -70,7 +70,7 @@ export default function AuthScreen({ initialMode }: { initialMode: "login" | "si
           </g>
         </svg>
       </div>
-      <div className="card relative z-10 w-full max-w-md">
+      <div className={`card relative z-10 w-full ${mode === "signup" ? "max-w-2xl" : "max-w-md"}`}>
         <div className="mb-6 grid grid-cols-2 gap-2">
           <button
             type="button"
@@ -128,7 +128,7 @@ export default function AuthScreen({ initialMode }: { initialMode: "login" | "si
             <h1 className="mb-2 text-2xl font-bold text-ink">Créer une structure</h1>
             <p className="mb-6 text-sm text-muted">Créez le compte administrateur de votre structure.</p>
             {signupState?.success && <p className="mb-4 text-sm text-accent">{signupState.message}</p>}
-            <form action={signupAction} className="space-y-5">
+            <form action={signupAction} className="grid grid-cols-1 gap-x-5 gap-y-4 sm:grid-cols-2">
               <div>
                 <label className="lbl" htmlFor="structureName">Nom de la structure <span className="text-danger">*</span></label>
                 <input id="structureName" name="structureName" minLength={2} required className="input" onChange={set("structureName")} />
@@ -147,6 +147,7 @@ export default function AuthScreen({ initialMode }: { initialMode: "login" | "si
                 {hint("email") && <p className="mt-2 text-sm text-danger">{hint("email")}</p>}
                 {signupState?.errors?.email && <p className="mt-2 text-sm text-danger">{signupState.errors.email}</p>}
               </div>
+              <div className="sm:col-span-2 grid grid-cols-1 gap-x-5 sm:grid-cols-2">
               <div>
                 <label className="lbl" htmlFor="password">Mot de passe <span className="text-danger">*</span></label>
                 <div className="relative">
@@ -177,6 +178,7 @@ export default function AuthScreen({ initialMode }: { initialMode: "login" | "si
                   </button>
                 </div>
                 {signupState?.errors?.confirmPassword && <p className="mt-2 text-sm text-danger">{signupState.errors.confirmPassword}</p>}
+              </div>
               </div>
               <div>
                 <label className="lbl" htmlFor="address">Adresse <span className="text-danger">*</span></label>

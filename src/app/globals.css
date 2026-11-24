@@ -22,6 +22,21 @@ html { font-family: var(--font-sans); }
 button, a[role="button"] { cursor: pointer; }
 button:disabled { cursor: not-allowed; }
 
+/* Health motifs animation on auth screen */
+@keyframes health-pulse {
+  0% { stroke-dashoffset: 1200; opacity: 0; }
+  10% { opacity: 0.35; }
+  90% { opacity: 0.35; }
+  100% { stroke-dashoffset: -200; opacity: 0; }
+}
+.health-pulse { stroke-dasharray: 1200; animation: health-pulse 7s linear infinite; }
+.health-pulse-2 { animation-delay: 3.5s; }
+@keyframes health-glow {
+  0%, 100% { opacity: 0.08; transform: scale(1); }
+  50% { opacity: 0.16; transform: scale(1.12); }
+}
+.health-glow { animation: health-glow 8s ease-in-out infinite; transform-origin: center; }
+
 body {
   background-color: var(--color-bg);
   color: var(--color-ink);
