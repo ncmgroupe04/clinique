@@ -9,6 +9,7 @@ import {
   type TarifState,
 } from "@/app/actions/tarifs";
 import { updatePaperWidth } from "@/app/actions/settings";
+import ConfirmActionButton from "../confirm-action-button";
 
 type Service = {
   id: string;
@@ -116,16 +117,18 @@ export default function TarifsClient({
                       </button>
                     </form>
 
-                    <form action={toggleService}>
-                      <input type="hidden" name="id" value={s.id} />
-                      <input type="hidden" name="active" value={s.active ? "false" : "true"} />
-                      <button
-                        type="submit"
-                        className="text-sm font-medium text-muted underline-offset-2 hover:underline"
-                      >
-                        {s.active ? "Désactiver ce service" : "Réactiver ce service"}
-                      </button>
-                    </form>
+                    <ConfirmActionButton
+                      label={s.active ? "Désactiver ce service" : "Réactiver ce service"}
+                      confirmTitle={s.active ? "Désactiver ce service ?" : "Réactiver ce service ?"}
+                      confirmMessage={s.active ? "Le service ne sera plus proposé à la vente." : "Le service sera à nouveau disponible."}
+                      formAction={toggleService}
+                      hiddenInputs={[
+                        { name: "id", value: s.id },
+                        { name: "active", value: s.active ? "false" : "true" },
+                      ]}
+                      buttonClassName="text-sm font-medium text-muted underline-offset-2 hover:underline"
+                      buttonStyle={{ padding: "0 6px" }}
+                    />
 
                     {editState?.message && (
                       <p
@@ -276,17 +279,43 @@ export default function TarifsClient({
 
 function DeleteServiceButton({ id }: { id: string }) {
   const [state, action, pending] = useActionState<TarifState, FormData>(deleteService, undefined);
+  const [open, setOpen] = useState(false);
   return (
-    <form action={action}>
-      <input type="hidden" name="id" value={id} />
+    <>
       <button
-        type="submit"
-        disabled={pending}
+        type="button"
+        onClick={() => setOpen(true)}
         className="text-xs font-medium text-danger underline-offset-2 hover:underline"
         title={state?.message}
       >
-        {pending ? "…" : "Supprimer"}
+        Supprimer
       </button>
-    </form>
+      {open && (
+        <div
+          className="fixed inset-0 z-50 flex items-center justify-center p-4"
+          style={{ background: "rgba(11, 31, 42, 0.55)" }}
+          onClick={() => setOpen(false)}
+        >
+          <div className="card w-full max-w-md" onClick={(e) => e.stopPropagation()}>
+            <h3 className="text-lg font-extrabold text-ink">Supprimer ce service ?</h3>
+            <p className="mt-2 text-sm text-muted">
+              Cette action est définitive. Un service déjà utilisé dans un ticket ne peut pas être supprimé.
+            </p>
+            {state?.message && <p className="mt-2 text-sm text-danger">{state.message}</p>}
+            <div className="mt-5 flex justify-end gap-2">
+              <button type="button" onClick={() => setOpen(false)} className="btn-secondary" style={{ height: 40, padding: "0 18px", borderRadius: 12, fontSize: 13 }}>
+                Annuler
+              </button>
+              <form action={action}>
+                <input type="hidden" name="id" value={id} />
+                <button type="submit" disabled={pending} className="btn-danger-solid" style={{ height: 40, padding: "0 18px", borderRadius: 12, fontSize: 13, width: "auto" }}>
+                  {pending ? "…" : "Supprimer"}
+                </button>
+              </form>
+            </div>
+          </div>
+        </div>
+      )}
+    </>
   );
 }

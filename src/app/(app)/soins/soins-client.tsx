@@ -1,7 +1,8 @@
 "use client";
 
-import { useActionState, useRef, useState } from "react";
+import { useActionState, useEffect, useRef, useState } from "react";
 import { createCare, updateCare, toggleCare, deleteCare, type CareState } from "@/app/actions/cares";
+import ConfirmActionButton from "../confirm-action-button";
 
 type Care = { id: string; name: string; price: number; active: boolean; unit: string };
 
@@ -14,6 +15,10 @@ export default function SoinsClient({ cares }: { cares: Care[] }) {
   const nameRef = useRef<HTMLInputElement>(null);
   const [createState, createAction, createPending] = useActionState<CareState, FormData>(createCare, undefined);
   const [editState, editAction, editPending] = useActionState<CareState, FormData>(updateCare, undefined);
+  useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect
+    if (editState?.success) setEditingId(null);
+  }, [editState]);
 
   return (
     <div className="flex flex-1 flex-col gap-6">
@@ -80,13 +85,18 @@ export default function SoinsClient({ cares }: { cares: Care[] }) {
                     <button type="button" onClick={() => setEditingId(c.id)} aria-label={`Modifier ${c.name}`} className="x" style={{ width: "auto", padding: "0 16px", fontSize: 13, fontWeight: 600 }}>
                       Modifier
                     </button>
-                    <form action={toggleCare}>
-                      <input type="hidden" name="id" value={c.id} />
-                      <input type="hidden" name="active" value={c.active ? "false" : "true"} />
-                      <button type="submit" className="text-sm font-medium text-muted underline-offset-2 hover:underline">
-                        {c.active ? "Désactiver" : "Réactiver"}
-                      </button>
-                    </form>
+                    <ConfirmActionButton
+                      label={c.active ? "Désactiver" : "Réactiver"}
+                      confirmTitle={c.active ? "Désactiver ce soin ?" : "Réactiver ce soin ?"}
+                      confirmMessage={c.active ? "Le soin ne sera plus proposé à la facturation." : "Le soin sera à nouveau disponible."}
+                      formAction={toggleCare}
+                      hiddenInputs={[
+                        { name: "id", value: c.id },
+                        { name: "active", value: c.active ? "false" : "true" },
+                      ]}
+                      buttonClassName="text-sm font-medium text-muted underline-offset-2 hover:underline"
+                      buttonStyle={{ padding: "0 6px" }}
+                    />
                     <DeleteCareButton id={c.id} />
                   </>
                 )}
@@ -128,17 +138,43 @@ export default function SoinsClient({ cares }: { cares: Care[] }) {
 
 function DeleteCareButton({ id }: { id: string }) {
   const [state, action, pending] = useActionState(deleteCare, {});
+  const [open, setOpen] = useState(false);
   return (
-    <form action={action}>
-      <input type="hidden" name="id" value={id} />
+    <>
       <button
-        type="submit"
-        disabled={pending}
+        type="button"
+        onClick={() => setOpen(true)}
         className="text-xs font-medium text-danger underline-offset-2 hover:underline"
         title={state?.message}
       >
-        {pending ? "…" : "Supprimer"}
+        Supprimer
       </button>
-    </form>
+      {open && (
+        <div
+          className="fixed inset-0 z-50 flex items-center justify-center p-4"
+          style={{ background: "rgba(11, 31, 42, 0.55)" }}
+          onClick={() => setOpen(false)}
+        >
+          <div className="card w-full max-w-md" onClick={(e) => e.stopPropagation()}>
+            <h3 className="text-lg font-extrabold text-ink">Supprimer ce soin ?</h3>
+            <p className="mt-2 text-sm text-muted">
+              Cette action est définitive. Un soin déjà utilisé dans une facture ne peut pas être supprimé.
+            </p>
+            {state?.message && <p className="mt-2 text-sm text-danger">{state.message}</p>}
+            <div className="mt-5 flex justify-end gap-2">
+              <button type="button" onClick={() => setOpen(false)} className="btn-secondary" style={{ height: 40, padding: "0 18px", borderRadius: 12, fontSize: 13 }}>
+                Annuler
+              </button>
+              <form action={action}>
+                <input type="hidden" name="id" value={id} />
+                <button type="submit" disabled={pending} className="btn-danger-solid" style={{ height: 40, padding: "0 18px", borderRadius: 12, fontSize: 13, width: "auto" }}>
+                  {pending ? "…" : "Supprimer"}
+                </button>
+              </form>
+            </div>
+          </div>
+        </div>
+      )}
+    </>
   );
 }

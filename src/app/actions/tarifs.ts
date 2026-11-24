@@ -107,6 +107,7 @@ export async function deleteService(
     .select("id")
     .eq("service_name", service.name)
     .limit(1);
+  console.log("deleteService: id=", id, "service=", JSON.stringify(service), "used=", used?.length);
   if (used && used.length > 0) {
     return { message: "Ce service a déjà été utilisé : désactivez-le plutôt." };
   }
