@@ -20,10 +20,31 @@ export default async function NouveauTicketPage() {
     .eq("active", true)
     .order("name", { ascending: true });
 
+  const { data: structure } = await supabase
+    .from("structures")
+    .select("name, address, phone, header_text")
+    .eq("id", user.structureId)
+    .maybeSingle();
+
   return (
     <div className="space-y-6">
-      <h1 className="text-2xl font-bold text-[#0B1F2A]">Nouveau ticket</h1>
-      <NouveauTicketForm services={services ?? []} isAdmin={user.role === "structure_admin"} />
+      <div>
+        <h1 className="text-2xl font-bold text-[#0B1F2A]">Nouveau ticket</h1>
+        <p className="text-sm text-[#4B5F6B]">
+          Caisse ·{" "}
+          {new Date().toLocaleDateString("fr-FR", {
+            weekday: "long",
+            day: "numeric",
+            month: "long",
+            year: "numeric",
+          })}
+        </p>
+      </div>
+      <NouveauTicketForm
+        services={services ?? []}
+        isAdmin={user.role === "structure_admin"}
+        structure={structure}
+      />
     </div>
   );
 }
