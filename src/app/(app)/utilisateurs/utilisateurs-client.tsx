@@ -103,7 +103,7 @@ export default function UtilisateursClient({ users }: { users: User[] }) {
         ) : (
           <ul className="divide-y divide-border">
             {users.map((u) => (
-              <li key={u.id} className="py-2.5">
+              <li key={u.id} className="py-5">
                 <div className="flex flex-wrap items-center justify-between gap-2">
                   <p className="min-w-0 text-sm">
                     <span className="font-semibold text-ink">{u.full_name || "—"}</span>
