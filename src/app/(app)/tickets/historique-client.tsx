@@ -88,7 +88,8 @@ export default function HistoriqueClient({ tickets }: { tickets: Ticket[] }) {
                   <button
                     type="submit"
                     disabled={pending}
-                    className="btn-danger-solid w-full sm:w-auto"
+                    className="btn-danger-solid"
+                    style={{ height: 48, padding: "0 24px", borderRadius: 14, fontSize: 15 }}
                   >
                     {pending ? "…" : "Annuler le ticket"}
                   </button>

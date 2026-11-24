@@ -14,7 +14,7 @@ export default function PrintButton({ ticketId }: { ticketId: string }) {
           window.print();
         });
       }}
-      className="btn-primary w-full disabled:opacity-60"
+      className="btn-primary mx-auto w-full max-w-[280px] disabled:opacity-60"
     >
       {pending ? "Préparation…" : "Imprimer le ticket"}
     </button>

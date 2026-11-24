@@ -125,7 +125,10 @@ export default async function HistoriquePage({
           <option value="actif">Valide</option>
           <option value="annule">Annulé</option>
         </select>
-        <button type="submit" className="btn-primary w-full lg:col-span-5">
+        <button
+          type="submit"
+          className="btn-primary w-full px-8 sm:w-auto sm:justify-self-start lg:col-span-5"
+        >
           Filtrer
         </button>
       </form>
