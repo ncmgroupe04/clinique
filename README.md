@@ -1,15 +1,30 @@
 # Tickets de caisse — structures de santé (multi-tenant)
 
-Application web (Next.js + Supabase) permettant à chaque structure de santé
-(clinique, hôpital, pharmacie) de gérer ses propres tickets de caisse thermiques.
-Seul le module **Ticket** est développé (le module Ordonnancier est reporté).
+Application web SaaS (Next.js + Supabase) permettant à chaque structure de santé
+(clinique, hôpital, pharmacie) de gérer ses tickets de caisse, ses factures et son
+abonnement. Interface 100 % en français, montants en F CFA entiers.
+
+## Modules
+
+| Module | Routes | Rôles |
+|---|---|---|
+| Tableau de bord | `/tableau` | Structure |
+| Tickets (2 étapes, thermique 80/58 mm, A6) | `/tickets`, `/tickets/nouveau` |structure_admin, cashier |
+| Factures (soins, multi-lignes, A4) | `/factures` | structure_admin, cashier |
+| Soins et prix | `/soins` | structure_admin |
+| Tarifs et format d'impression | `/tarifs` | structure_admin |
+| Utilisateurs | `/utilisateurs` | structure_admin |
+| Réglages · En-tête | `/reglages` | structure_admin |
+| Abonnement (Wave, renouvellement) | `/abonnement` | structure_admin |
+| Ordonnances (bientôt) | `/ordonnances` | structure_admin, docteur |
+| Super Admin (abonnés, formules, inscriptions, structures) | `/admin` | platform_admin |
 
 ## Stack
 
 - Next.js 16 (App Router) + TypeScript + Tailwind CSS
 - Supabase : PostgreSQL, Auth, Row Level Security (région Europe)
 - Déploiement : Vercel
-- Interface 100 % en français, monnaie F CFA
+- Tests : Vitest + PGlite, Playwright
 
 ## Installation locale
 
@@ -49,11 +64,27 @@ Voir `.env.example`. Trois variables sont requises :
 - `NEXT_PUBLIC_SUPABASE_ANON_KEY` : clé publique (anon)
 - `SUPABASE_SERVICE_ROLE_KEY` : clé secrète (serveur uniquement, jamais côté navigateur)
 
+⚠️ `.env`, `.env.local` et tout `.env*` (sauf `.env.example`) sont ignorés par Git.
+Ne jamais committer de clé ni de mot de passe.
+
+### Comptes de test
+
+Les tests e2e créent leurs propres comptes. Pour un compte Super Admin local :
+
+1. Créer un compte via `/inscription`.
+2. Promouvoir le profil en base :
+   ```sql
+   UPDATE public.profiles
+   SET role = 'platform_admin', structure_id = NULL
+   WHERE id = (SELECT id FROM auth.users WHERE email = 'admin@exemple.sn');
+   ```
+3. Se reconnecter : le tableau de bord Super Admin (`/admin`) s'affiche.
+
 ### Tests
 
 ```bash
 # Tests unitaires / logique (Vitest + PGlite)
-npm test
+npx vitest run
 
 # Tests de parcours (Playwright)
 npx playwright test
@@ -72,37 +103,60 @@ npm run build
    ```bash
    npx supabase link --project-ref <PROJECT_REF>
    ```
-4. Pousser les migrations :
+4. Pousser **toutes** les migrations (0001 → 0014) :
    ```bash
    npx supabase db push
    ```
+   Migrations notables : abonnements/formules (0005, 0009), factures (0010),
+   anti force brute (0013), renouvellement (0014).
 
-### 2. Vercel
+5. Vérifier que RLS est active sur toutes les tables métier.
 
-1. Pousser le code sur GitHub.
-2. Importer le dépôt sur https://vercel.com.
-3. Renseigner les variables d'environnement dans Vercel :
-   - `NEXT_PUBLIC_SUPABASE_URL`
-   - `NEXT_PUBLIC_SUPABASE_ANON_KEY`
-   - `SUPABASE_SERVICE_ROLE_KEY`
-4. Déployer.
+### 2. GitHub
 
-### 3. Vérifications post-déploiement
+Aucun remote n'est encore configuré dans ce dépôt. Ajouter le remote puis pousser :
 
-- [ ] Aucun secret dans le dépôt (scan gitleaks).
+```bash
+git remote add origin https://github.com/<UTILISATEUR>/<DEPOT>.git
+git push -u origin master
+```
+
+⚠️ L'historique git a été nettoyé (anciens identifiants de test supprimés). Si le
+dépôt distant existait déjà, il faudrait un `git push --force-with-lease`.
+
+### 3. Vercel
+
+```bash
+npx vercel login
+npx vercel link
+npx vercel --prod
+```
+
+Ou importer le dépôt sur https://vercel.com et renseigner les variables
+d'environnement :
+
+- `NEXT_PUBLIC_SUPABASE_URL`
+- `NEXT_PUBLIC_SUPABASE_ANON_KEY`
+- `SUPABASE_SERVICE_ROLE_KEY`
+
+### 4. Vérifications post-déploiement
+
+- [ ] Aucun secret dans le dépôt.
 - [ ] RLS active sur toutes les tables.
 - [ ] Deux structures de test ne voient pas les données l'une de l'autre.
-- [ ] Impression vérifiée sur une imprimante thermique réelle (58 et 80 mm).
-- [ ] README à jour.
+- [ ] Paiement Wave testé et validé depuis `/admin/inscriptions`.
+- [ ] Impression vérifiée sur une imprimante thermique réelle (58 et 80 mm) et A6.
+- [ ] Essai de 7 jours et suspension automatique vérifiés.
 
 ## Sécurité
 
 - Isolation multi-tenant par `structure_id` + Row Level Security.
 - Aucune clé `service_role` côté navigateur.
-- Pas de suppression de ticket (annulation avec motif).
-- Prix copié sur le ticket à la création.
+- Anti force brute : 5 tentatives de connexion par minute et par e-mail.
+- Pas de suppression de ticket (annulation avec motif, restauration possible).
+- Prix copié sur le ticket/facture à la création.
 - Calculs en entiers (F CFA).
-- Numéro de reçu attribué côté serveur.
+- Numéros attribués côté serveur, sans trou ni doublon (`Reçu 2026-0001`).
 
 ## Licence
 
