@@ -8,6 +8,7 @@ import {
   togglePlanActive,
 } from "@/app/actions/admin";
 import AdminStructuresTable, { DeletePlanButton } from "./admin-client";
+import BarChart, { type ChartDatum } from "./chart";
 
 export default async function AdminPage() {
   await connection();
@@ -81,6 +82,27 @@ export default async function AdminPage() {
             <p className="mt-1 text-xl font-extrabold text-accent">{k.value}</p>
           </div>
         ))}
+      </div>
+
+      {/* Charts */}
+      <div className="grid grid-cols-1 gap-5 lg:grid-cols-2">
+        <BarChart
+          title="Répartition des structures"
+          data={[
+            { label: "Actives", value: activeSubs.length, color: "#0b7a6b" },
+            { label: "Suspendues", value: (structures ?? []).filter((s) => s.suspended).length, color: "#f59e0b" },
+            { label: "Expirées", value: (structures ?? []).filter((s) => s.subscription_ends_at && new Date(s.subscription_ends_at) < now).length, color: "#dc2626" },
+            { label: "Désactivées", value: (structures ?? []).filter((s) => !s.active).length, color: "#6b7280" },
+          ] as ChartDatum[]}
+        />
+        <BarChart
+          title="Formules utilisées"
+          data={(plans ?? []).map((p, i) => ({
+            label: p.name,
+            value: (structures ?? []).filter((s) => s.plan_id === p.id).length,
+            color: ["#0b7a6b", "#1d4e89", "#6b4a00", "#8c2f3d", "#4b3b7a"][i % 5],
+          })) as ChartDatum[]}
+        />
       </div>
 
       {/* Plans management */}
