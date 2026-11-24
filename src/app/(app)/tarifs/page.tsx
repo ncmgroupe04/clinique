@@ -23,7 +23,7 @@ export default async function TarifsPage() {
 
   const { data: structure } = await supabase
     .from("structures")
-    .select("paper_width_mm")
+    .select("paper_width_mm, print_format")
     .eq("id", user.structureId)
     .maybeSingle();
 
@@ -37,7 +37,7 @@ export default async function TarifsPage() {
       />
       <TarifsClient
         services={services ?? []}
-        paperWidth={structure?.paper_width_mm === 58 ? 58 : 80}
+        printFormat={structure?.print_format ?? "80"}
         nextReceipt={nextReceipt}
       />
     </div>

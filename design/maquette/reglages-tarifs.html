@@ -25,7 +25,7 @@ body{margin:0}*{box-sizing:border-box}
 <body>
 <div style="width:1280px;height:800px;display:flex;background:#EEF3F6;font-family:'Plus Jakarta Sans',Inter,sans-serif;color:#0B1F2A">
 <nav style="width:104px;background:#0B1F2A;display:flex;flex-direction:column;align-items:center;gap:10px;padding:28px 0">
-<div style="width:48px;height:48px;border-radius:16px;background:#0B7A6B;display:flex;align-items:center;justify-content:center;margin-bottom:22px"><svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.4" stroke-linecap="round" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg></div>
+<button aria-label="Nouveau ticket" style="width:56px;height:56px;border:none;border-radius:18px;background:#0B7A6B;display:flex;align-items:center;justify-content:center;margin-bottom:8px;cursor:pointer;box-shadow:0 0 0 4px #163545"><svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.4" stroke-linecap="round" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg></button><div style="margin-bottom:14px;color:#fff;font:700 11px 'Plus Jakarta Sans',sans-serif">Nouveau ticket</div>
 <button class="nv "><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 9V6a1 1 0 0 1 1-1h16a1 1 0 0 1 1 1v3a2.5 2.5 0 0 0 0 5v3a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1v-3a2.5 2.5 0 0 0 0-5z"/></svg>Tickets</button>
 <button class="nv "><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 3h9l4 4v14H6z"/><path d="M9 12h7M9 16h7"/></svg>Ordonnances</button>
 <button class="nv"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg>Historique</button>
@@ -46,8 +46,8 @@ body{margin:0}*{box-sizing:border-box}
 </section>
 <div style="width:400px;display:flex;flex-direction:column;gap:18px">
 <section class="card"><div style="font-size:18px;font-weight:800;margin-bottom:14px">Impression du ticket</div>
-<span class="lbl">Largeur du papier thermique</span>
-<div style="display:flex;gap:12px"><button class="chip on">80 mm<span>Zone imprimable 72 mm · par défaut</span></button><button class="chip">58 mm<span>Zone imprimable 48 mm</span></button></div></section>
+<span class="lbl">Format d’impression du ticket</span>
+<div style="display:flex;flex-direction:column;gap:10px"><button class="chip on" style="flex:none">Thermique 80 mm<span>Zone 72 mm · par défaut</span></button><button class="chip" style="flex:none">Thermique 58 mm<span>Zone 48 mm</span></button><button class="chip" style="flex:none">Papier normal A6<span>105 × 148 mm · sans imprimante thermique</span></button></div></section>
 <section class="card"><div style="font-size:18px;font-weight:800;margin-bottom:10px">Numérotation des reçus</div>
 <div style="font-size:32px;font-weight:800;color:#0B7A6B;letter-spacing:-0.5px">Reçu 2026-001</div>
 <p style="margin:10px 0 0;font-size:14px;color:#4B5F6B;line-height:1.5">Le numéro repart à 001 chaque 1er janvier : Reçu 2027-001. Recherche et filtre par année.</p></section>

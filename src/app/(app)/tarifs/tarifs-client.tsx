@@ -22,11 +22,11 @@ function fcfa(value: number): string {
 
 export default function TarifsClient({
   services,
-  paperWidth,
+  printFormat,
   nextReceipt,
 }: {
   services: Service[];
-  paperWidth: number;
+  printFormat: string;
   nextReceipt: { year: number; number: number };
 }) {
   const [editingId, setEditingId] = useState<string | null>(null);
@@ -223,23 +223,31 @@ export default function TarifsClient({
       <div className="flex w-full flex-col gap-[18px] lg:w-[400px] lg:shrink-0">
         <section className="card">
           <h2 className="mb-3.5 text-lg font-extrabold">Impression du ticket</h2>
-          <span className="lbl">Largeur du papier thermique</span>
-          <form action={updatePaperWidth} className="flex gap-3">
+          <span className="lbl">Format du papier</span>
+          <form action={updatePaperWidth} className="flex flex-col gap-3">
             <button
               type="submit"
-              name="paper_width_mm"
-              value={80}
-              className={`chip ${paperWidth === 80 ? "on" : ""}`}
+              name="print_format"
+              value="80"
+              className={`chip ${printFormat === "80" ? "on" : ""}`}
             >
-              80 mm<span>Zone imprimable 72 mm · par défaut</span>
+              Thermique 80 mm<span>Zone imprimable 72 mm · par défaut</span>
             </button>
             <button
               type="submit"
-              name="paper_width_mm"
-              value={58}
-              className={`chip ${paperWidth === 58 ? "on" : ""}`}
+              name="print_format"
+              value="58"
+              className={`chip ${printFormat === "58" ? "on" : ""}`}
             >
-              58 mm<span>Zone imprimable 48 mm</span>
+              Thermique 58 mm<span>Zone imprimable 48 mm</span>
+            </button>
+            <button
+              type="submit"
+              name="print_format"
+              value="a6"
+              className={`chip ${printFormat === "a6" ? "on" : ""}`}
+            >
+              Papier normal A6<span>105 × 148 mm · noir sur blanc</span>
             </button>
           </form>
         </section>

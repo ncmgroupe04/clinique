@@ -8,6 +8,7 @@ export const settingsSchema = z.object({
   paper_width_mm: z.coerce.number().refine((v) => v === 58 || v === 80, {
     message: "Largeur invalide.",
   }),
+  print_format: z.enum(["80", "58", "a6"]).optional(),
 });
 
 export type SettingsState =

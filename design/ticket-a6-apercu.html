@@ -1,0 +1,59 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<title>Maquette de référence · ticket-a6-apercu</title>
+<!-- SOURCE DE VÉRITÉ visuelle. Écran fixe 1280x800. Reproduire à l'identique (couleurs, tailles, espacements, textes). -->
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@500;600;700;800&display=swap" rel="stylesheet">
+<style>
+body{margin:0}*{box-sizing:border-box}
+.card{background:#fff;border:1px solid #E2EAEF;border-radius:24px;padding:28px}
+.lbl{font-size:13px;font-weight:600;color:#4B5F6B;margin-bottom:8px;display:block}
+.in{width:100%;height:52px;border:1.5px solid #D5E0E6;border-radius:14px;padding:0 16px;font:600 16px "Plus Jakarta Sans",sans-serif;color:#0B1F2A;background:#fff}
+.chip{flex:1;display:flex;flex-direction:column;align-items:flex-start;gap:4px;padding:14px 18px;border:1.5px solid #D5E0E6;border-radius:16px;background:#fff;font:700 15px "Plus Jakarta Sans",sans-serif;color:#0B1F2A;cursor:pointer}
+.chip span{font-weight:500;color:#4B5F6B;font-size:13px}
+.chip.on{border-color:#0B7A6B;background:#DFF3EF}.chip.on span{color:#0B5F54}
+.nv{display:flex;flex-direction:column;align-items:center;gap:6px;width:76px;padding:12px 0;border:none;border-radius:18px;background:transparent;color:#B9CBD3;font:600 11px "Plus Jakarta Sans",sans-serif;cursor:pointer}
+.nv.on{background:#163545;color:#fff}
+.go{height:60px;border:none;border-radius:18px;background:#0B7A6B;color:#fff;font:700 17px "Plus Jakarta Sans",sans-serif;display:flex;align-items:center;justify-content:center;gap:10px;cursor:pointer}
+.row{display:flex;justify-content:space-between;font-size:14px;font-weight:600}.row span{color:#4B5F6B;font-weight:500}
+.ln{display:flex;align-items:center;gap:16px;padding:14px 0;border-top:1px solid #E2EAEF}
+.cd{width:58px;height:36px;border-radius:10px;background:#DFF3EF;color:#0B5F54;font-weight:800;font-size:13px;display:flex;align-items:center;justify-content:center}
+.x{margin-left:auto;width:44px;height:44px;border:none;border-radius:12px;background:#F2F5F7;color:#4B5F6B;display:flex;align-items:center;justify-content:center;cursor:pointer}
+</style>
+</head>
+<body>
+<div style="width:1280px;height:800px;display:flex;background:#EEF3F6;font-family:'Plus Jakarta Sans',Inter,sans-serif;color:#0B1F2A">
+<nav style="width:104px;background:#0B1F2A;display:flex;flex-direction:column;align-items:center;gap:10px;padding:28px 0">
+<button aria-label="Nouveau ticket" style="width:56px;height:56px;border:none;border-radius:18px;background:#0B7A6B;display:flex;align-items:center;justify-content:center;margin-bottom:8px;cursor:pointer;box-shadow:0 0 0 4px #163545"><svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.4" stroke-linecap="round" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg></button><div style="margin-bottom:14px;color:#fff;font:700 11px 'Plus Jakarta Sans',sans-serif">Nouveau ticket</div>
+<button class="nv on"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 9V6a1 1 0 0 1 1-1h16a1 1 0 0 1 1 1v3a2.5 2.5 0 0 0 0 5v3a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1v-3a2.5 2.5 0 0 0 0-5z"/></svg>Tickets</button>
+<button class="nv "><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 3h9l4 4v14H6z"/><path d="M9 12h7M9 16h7"/></svg>Ordonnances</button>
+<button class="nv"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg>Historique</button>
+<button class="nv"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><circle cx="12" cy="12" r="3"/><path d="M12 3v3M12 18v3M3 12h3M18 12h3"/></svg>Réglages</button>
+</nav>
+<main style="flex:1;padding:36px 40px;display:flex;flex-direction:column;gap:22px">
+<header><h1 style="margin:0;font-size:32px;font-weight:800;letter-spacing:-0.5px">Aperçu avant impression</h1><p style="margin:6px 0 0;font-size:15px;color:#4B5F6B;font-weight:500">Format Papier normal A6 · 105 × 148 mm</p></header>
+<div style="display:flex;gap:28px;flex:1">
+<section class="card" style="flex:1;display:flex;flex-direction:column;align-items:center;gap:12px;padding:24px">
+<div style="font-size:12px;font-weight:700;color:#4B5F6B;letter-spacing:1px">TICKET A6 · TAILLE RÉELLE RÉDUITE</div>
+<div style="width:340px;height:477px;background:#fff;border:1px solid #D5E0E6;box-shadow:0 6px 24px rgba(11,31,42,0.10);padding:26px 24px;display:flex;flex-direction:column;gap:12px;color:#000;font-family:'Plus Jakarta Sans',Arial,sans-serif">
+<div style="text-align:center"><div style="font-size:16px;font-weight:800">Clinique Cheikh Ahmadou Bamba</div><div style="font-size:12px;margin-top:4px;line-height:1.4">Quartier Exemple, Touba<br>Tél. 77 000 00 00</div></div>
+<div style="border-top:1px solid #000"></div>
+<div style="text-align:center"><div style="font-size:23px;font-weight:800;letter-spacing:-0.5px">Reçu 2026-042</div><div style="font-size:12px;margin-top:2px">21/11/2026 · 10:42</div></div>
+<div style="border-top:1px solid #000"></div>
+<div class="row" style="font-size:13px"><span style="color:#000">Nom et prénom</span>Awa Ndiaye</div>
+<div class="row" style="font-size:13px"><span style="color:#000">Service</span>Visite prénatale</div>
+<div class="row" style="font-size:13px"><span style="color:#000">Montant total</span>5 000 F</div>
+<div class="row" style="font-size:13px"><span style="color:#000">Avance</span>2 000 F</div>
+<div style="border:2px solid #000;padding:10px 12px;display:flex;justify-content:space-between;font-size:18px;font-weight:800"><span>Reste à payer</span><span>3 000 F</span></div>
+<div style="margin-top:auto;display:flex;justify-content:space-between;align-items:flex-end;font-size:11px"><span>Merci de votre visite</span><span style="width:110px;border-top:1px solid #000;padding-top:3px;text-align:center">Cachet</span></div>
+</div></section>
+<div style="width:420px;display:flex;flex-direction:column;gap:18px">
+<section class="card"><div style="font-size:18px;font-weight:800;margin-bottom:14px">Imprimer sur</div>
+<div style="display:flex;gap:12px"><button class="chip">Feuille A6<span>Bac manuel</span></button><button class="chip on">Feuille A4<span>À découper</span></button></div>
+<div style="display:flex;align-items:center;gap:18px;margin-top:18px"><div style="position:relative;width:112px;height:158px;background:#fff;border:1.5px solid #D5E0E6;flex:none"><div style="position:absolute;left:0;top:0;width:56px;height:79px;background:#DFF3EF;border-right:1.5px dashed #0B7A6B;border-bottom:1.5px dashed #0B7A6B;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:800;color:#0B5F54">A6</div></div>
+<p style="margin:0;font-size:14px;color:#4B5F6B;line-height:1.5">Le ticket s’imprime en haut à gauche de la feuille A4, à sa taille réelle. Il suffit de le découper le long des pointillés.</p></div></section>
+<div style="display:flex;gap:12px;margin-top:auto"><button class="go" style="flex:1"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M7 9V3h10v6M7 17H5a1 1 0 0 1-1-1v-6a1 1 0 0 1 1-1h14a1 1 0 0 1 1 1v6a1 1 0 0 1-1 1h-2"/><rect x="7" y="14" width="10" height="7"/></svg> Imprimer le ticket</button><button class="chip" style="flex:none;align-items:center;justify-content:center;height:60px;padding:0 20px">Test</button></div>
+</div></div></main></div>
+</body>
+</html>
