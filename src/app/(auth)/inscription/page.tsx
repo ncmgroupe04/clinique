@@ -1,6 +1,5 @@
 import { unstable_cache } from "next/cache";
 import { createServiceClient } from "@/lib/supabase/server";
-import Link from "next/link";
 import AuthScreen from "../auth-screen";
 
 const getPublicPlans = unstable_cache(
@@ -20,14 +19,5 @@ const getPublicPlans = unstable_cache(
 
 export default async function InscriptionPage() {
   const plans = await getPublicPlans();
-  return (
-    <>
-      <AuthScreen initialMode="signup" plans={plans} />
-      <div className="fixed bottom-3 left-1/2 z-40 -translate-x-1/2">
-        <Link href="/formules" className="btn-secondary text-xs shadow-lg">
-          Voir le détail des formules
-        </Link>
-      </div>
-    </>
-  );
+  return <AuthScreen initialMode="signup" plans={plans} />;
 }
