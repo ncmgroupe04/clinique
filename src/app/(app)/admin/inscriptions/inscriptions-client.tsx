@@ -1,8 +1,23 @@
 "use client";
 
 import { useState } from "react";
+import { useFormStatus } from "react-dom";
 import { validateRegistration, rejectRegistration } from "@/app/actions/admin";
 import Pagination from "../../pagination";
+
+function ActionButton({ label, variant }: { label: string; variant: "primary" | "danger" }) {
+  const { pending } = useFormStatus();
+  return (
+    <button
+      type="submit"
+      disabled={pending}
+      className={variant === "primary" ? "go" : "btn-danger-solid"}
+      style={{ height: 34, padding: "0 14px", borderRadius: 10, fontSize: 12, width: "auto" }}
+    >
+      {pending ? "…" : label}
+    </button>
+  );
+}
 
 type Inscription = {
   id: string;
@@ -91,15 +106,11 @@ export default function InscriptionsClient({ structures }: { structures: Inscrip
                       <>
                         <form action={validateRegistration}>
                           <input type="hidden" name="id" value={s.id} />
-                          <button type="submit" className="go" style={{ height: 34, padding: "0 14px", borderRadius: 10, fontSize: 12, width: "auto" }}>
-                            Valider le paiement
-                          </button>
+                          <ActionButton label="Valider le paiement" variant="primary" />
                         </form>
                         <form action={rejectRegistration}>
                           <input type="hidden" name="id" value={s.id} />
-                          <button type="submit" className="btn-danger-solid" style={{ height: 34, padding: "0 14px", borderRadius: 10, fontSize: 12, width: "auto" }}>
-                            Rejeter
-                          </button>
+                          <ActionButton label="Rejeter" variant="danger" />
                         </form>
                       </>
                     )}

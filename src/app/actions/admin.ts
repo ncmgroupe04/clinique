@@ -78,7 +78,7 @@ export async function createPlan(formData: FormData): Promise<void> {
 
   const name = String(formData.get("name") ?? "").trim();
   const monthlyPrice = Number(formData.get("monthly_price"));
-  const registrationFee = Number(formData.get("registration_fee"));
+  const registrationFee = 50000;
   const durationDays = Number(formData.get("duration_days"));
   if (!name || !Number.isFinite(monthlyPrice) || !Number.isFinite(registrationFee) || !Number.isFinite(durationDays)) return;
 
@@ -109,15 +109,17 @@ export async function togglePlanActive(formData: FormData): Promise<void> {
 export async function validateRegistration(formData: FormData): Promise<void> {
   await requireRole("platform_admin");
   const id = String(formData.get("id") ?? "");
+  console.log("validateRegistration id=", id);
   if (!id) return;
 
   const supabase = createServiceClient();
   const endsAt = new Date();
   endsAt.setDate(endsAt.getDate() + 30);
-  await supabase
+  const { error } = await supabase
     .from("structures")
     .update({ registration_fee_paid: true, active: true, suspended: false, subscription_ends_at: endsAt.toISOString() })
     .eq("id", id);
+  console.log("validateRegistration error=", error?.message);
 
   revalidatePath("/admin/inscriptions");
   revalidatePath("/admin");

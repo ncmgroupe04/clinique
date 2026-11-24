@@ -211,7 +211,7 @@ export default function AuthScreen({
                     <option value="">Choisir une formule (essai 7 jours offert)</option>
                     {plans.map((p) => (
                       <option key={p.id} value={p.id}>
-                        {p.name} — {p.monthly_price.toLocaleString("fr-FR")} F/mois · inscription {p.registration_fee.toLocaleString("fr-FR")} F
+                        {p.name} — {p.monthly_price.toLocaleString("fr-FR")} F/mois · inscription 50 000 F
                       </option>
                     ))}
                   </select>

@@ -35,7 +35,7 @@ export default async function FormulesPage() {
               <div>
                 <p className="font-bold text-ink">{p.name}</p>
                 <p className="text-xs text-muted">
-                  {p.monthly_price.toLocaleString("fr-FR")} F/mois · inscription {p.registration_fee.toLocaleString("fr-FR")} F · {p.duration_days} jours
+                  {p.monthly_price.toLocaleString("fr-FR")} F/mois · {p.duration_days} jours · inscription 50 000 F
                 </p>
                 <p className="text-xs text-muted">
                   {(structures ?? []).filter((s) => s.plan_id === p.id).length} structure(s) abonnée(s)
@@ -58,12 +58,11 @@ export default async function FormulesPage() {
             </li>
           ))}
         </ul>
-        <form action={createPlan} className="mt-4 grid grid-cols-1 gap-3 border-t border-border pt-4 md:grid-cols-4">
+        <form action={createPlan} className="mt-4 grid grid-cols-1 gap-3 border-t border-border pt-4 md:grid-cols-3">
           <input name="name" placeholder="Nom de la formule" required className="input" style={{ height: 38, fontSize: 14 }} />
           <input name="monthly_price" type="number" min={0} placeholder="Prix mensuel (F)" required className="input" style={{ height: 38, fontSize: 14 }} />
-          <input name="registration_fee" type="number" min={0} placeholder="Frais inscription (F)" required className="input" style={{ height: 38, fontSize: 14 }} />
           <input name="duration_days" type="number" min={1} defaultValue={30} placeholder="Durée (jours)" required className="input" style={{ height: 38, fontSize: 14 }} />
-          <div className="md:col-span-4 flex justify-end">
+          <div className="md:col-span-3 flex justify-end">
             <button type="submit" className="go" style={{ height: 38, padding: "0 16px", borderRadius: 10, fontSize: 13, width: "auto" }}>
               + Ajouter une formule
             </button>
