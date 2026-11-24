@@ -1,9 +1,15 @@
 "use client";
 
+import Link from "next/link";
 import { useActionState, useState } from "react";
 import { createTicket, type CreateTicketState } from "@/app/actions/tickets";
 
-type Service = { id: string; name: string; price: number };
+type ChosenService = {
+  id: string | null;
+  label: string;
+  price: number;
+  other: boolean;
+};
 
 type Structure = {
   name: string;
@@ -17,14 +23,14 @@ function fcfa(value: number): string {
   return `${value.toLocaleString("fr-FR")} F`;
 }
 
-export default function NouveauTicketForm({
-  services,
+export default function TicketStep({
+  service,
   isAdmin,
   structure,
   nextReceipt,
   now,
 }: {
-  services: Service[];
+  service: ChosenService;
   isAdmin: boolean;
   structure: Structure | null;
   nextReceipt: { year: number; number: number };
@@ -32,19 +38,12 @@ export default function NouveauTicketForm({
 }) {
   const [state, action, pending] = useActionState<CreateTicketState, FormData>(createTicket, undefined);
   const [patientName, setPatientName] = useState("");
-  const [serviceId, setServiceId] = useState("");
-  const [other, setOther] = useState(false);
-  const [otherLabel, setOtherLabel] = useState("");
-  const [otherPrice, setOtherPrice] = useState("");
   const [advance, setAdvance] = useState<number>(0);
   const [totalOverride, setTotalOverride] = useState<number | null>(null);
 
-  const selected = services.find((s) => s.id === serviceId);
-  const unitPrice = other ? Number(otherPrice) || 0 : selected?.price ?? 0;
+  const unitPrice = service.price;
   const total = isAdmin && totalOverride !== null ? totalOverride : unitPrice;
   const reste = Math.max(0, total - advance);
-
-  const serviceLabel = other ? otherLabel.trim() || "Autre service" : selected?.name ?? "—";
   const paperWidth = structure?.paper_width_mm === 58 ? 58 : 80;
 
   return (
@@ -68,67 +67,31 @@ export default function NouveauTicketForm({
         </div>
 
         <div>
-          <label className="lbl" htmlFor="service_id">
-            Service (liste déroulante, le prix s’affiche seul)
-          </label>
-          <select
-            id="service_id"
-            name="service_id"
-            value={other ? "" : serviceId}
-            onChange={(e) => {
-              if (e.target.value === "__other__") {
-                setOther(true);
-                setServiceId("");
-              } else {
-                setOther(false);
-                setServiceId(e.target.value);
-                setTotalOverride(null);
-              }
-            }}
-            className="in in-lg"
-          >
-            <option value="">— Choisir —</option>
-            {services.map((s) => (
-              <option key={s.id} value={s.id}>
-                {s.name} · {fcfa(s.price)}
-              </option>
-            ))}
-            <option value="__other__">Autre service…</option>
-          </select>
-          {other && <input type="hidden" name="service_id" value="" />}
-          {other && (
-            <div className="mt-4 grid gap-4 sm:grid-cols-2">
-              <div>
-                <label className="lbl" htmlFor="other_label">
-                  Libellé du service
-                </label>
-                <input
-                  id="other_label"
-                  name="other_label"
-                  required
-                  value={otherLabel}
-                  onChange={(e) => setOtherLabel(e.target.value)}
-                  className="in"
-                />
-              </div>
-              <div>
-                <label className="lbl" htmlFor="other_price">
-                  Prix (F CFA)
-                </label>
-                <input
-                  id="other_price"
-                  name="other_price"
-                  type="number"
-                  min={0}
-                  step={1}
-                  required
-                  value={otherPrice}
-                  onChange={(e) => setOtherPrice(e.target.value)}
-                  className="in"
-                />
-              </div>
+          <span className="lbl">Service choisi</span>
+          <div className="flex h-[60px] items-center justify-between gap-3 rounded-[14px] border-[1.5px] border-accent bg-accent-light px-[18px]">
+            <div className="min-w-0 truncate">
+              <b className="text-lg">{service.label}</b>{" "}
+              <span className="text-[15px] font-semibold text-accent-text">
+                · {fcfa(service.price)}
+              </span>
             </div>
-          )}
+            <Link
+              href="/tickets/nouveau"
+              className="x"
+              style={{
+                width: "auto",
+                height: 40,
+                padding: "0 16px",
+                background: "#fff",
+                color: "#0B5F54",
+                fontSize: 13,
+                fontWeight: 700,
+                flexShrink: 0,
+              }}
+            >
+              Changer
+            </Link>
+          </div>
         </div>
 
         <div className="flex flex-col gap-4 sm:flex-row">
@@ -194,6 +157,15 @@ export default function NouveauTicketForm({
         </div>
 
         <input type="hidden" name="quantity" value={1} />
+        {service.other ? (
+          <>
+            <input type="hidden" name="service_id" value="" />
+            <input type="hidden" name="other_label" value={service.label} />
+            <input type="hidden" name="other_price" value={service.price} />
+          </>
+        ) : (
+          <input type="hidden" name="service_id" value={service.id ?? ""} />
+        )}
 
         {state?.message && !state.ticketId && (
           <p className="text-sm text-danger">{state.message}</p>
@@ -231,7 +203,7 @@ export default function NouveauTicketForm({
             </div>
             <div className="row" style={{ fontSize: 13 }}>
               <span>Service</span>
-              <span style={{ color: "#0B1F2A", fontWeight: 600 }}>{serviceLabel}</span>
+              <span style={{ color: "#0B1F2A", fontWeight: 600 }}>{service.label}</span>
             </div>
             <div className="row" style={{ fontSize: 13 }}>
               <span>Total</span>

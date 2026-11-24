@@ -26,9 +26,13 @@ Cet en-tête s'imprime sur chaque ticket (et, plus tard, sur chaque ordonnance :
 Écran **Réglages › Tarifs**, entièrement personnalisable par chaque structure : un bouton **« Ajouter un service »** (nom + prix en F CFA), modification du nom ou du prix, désactivation (pas de suppression si le service a déjà servi). Aucune liste de services n'est imposée : une nouvelle structure démarre avec une liste vide (ou 2 exemples modifiables : Consultation, Visite prénatale) et saisit ses propres services et prix.
 
 ## 7. Création d'un ticket
-Champs, dans cet ordre :
+Le bouton **« + » de la barre latérale** est le bouton « Nouveau ticket » du caissier (« Nouvelle ordonnance » pour un médecin, quand le module 2 existera). Le parcours se fait en deux étapes, pour éviter toute erreur de service :
+
+**Étape 1 · Choix du service** : écran de grandes cartes (nom + prix) pour tous les services actifs, plus « Autre service ». Aucun service présélectionné ; « Continuer » est désactivé tant qu'aucun service n'est choisi.
+
+**Étape 2 · Patient et paiement**, champs dans cet ordre :
 1. **Nom et prénom** : un seul champ texte, obligatoire.
-2. **Service** : liste déroulante issue des tarifs. Choisir un service remplit automatiquement le **montant total**. Option « Autre service » : saisie manuelle du libellé et du prix.
+2. **Service** : récapitulatif du service choisi à l'étape 1 (nom + prix), non modifiable ici ; un bouton « Changer » ramène à l'étape 1. Le choix remplit automatiquement le **montant total**. « Autre service » : saisie manuelle du libellé et du prix à l'étape 1.
 3. **Montant total** : rempli par le tarif, modifiable seulement par l'administrateur (ou selon un réglage).
 4. **Avance** : saisie, entre 0 et le total.
 5. **Reste** : calculé automatiquement, non modifiable.

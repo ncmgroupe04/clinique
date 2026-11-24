@@ -65,8 +65,8 @@ export default function SidebarNav({ role }: { role: Role }) {
 
   const items: Item[] = [];
   if (ticketAccess) {
-    items.push({ href: "/tickets/nouveau", label: "Tickets", icon: "ticket" });
-    items.push({ href: "/tickets", label: "Historique", icon: "history" });
+    items.push({ href: "/tickets", label: "Tickets", icon: "ticket" });
+    items.push({ href: "/tickets/historique", label: "Historique", icon: "history" });
   }
   if (adminAccess) {
     items.push({ href: "/tarifs", label: "Tarifs", icon: "tag" });
@@ -77,7 +77,7 @@ export default function SidebarNav({ role }: { role: Role }) {
   const isActive = (href: string) => {
     if (pathname === href) return true;
     if (href === "/tickets") {
-      return pathname.startsWith("/tickets/") && pathname !== "/tickets/nouveau";
+      return pathname.startsWith("/tickets/") && pathname !== "/tickets/historique";
     }
     return false;
   };
@@ -85,14 +85,15 @@ export default function SidebarNav({ role }: { role: Role }) {
   return (
     <aside className="print:hidden sticky top-0 flex h-screen w-[104px] shrink-0 flex-col items-center gap-2.5 overflow-y-auto bg-ink py-7">
       <Link
-        href="/tableau"
-        aria-label="Tableau de bord"
-        className="mb-[22px] flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl bg-accent"
+        href="/tickets/nouveau"
+        aria-label="Nouveau ticket"
+        className="mb-2 flex h-14 w-14 shrink-0 items-center justify-center rounded-[18px] bg-accent shadow-[0_0_0_4px_#163545]"
       >
         <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="#fff" strokeWidth="2.4" strokeLinecap="round" aria-hidden="true">
           <path d="M12 5v14M5 12h14" />
         </svg>
       </Link>
+      <div className="mb-3.5 text-[11px] font-bold text-white">Nouveau ticket</div>
 
       <nav className="flex flex-col items-center gap-2.5">
         {items.map((item) => (

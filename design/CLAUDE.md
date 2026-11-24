@@ -41,7 +41,7 @@ Style clair et moderne : vert pharmacie `#0B7A6B` (accent), texte `#0B1F2A`, fon
 2. Inscription d'une structure et connexion, rôles
 3. Réglages : en-tête, format du papier
 4. Tarifs : écran Réglages › Tarifs avec bouton « Ajouter un service », modification, désactivation
-5. Écran de création de ticket + calculs
+5. Création de ticket en deux étapes : étape 1 cartes de services (le « + » de la barre latérale = Nouveau ticket), étape 2 patient et paiement + calculs
 6. Impression thermique (aperçu 58/80 mm)
 7. Historique, total du jour, annulation
 8. Tests, déploiement, documentation d'installation

@@ -76,6 +76,7 @@ export async function createTicket(
   }
 
   revalidatePath("/tickets");
+  revalidatePath("/tickets/historique");
   redirect(`/tickets/${ticketId}`);
 }
 
@@ -103,6 +104,7 @@ export async function cancelTicketAction(
   });
   if (error) return { message: error.message };
   revalidatePath("/tickets");
+  revalidatePath("/tickets/historique");
   revalidatePath(`/tickets/${ticketId}`);
   return { success: true, message: "Ticket annulé." };
 }

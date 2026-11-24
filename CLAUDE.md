@@ -30,6 +30,9 @@ Application web en ligne pour cliniques, hôpitaux et pharmacies du Sénégal (T
 ## Impression thermique
 Papier **80 mm par défaut** (zone imprimable 72 mm), option **58 mm** (zone 48 mm). `@page { size: 80mm auto; margin: 0 }`, marge interne 2 à 3 mm, noir sur blanc, police sans empattement 12 à 13 px, hauteur continue. Largeur choisie dans les réglages de la structure. Voir le détail dans `CAHIER-DES-CHARGES.md` section 8.
 
+## Fidélité à la maquette
+Lis `DESIGN-SPEC.md` et ouvre les fichiers de `maquette/`. Reproduis les écrans **à l'identique** (couleurs, tailles, rayons, espacements, textes), puis fais le contrôle de fidélité décrit dans ce fichier. Ne code pas `maquette/ordonnancier-module-2.html` maintenant.
+
 ## Design
 Style clair et moderne : vert pharmacie `#0B7A6B` (accent), texte `#0B1F2A`, fond `#EEF3F6`, cartes blanches très arrondies, police Plus Jakarta Sans. Maquette de référence : https://claude.ai/artifact/B6vE6A1gF28bVFzfvgMzvC (écrans Ticket financier et Réglages · En-tête).
 
@@ -38,7 +41,7 @@ Style clair et moderne : vert pharmacie `#0B7A6B` (accent), texte `#0B1F2A`, fon
 2. Inscription d'une structure et connexion, rôles
 3. Réglages : en-tête, format du papier
 4. Tarifs : écran Réglages › Tarifs avec bouton « Ajouter un service », modification, désactivation
-5. Écran de création de ticket + calculs
+5. Création de ticket en deux étapes : étape 1 cartes de services (le « + » de la barre latérale = Nouveau ticket), étape 2 patient et paiement + calculs
 6. Impression thermique (aperçu 58/80 mm)
 7. Historique, total du jour, annulation
 8. Tests, déploiement, documentation d'installation

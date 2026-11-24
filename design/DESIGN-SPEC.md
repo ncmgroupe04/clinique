@@ -6,7 +6,8 @@ Lien de la maquette en ligne : https://claude.ai/artifact/B6vE6A1gF28bVFzfvgMzvC
 
 | Fichier | Écran | Statut |
 |---|---|---|
-| `ticket.html` | Nouveau ticket (caisse) | **À construire maintenant** |
+| `choix-service-etape1.html` | Nouveau ticket · Étape 1 : choix du service (cartes) | **À construire maintenant** |
+| `ticket-etape2.html` | Nouveau ticket · Étape 2 : patient et paiement | **À construire maintenant** |
 | `reglages-entete.html` | Réglages · En-tête | **À construire maintenant** |
 | `reglages-tarifs.html` | Réglages · Tarifs et impression | **À construire maintenant** |
 | `ordonnancier-module-2.html` | Ordonnancier | Plus tard, ne pas coder |
@@ -34,7 +35,10 @@ Lien de la maquette en ligne : https://claude.ai/artifact/B6vE6A1gF28bVFzfvgMzvC
 Les construire comme composants réutilisables (React + Tailwind avec ces valeurs en variables), sans changer leur rendu.
 
 ## Contenu et comportements à respecter
-- **Ticket** : champs dans cet ordre : Nom et prénom, Service (liste déroulante, prix automatique), Montant total, Avance, Reste (lecture seule, fond `#DFF3EF`), date prise automatiquement. À droite : aperçu du ticket thermique 80 mm et bouton « Imprimer le ticket ». Numéro affiché `Reçu 2026-042` (année + numéro à 3 chiffres, repart à 001 chaque année).
+- **Bouton « + » de la barre latérale** : c'est le bouton principal. Il s'appelle **« Nouveau ticket »** pour le caissier (plus tard « Nouvelle ordonnance » pour le médecin, selon le rôle). Un clic ouvre toujours l'étape 1.
+- **Étape 1 · Choix du service** : tous les services actifs s'affichent en **grandes cartes** avec leur prix (nom 22 px / 800, prix 34 px / 800), plus une carte « Autre service » en pointillés (prix à saisir). **Aucun service n'est présélectionné.** Le bouton « Continuer » reste grisé et inactif tant qu'aucune carte n'est choisie. La carte choisie passe en vert (bordure `#0B7A6B`, fond `#DFF3EF`, pastille ✓) et la barre du bas affiche « Service choisi · prix ».
+- **Étape 2 · Patient et paiement** : le service choisi est affiché en **récapitulatif verrouillé** (nom et prix, pas de liste déroulante) avec un bouton « Changer » qui renvoie à l'étape 1. Le montant total vient du service et ne se saisit pas à la main.
+- **Ticket (étape 2)** : champs dans cet ordre : Nom et prénom, Service choisi (récapitulatif verrouillé), Montant total, Avance, Reste (lecture seule, fond `#DFF3EF`), date prise automatiquement. À droite : aperçu du ticket thermique 80 mm et bouton « Imprimer le ticket ». Numéro affiché `Reçu 2026-042` (année + numéro à 3 chiffres, repart à 001 chaque année).
 - **Réglages · En-tête** : nom, adresse, téléphone, autres contacts, numérotation automatique, aperçu de l'en-tête.
 - **Réglages · Tarifs** : liste des services avec prix, bouton « + Ajouter un service », formulaire d'ajout (nom, prix, Enregistrer), choix du papier 80 mm (défaut) ou 58 mm, rappel de la numérotation.
 - Textes en français, tels qu'écrits dans la maquette. Les noms, prix et numéros de la maquette sont des **exemples** : ils viennent de la base de données.

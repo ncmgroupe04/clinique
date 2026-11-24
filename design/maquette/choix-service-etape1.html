@@ -1,0 +1,50 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<title>Maquette de référence · choix-service-etape1</title>
+<!-- SOURCE DE VÉRITÉ visuelle. Écran fixe 1280x800. Reproduire à l'identique (couleurs, tailles, espacements, textes). -->
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@500;600;700;800&display=swap" rel="stylesheet">
+<style>
+body{margin:0}*{box-sizing:border-box}
+.card{background:#fff;border:1px solid #E2EAEF;border-radius:24px;padding:28px}
+.lbl{font-size:13px;font-weight:600;color:#4B5F6B;margin-bottom:8px;display:block}
+.in{width:100%;height:52px;border:1.5px solid #D5E0E6;border-radius:14px;padding:0 16px;font:600 16px "Plus Jakarta Sans",sans-serif;color:#0B1F2A;background:#fff}
+.chip{flex:1;display:flex;flex-direction:column;align-items:flex-start;gap:4px;padding:14px 18px;border:1.5px solid #D5E0E6;border-radius:16px;background:#fff;font:700 15px "Plus Jakarta Sans",sans-serif;color:#0B1F2A;cursor:pointer}
+.chip span{font-weight:500;color:#4B5F6B;font-size:13px}
+.chip.on{border-color:#0B7A6B;background:#DFF3EF}.chip.on span{color:#0B5F54}
+.nv{display:flex;flex-direction:column;align-items:center;gap:6px;width:76px;padding:12px 0;border:none;border-radius:18px;background:transparent;color:#B9CBD3;font:600 11px "Plus Jakarta Sans",sans-serif;cursor:pointer}
+.nv.on{background:#163545;color:#fff}
+.go{height:60px;border:none;border-radius:18px;background:#0B7A6B;color:#fff;font:700 17px "Plus Jakarta Sans",sans-serif;display:flex;align-items:center;justify-content:center;gap:10px;cursor:pointer}
+.row{display:flex;justify-content:space-between;font-size:14px;font-weight:600}.row span{color:#4B5F6B;font-weight:500}
+.ln{display:flex;align-items:center;gap:16px;padding:14px 0;border-top:1px solid #E2EAEF}
+.cd{width:58px;height:36px;border-radius:10px;background:#DFF3EF;color:#0B5F54;font-weight:800;font-size:13px;display:flex;align-items:center;justify-content:center}
+.x{margin-left:auto;width:44px;height:44px;border:none;border-radius:12px;background:#F2F5F7;color:#4B5F6B;display:flex;align-items:center;justify-content:center;cursor:pointer}
+</style>
+</head>
+<body>
+<div style="width:1280px;height:800px;display:flex;background:#EEF3F6;font-family:'Plus Jakarta Sans',Inter,sans-serif;color:#0B1F2A">
+<nav style="width:104px;background:#0B1F2A;display:flex;flex-direction:column;align-items:center;gap:10px;padding:28px 0">
+<button aria-label="Nouveau ticket" style="width:56px;height:56px;border:none;border-radius:18px;background:#0B7A6B;display:flex;align-items:center;justify-content:center;margin-bottom:8px;cursor:pointer;box-shadow:0 0 0 4px #163545"><svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.4" stroke-linecap="round" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg></button><div style="margin-bottom:14px;color:#fff;font:700 11px 'Plus Jakarta Sans',sans-serif">Nouveau ticket</div>
+<button class="nv on"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 9V6a1 1 0 0 1 1-1h16a1 1 0 0 1 1 1v3a2.5 2.5 0 0 0 0 5v3a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1v-3a2.5 2.5 0 0 0 0-5z"/></svg>Tickets</button>
+<button class="nv "><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 3h9l4 4v14H6z"/><path d="M9 12h7M9 16h7"/></svg>Ordonnances</button>
+<button class="nv"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg>Historique</button>
+<button class="nv"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><circle cx="12" cy="12" r="3"/><path d="M12 3v3M12 18v3M3 12h3M18 12h3"/></svg>Réglages</button>
+</nav>
+<main style="flex:1;padding:36px 40px;display:flex;flex-direction:column;gap:24px">
+<header style="display:flex;align-items:flex-end;justify-content:space-between">
+<div><h1 style="margin:0;font-size:32px;font-weight:800;letter-spacing:-0.5px">Nouveau ticket</h1><p style="margin:6px 0 0;font-size:15px;color:#4B5F6B;font-weight:500">Étape 1 sur 2 · Choisissez le service pour continuer</p></div>
+<div style="display:flex;gap:10px"><span style="padding:10px 18px;border-radius:999px;background:#0B7A6B;color:#fff;font-size:14px;font-weight:700">1 · Service</span><span style="padding:10px 18px;border-radius:999px;background:#fff;border:1px solid #E2EAEF;color:#4B5F6B;font-size:14px;font-weight:600">2 · Patient et paiement</span></div>
+</header>
+<div style="display:grid;grid-template-columns:repeat(3,1fr);gap:20px;flex:1;align-content:start">
+<button style="text-align:left;height:190px;padding:26px;border-radius:24px;border:2px solid #E2EAEF;background:#fff;font-family:inherit;cursor:pointer;display:flex;flex-direction:column;justify-content:space-between;color:#0B1F2A"><span style="font-size:22px;font-weight:800">Consultation</span><span style="font-size:34px;font-weight:800;letter-spacing:-1px">2 000 F</span></button>
+<button style="position:relative;text-align:left;height:190px;padding:26px;border-radius:24px;border:2px solid #0B7A6B;background:#DFF3EF;font-family:inherit;cursor:pointer;display:flex;flex-direction:column;justify-content:space-between;color:#0B1F2A"><span style="font-size:22px;font-weight:800">Visite prénatale</span><span style="font-size:34px;font-weight:800;color:#0B5F54;letter-spacing:-1px">5 000 F</span><span style="position:absolute;top:20px;right:20px;width:32px;height:32px;border-radius:50%;background:#0B7A6B;display:flex;align-items:center;justify-content:center"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12l5 5 9-10"/></svg></span></button>
+<button style="text-align:left;height:190px;padding:26px;border-radius:24px;border:2px solid #E2EAEF;background:#fff;font-family:inherit;cursor:pointer;display:flex;flex-direction:column;justify-content:space-between;color:#0B1F2A"><span style="font-size:22px;font-weight:800">Échographie</span><span style="font-size:34px;font-weight:800;letter-spacing:-1px">10 000 F</span></button>
+<button style="text-align:left;height:190px;padding:26px;border-radius:24px;border:2px dashed #B9C7CF;background:transparent;font-family:inherit;cursor:pointer;display:flex;flex-direction:column;justify-content:space-between;color:#0B1F2A"><span style="font-size:22px;font-weight:800">Autre service</span><span style="font-size:18px;font-weight:600;color:#4B5F6B">Prix à saisir</span></button>
+</div>
+<div class="card" style="display:flex;align-items:center;justify-content:space-between;padding:18px 28px">
+<div><span style="font-size:13px;color:#4B5F6B;font-weight:600">Service choisi</span><div style="font-size:20px;font-weight:800">Visite prénatale · 5 000 F</div></div>
+<button class="go" style="padding:0 48px">Continuer</button></div>
+</main></div>
+</body>
+</html>

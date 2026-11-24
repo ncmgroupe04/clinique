@@ -1,6 +1,6 @@
 import { test, expect } from "@playwright/test";
 
-test("création d'un ticket et affichage du reçu", async ({ page }) => {
+test("création d'un ticket en deux étapes et affichage du reçu", async ({ page }) => {
   const email = `ticket-${Date.now()}@test.sn`;
   await page.goto("/inscription");
   await page.fill("#structureName", "Clinique Ticket");
@@ -10,11 +10,14 @@ test("création d'un ticket et affichage du reçu", async ({ page }) => {
   await page.click('button[type="submit"]');
   await page.waitForURL("**/tableau", { timeout: 15_000 });
 
+  // Étape 1 : choix du service dans les cartes.
   await page.goto("/tickets/nouveau");
+  await page.getByRole("button", { name: /Consultation/ }).click();
+  await page.getByRole("button", { name: "Continuer" }).click();
+  await page.waitForURL("**/tickets/nouveau?service=*", { timeout: 15_000 });
+
+  // Étape 2 : patient et paiement.
   await page.fill("#patient_name", "Fatou Ndiaye");
-  await page.selectOption("#service_id", "__other__");
-  await page.fill("#other_label", "Consultation");
-  await page.fill("#other_price", "5000");
   await page.fill("#advance", "2000");
   await page.click('button:has-text("Imprimer le ticket")');
   await page.waitForURL(/\/tickets\/.+/, { timeout: 15_000 });
