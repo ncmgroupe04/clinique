@@ -92,7 +92,10 @@ export default async function HistoriquePage({
       </ScreenHeader>
 
       {/* Filters */}
-      <form method="GET" className="card grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4">
+      <form
+        method="GET"
+        className="card grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-[1.5fr_1.2fr_0.85fr_0.95fr_0.9fr_auto]"
+      >
         <input
           name="q"
           defaultValue={sp.q ?? ""}
@@ -105,38 +108,66 @@ export default async function HistoriquePage({
           defaultValue={sp.date ?? ""}
           className="input"
         />
-        <select
-          name="year"
-          defaultValue={sp.year ?? ""}
-          className="input"
-        >
-          <option value="">Toutes années</option>
-          <option value={new Date().getFullYear()}>{new Date().getFullYear()}</option>
-        </select>
-        <select
-          name="service"
-          defaultValue={sp.service ?? ""}
-          className="input"
-        >
-          <option value="">Tous services</option>
-          {(services ?? []).map((s) => (
-            <option key={s.id} value={s.id}>
-              {s.name}
-            </option>
-          ))}
-        </select>
-        <select
-          name="status"
-          defaultValue={sp.status ?? ""}
-          className="input"
-        >
-          <option value="">Tous statuts</option>
-          <option value="actif">Valide</option>
-          <option value="annule">Annulé</option>
-        </select>
+
+        {/* Selects with a chevron set back from the right edge */}
+        {[
+          {
+            name: "year",
+            value: sp.year ?? "",
+            label: "Toutes années",
+            options: [{ value: String(new Date().getFullYear()), label: String(new Date().getFullYear()) }],
+          },
+          {
+            name: "service",
+            value: sp.service ?? "",
+            label: "Tous services",
+            options: (services ?? []).map((s) => ({ value: s.id, label: s.name })),
+          },
+          {
+            name: "status",
+            value: sp.status ?? "",
+            label: "Tous statuts",
+            options: [
+              { value: "actif", label: "Valide" },
+              { value: "annule", label: "Annulé" },
+            ],
+          },
+        ].map((sel) => (
+          <div key={sel.name} className="relative min-w-0">
+            <select
+              name={sel.name}
+              defaultValue={sel.value}
+              className="in appearance-none"
+              style={{ paddingRight: 42 }}
+            >
+              <option value="">{sel.label}</option>
+              {sel.options.map((o) => (
+                <option key={o.value} value={o.value}>
+                  {o.label}
+                </option>
+              ))}
+            </select>
+            <svg
+              className="pointer-events-none absolute top-1/2 -translate-y-1/2"
+              style={{ right: 16 }}
+              width="18"
+              height="18"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="#0b7a6b"
+              strokeWidth="2"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              aria-hidden="true"
+            >
+              <path d="m6 9 6 6 6-6" />
+            </svg>
+          </div>
+        ))}
+
         <button
           type="submit"
-          className="btn-primary w-full px-8 sm:w-auto sm:justify-self-start lg:col-span-5"
+          className="btn-primary w-full px-6 sm:w-auto"
         >
           Filtrer
         </button>

@@ -130,9 +130,9 @@ export default function SidebarNav({ role }: { role: Role }) {
         <button
           type="submit"
           className="nv"
-          style={{ width: 96, flexDirection: "row", alignItems: "center", gap: 8, padding: "12px 10px", fontSize: 10 }}
+          style={{ width: 100, flexDirection: "row", alignItems: "center", gap: 6, padding: "10px 2px", fontSize: 11, color: "#E3EDF2" }}
         >
-          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true" style={{ flexShrink: 0 }}>
             <path d="M14 4h4a1 1 0 0 1 1 1v14a1 1 0 0 1-1 1h-4" />
             <path d="M10 8l-4 4 4 4M6 12h9" />
           </svg>
