@@ -20,7 +20,7 @@ test("création d'un ticket en deux étapes et affichage du reçu", async ({ pag
   await page.fill("#patient_name", "Fatou Ndiaye");
   await page.fill("#advance", "2000");
   await page.click('button:has-text("Imprimer le ticket")');
-  await page.waitForURL(/\/tickets\/.+/, { timeout: 15_000 });
+  await page.waitForURL(/\/tickets\/[0-9a-f-]{36}$/, { timeout: 15_000 });
   await expect(page.getByRole("heading", { name: /Reçu 2026-/ })).toBeVisible();
   await expect(page.getByText("Reste à payer")).toBeVisible();
 });

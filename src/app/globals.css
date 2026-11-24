@@ -94,9 +94,9 @@ body {
 .nv.on { background: #163545; color: #fff; }
 
 /* Logout: icon by default, label on hover */
-.nv-logout { width: 64px; height: 64px; flex-direction: row; justify-content: center; align-items: center; padding: 0; border-radius: 18px; color: #fff; transition: width 0.15s ease; }
-.nv-logout:hover { width: 100px; }
-.nv-logout .logout-label { display: none; font-size: 11px; white-space: nowrap; }
+.nv-logout { width: 64px; height: 64px; flex-direction: row; justify-content: center; align-items: center; padding: 0; border-radius: 18px; color: #ef4444; font-weight: 700; background: rgba(220, 38, 38, 0.12); transition: width 0.15s ease, background 0.15s ease; }
+.nv-logout:hover { width: 100px; background: rgba(220, 38, 38, 0.22); }
+.nv-logout .logout-label { display: none; font-size: 11px; font-weight: 800; white-space: nowrap; }
 .nv-logout:hover .logout-icon { display: none; }
 .nv-logout:hover .logout-label { display: inline; }
 

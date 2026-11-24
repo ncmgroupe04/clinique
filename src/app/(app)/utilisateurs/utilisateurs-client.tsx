@@ -52,7 +52,7 @@ export default function UtilisateursClient({ users }: { users: User[] }) {
         </div>
 
         {showForm && (
-          <form action={action} className="grid grid-cols-1 gap-3.5 md:grid-cols-2">
+          <form action={action} className="mb-8 grid grid-cols-1 gap-3.5 md:grid-cols-2">
             <div>
               <label className="lbl !mb-1 !text-xs" htmlFor="full_name">Nom et prénom</label>
               <input id="full_name" name="full_name" required className="input" style={fieldStyle} />
