@@ -132,7 +132,6 @@ export default function SidebarNav({ role }: { role: Role }) {
   const adminAccess = role === "structure_admin" || role === "platform_admin";
 
   const [openGroup, setOpenGroup] = useState<string | null>(null);
-  const [anchor, setAnchor] = useState<{ top: number; left: number } | null>(null);
   const containerRef = useRef<HTMLElement>(null);
 
   useEffect(() => {
@@ -225,35 +224,39 @@ export default function SidebarNav({ role }: { role: Role }) {
       return pathname === it.href || pathname.startsWith(it.href + "/");
     });
 
+  const openGroupData = groups.find((g) => g.key === openGroup && g.items.length > 1) ?? null;
+
   return (
     <aside
       ref={containerRef}
-      className="print:hidden sticky top-0 flex h-screen w-[104px] shrink-0 flex-col items-center gap-1.5 overflow-hidden bg-ink pb-3 pt-4"
+      className={`print:hidden sticky top-0 flex h-screen shrink-0 overflow-hidden bg-ink pb-3 pt-4 transition-[width] duration-200 ${
+        openGroupData ? "w-[300px]" : "w-[104px]"
+      }`}
     >
-      {ticketAccess && role !== "platform_admin" && (
-        <>
-          <Link
-            href="/tickets/nouveau"
-            aria-label="Nouveau ticket"
-            className="mb-1 flex h-12 w-12 shrink-0 items-center justify-center rounded-[16px] bg-accent shadow-[0_0_0_4px_#163545]"
-          >
-            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#fff" strokeWidth="2.4" strokeLinecap="round" aria-hidden="true">
-              <path d="M12 5v14M5 12h14" />
-            </svg>
-          </Link>
-          <div className="mb-2 text-[10px] font-bold text-white">Nouveau ticket</div>
-        </>
-      )}
+      <div className="flex w-[104px] shrink-0 flex-col items-center gap-1.5">
+        {ticketAccess && role !== "platform_admin" && (
+          <>
+            <Link
+              href="/tickets/nouveau"
+              aria-label="Nouveau ticket"
+              className="mb-1 flex h-12 w-12 shrink-0 items-center justify-center rounded-[16px] bg-accent shadow-[0_0_0_4px_#163545]"
+            >
+              <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#fff" strokeWidth="2.4" strokeLinecap="round" aria-hidden="true">
+                <path d="M12 5v14M5 12h14" />
+              </svg>
+            </Link>
+            <div className="mb-2 text-[10px] font-bold text-white">Nouveau ticket</div>
+          </>
+        )}
 
-      <nav className="flex flex-col items-center gap-1">
-        {groups.map((g) => {
-          const active = isGroupActive(g);
-          const isOpen = openGroup === g.key;
-          const single = g.items.length === 1;
-          return (
-            <div key={g.key} className="relative">
-              {single ? (
+        <nav className="flex flex-col items-center gap-1">
+          {groups.map((g) => {
+            const active = isGroupActive(g);
+            const isOpen = openGroup === g.key;
+            if (g.items.length === 1) {
+              return (
                 <Link
+                  key={g.key}
                   href={g.items[0].href}
                   aria-current={active ? "page" : undefined}
                   className={`nv ${active ? "on" : ""}`}
@@ -261,70 +264,56 @@ export default function SidebarNav({ role }: { role: Role }) {
                   <Icon name={g.items[0].icon} />
                   {g.items[0].label}
                 </Link>
-              ) : (
-                <>
-                  <button
-                    type="button"
-                    onClick={(e) => {
-                      if (isOpen) {
-                        setOpenGroup(null);
-                        setAnchor(null);
-                        return;
-                      }
-                      const r = e.currentTarget.getBoundingClientRect();
-                      const estimatedHeight = g.items.length * 44 + 12;
-                      const top = Math.min(r.top, Math.max(8, window.innerHeight - estimatedHeight - 8));
-                      const left = Math.min(r.right + 6, Math.max(8, window.innerWidth - 196));
-                      setAnchor({ top, left });
-                      setOpenGroup(g.key);
-                    }}
-                    aria-expanded={isOpen}
-                    aria-haspopup="menu"
-                    className={`nv ${active || isOpen ? "on" : ""}`}
-                  >
-                    <Icon name={g.icon} />
-                    {g.label}
-                  </button>
-                  {isOpen && anchor && (
-                    <div
-                      role="menu"
-                      style={{ position: "fixed", top: anchor.top, left: anchor.left }}
-                      className="z-50 max-h-[80vh] min-w-[180px] overflow-y-auto rounded-[12px] bg-white py-1 shadow-xl ring-1 ring-black/5"
-                    >
-                      {g.items.map((it) => {
-                        const itActive =
-                          it.href === "/tickets"
-                            ? pathname === "/tickets" || (pathname.startsWith("/tickets/") && pathname !== "/tickets/historique")
-                            : pathname === it.href || pathname.startsWith(it.href + "/");
-                        return (
-                          <Link
-                            key={it.href}
-                            href={it.href}
-                            role="menuitem"
-                            onClick={() => {
-                              setOpenGroup(null);
-                              setAnchor(null);
-                            }}
-                            className={`flex items-center gap-3 px-4 py-2.5 text-[13px] font-medium transition-colors ${
-                              itActive ? "bg-accent/10 text-accent" : "text-ink hover:bg-ink/5"
-                            }`}
-                          >
-                            <Icon name={it.icon} />
-                            <span>{it.label}</span>
-                            {it.label === "Ordonnances" && (
-                              <span className="ml-auto text-[8px] text-accent font-bold">Bientôt</span>
-                            )}
-                          </Link>
-                        );
-                      })}
-                    </div>
-                  )}
-                </>
-              )}
-            </div>
-          );
-        })}
-      </nav>
+              );
+            }
+            return (
+              <button
+                key={g.key}
+                type="button"
+                onClick={() => setOpenGroup(isOpen ? null : g.key)}
+                aria-expanded={isOpen}
+                aria-haspopup="menu"
+                className={`nv ${active || isOpen ? "on" : ""}`}
+              >
+                <Icon name={g.icon} />
+                {g.label}
+              </button>
+            );
+          })}
+        </nav>
+      </div>
+
+      {openGroupData && (
+        <div role="menu" className="flex w-[196px] shrink-0 flex-col gap-1 border-l border-white/10 px-3 pt-4">
+          <p className="mb-2 px-2 text-[11px] font-bold uppercase tracking-wide text-nav">
+            {openGroupData.label}
+          </p>
+          {openGroupData.items.map((it) => {
+            const itActive =
+              it.href === "/tickets"
+                ? pathname === "/tickets" ||
+                  (pathname.startsWith("/tickets/") && pathname !== "/tickets/historique")
+                : pathname === it.href || pathname.startsWith(it.href + "/");
+            return (
+              <Link
+                key={it.href}
+                href={it.href}
+                role="menuitem"
+                onClick={() => setOpenGroup(null)}
+                className={`flex items-center gap-3 rounded-[12px] px-3 py-2.5 text-[13px] font-semibold transition-colors ${
+                  itActive ? "bg-accent text-white" : "text-nav hover:bg-white/5 hover:text-white"
+                }`}
+              >
+                <Icon name={it.icon} />
+                <span>{it.label}</span>
+                {it.label === "Ordonnances" && (
+                  <span className="ml-auto text-[8px] text-accent font-bold">Bientôt</span>
+                )}
+              </Link>
+            );
+          })}
+        </div>
+      )}
     </aside>
   );
 }
