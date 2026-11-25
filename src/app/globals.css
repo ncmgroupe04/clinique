@@ -30,7 +30,7 @@ button:disabled { cursor: not-allowed; }
   100% { stroke-dashoffset: -20; opacity: 0; }
 }
 .health-pulse { stroke-dasharray: 100; animation: health-pulse 7s linear infinite; }
-.health-pulse-3 { animation-delay: 1.75s; }
+.health-pulse-2 { animation-delay: 3.5s; }
 @keyframes health-glow {
   0%, 100% { opacity: 0.08; transform: scale(1); }
   50% { opacity: 0.16; transform: scale(1.12); }

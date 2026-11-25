@@ -82,6 +82,9 @@ export default function AuthScreen({
             </pattern>
           </defs>
           <rect width="100%" height="100%" fill="url(#health-cross)" />
+          <path className="health-pulse" pathLength="100" d="M0 140h180l24-46 22 90 26-62 20 20h4000" fill="none" stroke="#0b7a6b" strokeWidth="4" opacity="0.30" />
+          <path className="health-pulse health-pulse-2" pathLength="100" d="M0 800h220l26-54 24 104 28-74 24 26h4000" fill="none" stroke="#0b7a6b" strokeWidth="4" opacity="0.30" />
+          <circle cx="180" cy="180" r="110" fill="#0b7a6b" opacity="0.13" />
           <circle cx="1500" cy="620" r="150" fill="#0b7a6b" opacity="0.13" />
           <g opacity="0.26" stroke="#0b7a6b" strokeWidth="4" fill="none">
             <rect x="1300" y="120" width="100" height="44" rx="22" transform="rotate(-25 1350 142)" />
@@ -91,50 +94,6 @@ export default function AuthScreen({
             <path d="M120 640v70M85 675h70" />
             <circle cx="120" cy="675" r="44" />
           </g>
-        </svg>
-
-        {/* Tracé du pouls : ligne horizontale puis descente courbée à droite */}
-        <div
-          className="absolute bottom-0 left-0 right-[68px] top-[138px] rounded-tr-[140px] border-r-[4px] border-t-[4px] border-[#0b7a6b] opacity-30"
-          aria-hidden="true"
-        />
-
-        {/* Motif gauche : cercle + zigzag */}
-        <svg
-          className="absolute left-[50px] top-[70px] h-[240px] w-[260px] overflow-visible"
-          viewBox="0 0 260 240"
-          fill="none"
-          aria-hidden="true"
-        >
-          <circle cx="130" cy="110" r="110" fill="#0b7a6b" opacity="0.13" />
-          <path
-            className="health-pulse"
-            pathLength="100"
-            d="M130 70l24-46 22 90 26-62 20 18"
-            stroke="#0b7a6b"
-            strokeWidth="4"
-            strokeLinecap="round"
-            opacity="0.30"
-          />
-        </svg>
-
-        {/* Motif droit : même cercle, même zigzag, sur la même ligne */}
-        <svg
-          className="absolute right-[50px] top-[70px] h-[240px] w-[260px] overflow-visible"
-          viewBox="0 0 260 240"
-          fill="none"
-          aria-hidden="true"
-        >
-          <circle cx="130" cy="110" r="110" fill="#0b7a6b" opacity="0.13" />
-          <path
-            className="health-pulse health-pulse-3"
-            pathLength="100"
-            d="M130 70l24-46 22 90 26-62 20 18"
-            stroke="#0b7a6b"
-            strokeWidth="4"
-            strokeLinecap="round"
-            opacity="0.30"
-          />
         </svg>
       </div>
       <div className={`card relative z-10 w-full ${mode === "signup" ? "max-w-2xl" : "max-w-md"}`}>
