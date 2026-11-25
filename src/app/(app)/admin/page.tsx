@@ -42,7 +42,7 @@ export default async function AdminPage() {
     <div className="flex flex-1 flex-col gap-[26px]">
       <ScreenHeader
         title="Tableau de bord · Super Admin"
-        subtitle="Abonnés, MRR/ARR, prévisions et formules — formule unique : 25 000 F CFA / mois + frais d'inscription 50 000 F CFA."
+        subtitle="Abonnés, MRR/ARR, prévisions et formules — formule unique : 25 000 F CFA / mois."
       />
 
       {/* KPIs */}

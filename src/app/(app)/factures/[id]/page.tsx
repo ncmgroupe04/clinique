@@ -31,9 +31,13 @@ export default async function FactureDetailPage({ params }: { params: Promise<{ 
 
   const { data: structure } = await supabase
     .from("structures")
-    .select("name, address, phone, header_text")
+    .select("*")
     .eq("id", invoice.structure_id)
     .maybeSingle();
+
+  const logoUrl = structure?.logo_path
+    ? supabase.storage.from("structure-logos").getPublicUrl(structure.logo_path).data.publicUrl
+    : null;
 
   return (
     <div className="space-y-4">
@@ -53,6 +57,7 @@ export default async function FactureDetailPage({ params }: { params: Promise<{ 
 
       <div className="facture-print card mx-auto" style={{ maxWidth: "210mm", fontFamily: "Arial, Helvetica, sans-serif" }}>
         <div className="text-center mb-3">
+          {logoUrl && <img src={logoUrl} alt="Logo" style={{ maxHeight: 70, maxWidth: 180, objectFit: "contain", margin: "0 auto 8px" }} />}
           <p className="font-bold text-lg leading-tight">{structure?.name}</p>
           {structure?.address && <p className="text-xs leading-tight">{structure.address}</p>}
           {structure?.phone && <p className="text-xs leading-tight">Tél. {structure.phone}</p>}

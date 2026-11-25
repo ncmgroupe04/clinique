@@ -1,26 +1,49 @@
 import { redirect } from "next/navigation";
 import { connection } from "next/server";
 import { requireUser } from "@/lib/auth";
+import { createClient } from "@/lib/supabase/server";
 import ScreenHeader from "../screen-header";
+import OrdonnancesClient from "./ordonnances-client";
 
 export default async function OrdonnancesPage() {
   await connection();
   const user = await requireUser();
   if (user.role !== "structure_admin" && user.role !== "docteur") redirect("/tableau");
+  if (!user.structureId) redirect("/tableau");
+
+  const supabase = await createClient();
+  const { data: medications } = await supabase
+    .from("medications")
+    .select("id, dci, brand, class, form, dosage")
+    .eq("is_active", true)
+    .order("dci")
+    .limit(2000);
+
+  const { data: structure } = await supabase
+    .from("structures")
+    .select("*")
+    .eq("id", user.structureId)
+    .single();
+
+  const { data: altRows } = await supabase
+    .from("medication_alternatives")
+    .select("medication_id, alternative:medications!medication_alternatives_alternative_id_fkey(dci, dosage, form)");
+
+  const alternatives: Record<string, string[]> = {};
+  for (const r of altRows ?? []) {
+    const med = r.alternative as unknown as { dci: string; dosage: string | null; form: string } | null;
+    if (!med) continue;
+    (alternatives[r.medication_id] ??= []).push(`${med.dci}${med.dosage ? " " + med.dosage : ""} · ${med.form}`);
+  }
+
+  const logoUrl = structure?.logo_path
+    ? supabase.storage.from("structure-logos").getPublicUrl(structure.logo_path).data.publicUrl
+    : null;
+
   return (
     <div className="flex flex-1 flex-col gap-[26px]">
-      <ScreenHeader title="Ordonnances" subtitle="Module en préparation." />
-      <section className="card flex flex-1 flex-col items-center justify-center gap-4 text-center">
-        <span className="rounded-full bg-accent-light px-5 py-2 text-sm font-bold text-accent-text">
-          Bientôt disponible
-        </span>
-        <h2 className="text-xl font-extrabold text-ink">Le module Ordonnancier arrive prochainement</h2>
-        <p className="max-w-lg text-sm text-muted">
-          Il permettra de rédiger des ordonnances : recherche de médicaments via une barre de
-          recherche, gestion des posologies, des favoris et des protocoles, avec dictée vocale.
-          Le module Ticket reste pleinement fonctionnel.
-        </p>
-      </section>
+      <ScreenHeader title="Ordonnances" subtitle="Tapez les premières lettres, choisissez, imprimez." />
+      <OrdonnancesClient medications={medications ?? []} alternatives={alternatives} structure={structure ?? null} logoUrl={logoUrl} />
     </div>
   );
 }

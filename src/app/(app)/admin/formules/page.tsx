@@ -89,7 +89,7 @@ export default async function FormulesPage() {
           <input name="duration_days" type="number" min={1} defaultValue={30} placeholder="Durée (jours)" required className="input" style={{ height: 38, fontSize: 14 }} />
           <div className="md:col-span-3 grid grid-cols-2 gap-3 sm:grid-cols-3">
             <label className="flex items-center gap-2 text-xs text-muted"><input type="checkbox" name="is_unlimited" value="true" className="accent-accent" /> Utilisateurs illimités</label>
-            <label className="flex items-center gap-2 text-xs text-muted"><input type="checkbox" name="is_public" value="true" defaultChecked className="accent-accent" /> Visible à l&apos;inscription</label>
+            <label className="flex items-center gap-2 text-xs text-muted"><input type="checkbox" name="is_public" value="true" defaultChecked className="accent-accent" /> Visible publiquement</label>
             <input name="max_cashiers" type="number" min={0} placeholder="Nb caissiers" className="input" style={{ height: 34, fontSize: 13 }} />
             <input name="max_docteurs" type="number" min={0} placeholder="Nb docteurs" className="input" style={{ height: 34, fontSize: 13 }} />
             <input name="max_documents_per_month" type="number" min={1} placeholder="Documents / mois (vide = illimité)" className="input" style={{ height: 34, fontSize: 13 }} />

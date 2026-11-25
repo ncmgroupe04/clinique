@@ -18,7 +18,7 @@ export default async function ReglagesPage() {
   const supabase = await createClient();
   const { data: structure } = await supabase
     .from("structures")
-    .select("name, address, phone, header_text, paper_width_mm")
+    .select("*")
     .eq("id", user.structureId)
     .single();
 
@@ -47,6 +47,8 @@ export default async function ReglagesPage() {
           phone: structure.phone ?? "",
           header_text: structure.header_text ?? "",
           paper_width_mm: structure.paper_width_mm ?? 80,
+          logo_path: structure.logo_path ?? "",
+          structureId: user.structureId,
         }}
         nextReceipt={nextReceipt}
         dateLabel={dateLabel}

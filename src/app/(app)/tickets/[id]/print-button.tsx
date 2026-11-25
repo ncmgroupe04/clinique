@@ -17,11 +17,13 @@ export default function PrintButton({
   thermal,
   paperWidthMm,
   receipt,
+  logoUrl,
 }: {
   ticketId: string;
   thermal: boolean;
   paperWidthMm: number;
   receipt: ReceiptData;
+  logoUrl?: string | null;
 }) {
   const [pending, startTransition] = useTransition();
   const [busy, setBusy] = useState(false);
@@ -69,7 +71,7 @@ export default function PrintButton({
 
     let sent = false;
     try {
-      const bitmap = renderReceiptBitmap(receipt, paperWidthMm);
+      const bitmap = await renderReceiptBitmap({ ...receipt, logoUrl }, paperWidthMm);
       const bytes = concatParts(buildEscposParts(bitmap));
       sent = await sendToPrintAgent(bytes, { printerName: printer || undefined });
     } catch {

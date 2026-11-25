@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useActionState, useTransition } from "react";
+import { useEffect, useState, useActionState, useTransition } from "react";
 import {
   toggleStructureActive,
   updateSubscription,
@@ -164,7 +164,7 @@ export default function AdminStructuresTable({
             <thead>
               <tr className="border-b border-border text-left text-xs font-bold uppercase tracking-wide text-muted">
                 <th className="py-2 pr-3">Structure</th>
-                <th className="py-2 pr-3">Inscription (50 000 F)</th>
+                <th className="py-2 pr-3">Paiement</th>
                 <th className="py-2 pr-3">Échéance mensuelle</th>
                 <th className="py-2 pr-3">Statut</th>
                 <th className="py-2 pr-3">Tickets</th>
@@ -231,7 +231,9 @@ export default function AdminStructuresTable({
                           <input type="hidden" name="active" value={String(s.active)} />
                           <button
                             type="submit"
-                            className="text-xs font-medium text-muted underline-offset-2 hover:underline"
+                            className={s.active
+                              ? "rounded-[10px] bg-[#FDECEC] px-3 py-1.5 text-xs font-bold text-[#B42318] hover:bg-[#FADADA]"
+                              : "rounded-[10px] bg-[#DFF3EF] px-3 py-1.5 text-xs font-bold text-[#0B5F54] hover:bg-[#CDEBE4]"}
                           >
                             {s.active ? "Désactiver" : "Réactiver structure"}
                           </button>
@@ -312,6 +314,9 @@ type PlanEdit = {
 export function EditPlanButton({ plan }: { plan: PlanEdit }) {
   const [open, setOpen] = useState(false);
   const [state, action, pending] = useActionState(updatePlan, {});
+  useEffect(() => {
+    if (state?.success) setOpen(false);
+  }, [state]);
 
   return (
     <>
@@ -341,7 +346,7 @@ export function EditPlanButton({ plan }: { plan: PlanEdit }) {
               <input name="max_documents_per_month" type="number" min={1} defaultValue={plan.max_documents_per_month ?? ""} placeholder="Documents / mois" className="input" style={{ height: 38, fontSize: 13 }} />
               <div className="sm:col-span-2 flex flex-wrap gap-4">
                 <label className="flex items-center gap-2 text-xs text-muted"><input type="checkbox" name="is_unlimited" value="true" defaultChecked={plan.is_unlimited} className="accent-accent" /> Utilisateurs illimités</label>
-                <label className="flex items-center gap-2 text-xs text-muted"><input type="checkbox" name="is_public" value="true" defaultChecked={plan.is_public} className="accent-accent" /> Visible à l&apos;inscription</label>
+                <label className="flex items-center gap-2 text-xs text-muted"><input type="checkbox" name="is_public" value="true" defaultChecked={plan.is_public} className="accent-accent" /> Visible publiquement</label>
               </div>
               <div className="sm:col-span-2">
                 <p className="lbl">Fonctionnalités incluses</p>

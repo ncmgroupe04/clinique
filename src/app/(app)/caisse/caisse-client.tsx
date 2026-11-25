@@ -34,6 +34,7 @@ export default function CaisseClient({ initial }: { initial: CaisseData }) {
   const [cancelTarget, setCancelTarget] = useState<DepenseRow | null>(null);
   const [cancelReason, setCancelReason] = useState("");
   const [cancelError, setCancelError] = useState<string | null>(null);
+  const [depenseActionError, setDepenseActionError] = useState<string | null>(null);
 
   const firstRun = useRef(true);
   const reqId = useRef(0);
@@ -114,6 +115,25 @@ export default function CaisseClient({ initial }: { initial: CaisseData }) {
       await load(period, categorie);
     } catch (err) {
       setCancelError(err instanceof Error ? err.message : "Annulation impossible.");
+    } finally {
+      setPending(false);
+    }
+  }
+
+  async function restoreDepense(id: string) {
+    setPending(true);
+    setDepenseActionError(null);
+    try {
+      const res = await fetch("/api/depenses/restore", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ id }),
+      });
+      const json = await res.json().catch(() => ({}));
+      if (!res.ok) throw new Error(json?.error ?? "Rétablissement impossible.");
+      await load(period, categorie);
+    } catch (err) {
+      setDepenseActionError(err instanceof Error ? err.message : "Rétablissement impossible.");
     } finally {
       setPending(false);
     }
@@ -323,6 +343,12 @@ export default function CaisseClient({ initial }: { initial: CaisseData }) {
           </span>
         </div>
 
+        {depenseActionError && (
+          <p className="mb-3 rounded-[10px] bg-[#FDECEC] px-3 py-2 text-sm font-semibold text-[#B42318]">
+            {depenseActionError}
+          </p>
+        )}
+
         {depenses.length === 0 ? (
           <p className="py-3 text-sm text-muted">
             Aucune dépense sur cette période. Utilise « + Nouvelle dépense » pour en ajouter.
@@ -356,9 +382,19 @@ export default function CaisseClient({ initial }: { initial: CaisseData }) {
                         setCancelReason("");
                         setCancelError(null);
                       }}
-                      className="text-xs font-semibold text-danger underline-offset-2 hover:underline"
+                      className="rounded-[10px] bg-[#FDECEC] px-3 py-1.5 text-xs font-bold text-[#B42318] hover:bg-[#FADADA]"
                     >
                       Annuler
+                    </button>
+                  )}
+                  {d.status === "annule" && (
+                    <button
+                      type="button"
+                      disabled={pending}
+                      onClick={() => void restoreDepense(d.id)}
+                      className="rounded-[10px] bg-[#DFF3EF] px-3 py-1.5 text-xs font-bold text-[#0B5F54] hover:bg-[#CDEBE4]"
+                    >
+                      Rétablir
                     </button>
                   )}
                 </div>

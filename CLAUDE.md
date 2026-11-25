@@ -3,7 +3,7 @@
 Lis d'abord `CAHIER-DES-CHARGES.md`. Ce fichier donne les règles de travail permanentes.
 
 ## Contexte
-Application web en ligne pour cliniques, hôpitaux et pharmacies du Sénégal (Touba). Chaque structure (« tenant ») ouvre son compte et gère ses propres tickets de caisse. **Seul le module Ticket est à développer maintenant.** Le module Ordonnancier est reporté : ne pas le coder, mais ne pas bloquer son ajout futur.
+Application web en ligne pour cliniques, hôpitaux et pharmacies du Sénégal (Touba). Chaque structure (« tenant ») ouvre son compte et gère ses propres tickets de caisse. Les modules Ticket et Ordonnancier sont à développer. Le module Ordonnancier est désormais actif : il peut être codé, avec les mêmes règles multi-tenant et RLS que le module Ticket.
 
 ## Stack imposée
 - Next.js (App Router) + TypeScript + Tailwind CSS

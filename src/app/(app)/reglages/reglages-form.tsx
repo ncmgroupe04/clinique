@@ -2,6 +2,7 @@
 
 import { useActionState, useState } from "react";
 import { updateSettings, type SettingsState } from "@/app/actions/settings";
+import LogoUpload from "./logo-upload";
 
 type Defaults = {
   name: string;
@@ -9,6 +10,8 @@ type Defaults = {
   phone: string;
   header_text: string;
   paper_width_mm: number;
+  structureId: string;
+  logo_path: string;
 };
 
 export default function ReglagesForm({
@@ -76,6 +79,8 @@ export default function ReglagesForm({
             className="in"
           />
         </div>
+
+        <LogoUpload structureId={defaults.structureId} initialPath={defaults.logo_path} />
 
         <div>
           <label className="lbl" htmlFor="header_text">

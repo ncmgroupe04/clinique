@@ -17,6 +17,7 @@ export type ReceiptData = {
   remaining: string;
   date: string;
   duplicate: boolean;
+  logoUrl?: string | null;
 };
 
 export type DrawOp =
@@ -28,7 +29,8 @@ export type DrawOp =
     bold: boolean;
     align: "left" | "center" | "right";
   }
-  | { type: "rule"; y: number; dashed: boolean };
+  | { type: "rule"; y: number; dashed: boolean }
+  | { type: "image"; url: string; y: number; height: number };
 
 export type ReceiptLayout = {
   widthDots: number;
@@ -65,6 +67,10 @@ export function buildReceiptLayout(data: ReceiptData, paperWidthMm: number): Rec
     y += 14;
   };
 
+  if (data.logoUrl) {
+    ops.push({ type: "image", url: data.logoUrl, y, height: 60 });
+    y += 66;
+  }
   if (data.structureName) text(data.structureName, 20, true, "center");
   if (data.address) text(data.address, 14, false, "center");
   if (data.phone) text(`Tél. ${data.phone}`, 14, false, "center");

@@ -30,7 +30,7 @@ export default async function TicketDetailPage({
 
   const { data: structure } = await supabase
     .from("structures")
-    .select("name, address, phone, header_text, paper_width_mm, print_format")
+    .select("*")
     .eq("id", ticket.structure_id)
     .maybeSingle();
 
@@ -75,6 +75,13 @@ export default async function TicketDetailPage({
             style={{ maxWidth: "105mm", fontFamily: "Arial, Helvetica, sans-serif", color: "#000", background: "#fff" }}
           >
             <div className="text-center">
+              {structure?.logo_path && (
+                <img
+                  src={supabase.storage.from("structure-logos").getPublicUrl(structure.logo_path).data.publicUrl}
+                  alt="Logo"
+                  style={{ maxHeight: 70, maxWidth: 150, objectFit: "contain", margin: "0 auto 6px" }}
+                />
+              )}
               <p className="font-bold text-lg leading-tight">{structure?.name}</p>
               {(structure?.address || structure?.phone) && (
                 <p className="text-xs leading-tight mt-1">
@@ -110,6 +117,13 @@ export default async function TicketDetailPage({
             style={{ maxWidth: `${zoneWidth}mm`, fontFamily: "Arial, Helvetica, sans-serif" }}
           >
             <div className="text-center mb-2">
+              {structure?.logo_path && (
+                <img
+                  src={supabase.storage.from("structure-logos").getPublicUrl(structure.logo_path).data.publicUrl}
+                  alt="Logo"
+                  style={{ maxHeight: 60, maxWidth: 120, objectFit: "contain", margin: "0 auto 6px" }}
+                />
+              )}
               <p className="font-bold text-lg leading-tight">{structure?.name}</p>
               {structure?.address && (
                 <p className="text-xs leading-tight">{structure.address}</p>
@@ -173,6 +187,7 @@ export default async function TicketDetailPage({
 
         <div className="no-print space-y-2">
           <PrintButton
+            logoUrl={structure?.logo_path ? supabase.storage.from("structure-logos").getPublicUrl(structure.logo_path).data.publicUrl : null}
             ticketId={ticket.id}
             thermal={!isA6}
             paperWidthMm={paperWidth}

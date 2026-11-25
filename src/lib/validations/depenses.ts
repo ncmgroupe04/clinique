@@ -14,9 +14,15 @@ export const createDepenseSchema = z.object({
 
 export const cancelDepenseSchema = z.object({
   id: z.string().uuid("Dépense introuvable."),
+  action: z.literal("cancel").optional(),
   reason: z
     .string()
     .trim()
     .min(3, "Motif requis (au moins 3 caractères).")
     .max(200),
+});
+
+export const restoreDepenseSchema = z.object({
+  id: z.string().uuid("Dépense introuvable."),
+  action: z.literal("restore").optional(),
 });

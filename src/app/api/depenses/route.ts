@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 import { getCurrentUser } from "@/lib/auth";
 import { createClient } from "@/lib/supabase/server";
-import { createDepenseSchema, cancelDepenseSchema } from "@/lib/validations/depenses";
+import { createDepenseSchema, cancelDepenseSchema, restoreDepenseSchema } from "@/lib/validations/depenses";
 
 function forbidden() {
   return NextResponse.json({ error: "Accès refusé." }, { status: 403 });
@@ -58,6 +58,25 @@ export async function PATCH(request: Request) {
   }
 
   const body = await request.json().catch(() => null);
+  if (body && (body as { action?: string }).action === "restore") {
+    const restored = restoreDepenseSchema.safeParse(body);
+    if (!restored.success) {
+      return NextResponse.json({ error: "Données invalides." }, { status: 400 });
+    }
+    const supabase = await createClient();
+    const { data, error } = await supabase
+      .from("depenses")
+      .update({ status: "actif", cancel_reason: null })
+      .eq("id", restored.data.id)
+      .eq("structure_id", user.structureId)
+      .eq("status", "annule")
+      .select("*")
+      .maybeSingle();
+    if (error) return NextResponse.json({ error: error.message }, { status: 400 });
+    if (!data) return NextResponse.json({ error: "Dépense introuvable ou déjà active." }, { status: 404 });
+    return NextResponse.json({ depense: data });
+  }
+
   const parsed = cancelDepenseSchema.safeParse(body);
   if (!parsed.success) {
     return NextResponse.json(

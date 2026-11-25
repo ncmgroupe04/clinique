@@ -80,7 +80,7 @@ export default function InscriptionsClient({ structures }: { structures: Inscrip
 
       <section className="card">
         {visible.length === 0 ? (
-          <p className="text-sm text-muted">Aucune inscription dans cette catégorie.</p>
+          <p className="text-sm text-muted">Aucune demande dans cette catégorie.</p>
         ) : (
           <ul className="divide-y divide-border">
             {visible.map((s) => (
@@ -138,15 +138,15 @@ export default function InscriptionsClient({ structures }: { structures: Inscrip
           onClick={() => setDetail(null)}
         >
           <div className="card w-full max-w-md" onClick={(e) => e.stopPropagation()}>
-            <h3 className="text-lg font-extrabold text-ink">Détail de l&apos;inscription</h3>
+            <h3 className="text-lg font-extrabold text-ink">Détail de la demande</h3>
             <div className="mt-3 space-y-2 text-sm">
               <div className="row"><span>Structure</span><span className="font-bold">{detail.name}</span></div>
               <div className="row"><span>E-mail</span><span className="font-medium">{detail.email || "—"}</span></div>
               <div className="row"><span>Téléphone</span><span className="font-medium">{detail.phone || "—"}</span></div>
               <div className="row"><span>Adresse</span><span className="font-medium">{detail.address || "—"}</span></div>
               <div className="row"><span>Autres informations</span><span className="font-medium">{detail.headerText || "—"}</span></div>
-              <div className="row"><span>Date d&apos;inscription</span><span className="font-medium">{new Date(detail.created_at).toLocaleDateString("fr-FR")}</span></div>
-              <div className="row"><span>Paiement inscription</span><span className={detail.registration_fee_paid ? "text-accent font-bold" : "text-danger font-bold"}>{detail.registration_fee_paid ? "Payé" : "Non payé"}</span></div>
+              <div className="row"><span>Date</span><span className="font-medium">{new Date(detail.created_at).toLocaleDateString("fr-FR")}</span></div>
+              <div className="row"><span>Paiement</span><span className={detail.registration_fee_paid ? "text-accent font-bold" : "text-danger font-bold"}>{detail.registration_fee_paid ? "Payé" : "Non payé"}</span></div>
               <div className="row"><span>Statut</span><span className="font-medium">{detail.active && !detail.suspended ? "Actif" : "Inactif"}</span></div>
               <div className="row"><span>Échéance</span><span className="font-medium">{detail.subscription_ends_at ? new Date(detail.subscription_ends_at).toLocaleDateString("fr-FR") : "—"}</span></div>
             </div>

@@ -82,7 +82,7 @@ export default function PrintAgentCard() {
     setMessage("");
     setBusy(true);
     try {
-      const bitmap = renderReceiptBitmap(SAMPLE_RECEIPT, 80);
+      const bitmap = await renderReceiptBitmap(SAMPLE_RECEIPT, 80);
       const bytes = concatParts(buildEscposParts(bitmap));
       const sent = await sendToPrintAgent(bytes, { printerName: printer || undefined });
       setMessage(

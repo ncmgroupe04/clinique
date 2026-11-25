@@ -38,7 +38,7 @@ export default async function InscriptionsPage() {
     <div className="flex flex-1 flex-col gap-[26px]">
       <ScreenHeader
         title="Inscriptions"
-        subtitle="Validation des nouvelles inscriptions après réception du virement (50 000 F)."
+        subtitle="Validation des nouvelles demandes."
       />
       <InscriptionsClient structures={enriched} />
     </div>
