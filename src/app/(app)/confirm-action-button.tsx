@@ -7,19 +7,23 @@ export default function ConfirmActionButton({
   confirmTitle,
   confirmMessage,
   confirmLabel = "Confirmer",
+  confirmClassName = "btn-danger-solid",
   buttonClassName,
   buttonStyle,
   formAction,
   hiddenInputs = [],
+  children,
 }: {
   label: string;
   confirmTitle: string;
   confirmMessage: string;
   confirmLabel?: string;
+  confirmClassName?: string;
   buttonClassName?: string;
   buttonStyle?: React.CSSProperties;
   formAction: (formData: FormData) => void | Promise<void>;
   hiddenInputs?: { name: string; value: string }[];
+  children?: React.ReactNode;
 }) {
   const [open, setOpen] = useState(false);
   const [pending, startTransition] = useTransition();
@@ -41,7 +45,7 @@ export default function ConfirmActionButton({
         className={buttonClassName}
         style={buttonStyle}
       >
-        {label}
+        {children ?? label}
       </button>
       {open && (
         <div
@@ -64,7 +68,7 @@ export default function ConfirmActionButton({
               <button
                 type="button"
                 disabled={pending}
-                className="btn-danger-solid"
+                className={confirmClassName}
                 style={{ height: 40, padding: "0 18px", borderRadius: 12, fontSize: 13, width: "auto" }}
                 onClick={confirm}
               >

@@ -4,6 +4,7 @@ import { useState } from "react";
 import { useFormStatus } from "react-dom";
 import { validateRegistration, rejectRegistration } from "@/app/actions/admin";
 import Pagination from "../../pagination";
+import ConfirmActionButton from "../../confirm-action-button";
 
 function ActionButton({ label, variant }: { label: string; variant: "primary" | "danger" }) {
   const { pending } = useFormStatus();
@@ -104,10 +105,17 @@ export default function InscriptionsClient({ structures }: { structures: Inscrip
                     </button>
                     {tab === "pending" && (
                       <>
-                        <form action={validateRegistration}>
-                          <input type="hidden" name="id" value={s.id} />
-                          <ActionButton label="Valider le paiement" variant="primary" />
-                        </form>
+                        <ConfirmActionButton
+                          label="Valider le paiement"
+                          confirmTitle="Valider le paiement ?"
+                          confirmMessage={`La structure « ${s.name} » sera activée et pourra utiliser la plateforme.`}
+                          confirmLabel="Confirmer la validation"
+                          confirmClassName="btn-primary"
+                          formAction={validateRegistration}
+                          hiddenInputs={[{ name: "id", value: s.id }]}
+                          buttonClassName="go"
+                          buttonStyle={{ height: 34, padding: "0 14px", borderRadius: 10, fontSize: 12, width: "auto" }}
+                        />
                         <form action={rejectRegistration}>
                           <input type="hidden" name="id" value={s.id} />
                           <ActionButton label="Rejeter" variant="danger" />
