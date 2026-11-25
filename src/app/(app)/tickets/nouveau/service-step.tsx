@@ -46,6 +46,29 @@ export default function ServiceStep({ services }: { services: Service[] }) {
   return (
     <>
       <div className="grid flex-1 content-start gap-4 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5">
+        <button
+          type="button"
+          onClick={() => setSelectedId("__other__")}
+          aria-pressed={other}
+          className={`relative flex h-[150px] flex-col justify-between rounded-3xl border-2 p-5 text-left ${
+            other
+              ? "border-accent bg-accent-light"
+              : "border-dashed border-[#B9C7CF] bg-transparent"
+          }`}
+        >
+          <span className="text-lg font-extrabold leading-tight">Autre service</span>
+          <span className={`text-base font-semibold ${other ? "text-accent-text" : "text-muted"}`}>
+            {other && otherValid ? fcfa(Number(otherPrice)) : "Prix à saisir"}
+          </span>
+          {other && (
+            <span className="absolute right-4 top-4 flex h-7 w-7 items-center justify-center rounded-full bg-accent">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#fff" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+                <path d="M5 12l5 5 9-10" />
+              </svg>
+            </span>
+          )}
+        </button>
+
         {services.map((s, index) => {
           const on = selectedId === s.id;
           const tone = PALETTE[index % PALETTE.length];
@@ -77,35 +100,12 @@ export default function ServiceStep({ services }: { services: Service[] }) {
             </button>
           );
         })}
-
-        <button
-          type="button"
-          onClick={() => setSelectedId("__other__")}
-          aria-pressed={other}
-          className={`relative flex h-[150px] flex-col justify-between rounded-3xl border-2 p-5 text-left ${
-            other
-              ? "border-accent bg-accent-light"
-              : "border-dashed border-[#B9C7CF] bg-transparent"
-          }`}
-        >
-          <span className="text-lg font-extrabold leading-tight">Autre service</span>
-          <span className={`text-base font-semibold ${other ? "text-accent-text" : "text-muted"}`}>
-            {other && otherValid ? fcfa(Number(otherPrice)) : "Prix à saisir"}
-          </span>
-          {other && (
-            <span className="absolute right-4 top-4 flex h-7 w-7 items-center justify-center rounded-full bg-accent">
-              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#fff" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
-                <path d="M5 12l5 5 9-10" />
-              </svg>
-            </span>
-          )}
-        </button>
       </div>
 
-      <div className="card flex flex-wrap items-center justify-between gap-4 px-7 py-[18px]">
+      <div className="card flex flex-wrap items-end gap-4 px-7 py-[18px]">
         {other ? (
-          <div className="flex min-w-0 flex-1 flex-wrap items-end gap-3">
-            <div className="min-w-[200px] flex-[2]">
+          <div className="flex min-w-0 flex-1 items-end gap-3">
+            <div className="min-w-[200px] flex-1">
               <label className="lbl" htmlFor="other-label">
                 Libellé du service
               </label>
@@ -116,7 +116,7 @@ export default function ServiceStep({ services }: { services: Service[] }) {
                 className="in"
               />
             </div>
-            <div style={{ width: 170 }}>
+            <div className="w-[170px] shrink-0">
               <label className="lbl" htmlFor="other-price">
                 Prix (F CFA)
               </label>
@@ -132,7 +132,7 @@ export default function ServiceStep({ services }: { services: Service[] }) {
             </div>
           </div>
         ) : (
-          <div>
+          <div className="flex-1">
             <span className="text-[13px] font-semibold text-muted">Service choisi</span>
             <div className={selected ? "text-xl font-extrabold" : "text-[15px] font-medium text-muted"}>
               {selected ? `${selected.name} · ${fcfa(selected.price)}` : "Aucun service sélectionné"}
@@ -144,9 +144,10 @@ export default function ServiceStep({ services }: { services: Service[] }) {
           type="button"
           onClick={continueToStep2}
           disabled={!canContinue}
-          className="go"
+          className="go shrink-0"
           style={{
             width: "auto",
+            height: 52,
             padding: "0 48px",
             ...(canContinue ? {} : { background: "#C9D6DA", cursor: "not-allowed", opacity: 1 }),
           }}
