@@ -306,9 +306,7 @@ export default function SidebarNav({ role }: { role: Role }) {
               >
                 <Icon name={it.icon} />
                 <span>{it.label}</span>
-                {it.label === "Ordonnances" && (
-                  <span className="ml-auto text-[8px] text-accent font-bold">Bientôt</span>
-                )}
+
               </Link>
             );
           })}
