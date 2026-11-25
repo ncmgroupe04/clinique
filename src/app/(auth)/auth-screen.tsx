@@ -78,19 +78,19 @@ export default function AuthScreen({
         <svg width="100%" height="100%" className="h-full w-full">
           <defs>
             <pattern id="health-cross" width="120" height="120" patternUnits="userSpaceOnUse">
-              <path d="M60 44v32M44 60h32" stroke="#0b7a6b" strokeWidth="3" strokeLinecap="round" opacity="0.16" />
+              <path d="M60 44v32M44 60h32" stroke="#0b7a6b" strokeWidth="3" strokeLinecap="round" opacity="0.34" />
             </pattern>
           </defs>
           <rect width="100%" height="100%" fill="url(#health-cross)" />
-          <path className="health-pulse" pathLength="100" d="M0 140h180l24-46 22 90 26-62 20 20h4000" fill="none" stroke="#0b7a6b" strokeWidth="4" opacity="0.30" />
-          <path className="health-pulse health-pulse-2" pathLength="100" d="M0 800h220l26-54 24 104 28-74 24 26h4000" fill="none" stroke="#0b7a6b" strokeWidth="4" opacity="0.30" />
-          <circle cx="180" cy="180" r="110" fill="#0b7a6b" opacity="0.13" />
-          <circle cx="1500" cy="620" r="150" fill="#0b7a6b" opacity="0.13" />
-          <g opacity="0.26" stroke="#0b7a6b" strokeWidth="4" fill="none">
+          <path className="health-pulse" pathLength="100" d="M0 140h180l24-46 22 90 26-62 20 20h4000" fill="none" stroke="#0b7a6b" strokeWidth="4" opacity="0.55" />
+          <path className="health-pulse health-pulse-2" pathLength="100" d="M0 800h220l26-54 24 104 28-74 24 26h4000" fill="none" stroke="#0b7a6b" strokeWidth="4" opacity="0.55" />
+          <circle cx="180" cy="180" r="110" fill="#0b7a6b" opacity="0.28" />
+          <circle cx="1500" cy="620" r="150" fill="#0b7a6b" opacity="0.28" />
+          <g opacity="0.42" stroke="#0b7a6b" strokeWidth="4" fill="none">
             <rect x="1300" y="120" width="100" height="44" rx="22" transform="rotate(-25 1350 142)" />
             <line x1="1350" y1="120" x2="1350" y2="164" transform="rotate(-25 1350 142)" />
           </g>
-          <g opacity="0.22" stroke="#0b7a6b" strokeWidth="4" fill="none">
+          <g opacity="0.36" stroke="#0b7a6b" strokeWidth="4" fill="none">
             <path d="M120 640v70M85 675h70" />
             <circle cx="120" cy="675" r="44" />
           </g>

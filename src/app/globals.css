@@ -25,8 +25,8 @@ button:disabled { cursor: not-allowed; }
 /* Health motifs animation on auth screen */
 @keyframes health-pulse {
   0% { stroke-dashoffset: 100; opacity: 0; }
-  10% { opacity: 0.35; }
-  90% { opacity: 0.35; }
+  10% { opacity: 0.62; }
+  90% { opacity: 0.62; }
   100% { stroke-dashoffset: -20; opacity: 0; }
 }
 .health-pulse { stroke-dasharray: 100; animation: health-pulse 7s linear infinite; }
