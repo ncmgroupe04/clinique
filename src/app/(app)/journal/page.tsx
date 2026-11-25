@@ -71,6 +71,13 @@ function formatDetails(details: unknown): string {
     .join(" · ");
 }
 
+/** The e-mail lives in auth.users, but audit details often carry it. */
+function detailEmail(details: unknown): string | null {
+  if (!details || typeof details !== "object") return null;
+  const value = (details as Record<string, unknown>).email;
+  return typeof value === "string" && value.includes("@") ? value : null;
+}
+
 export default async function JournalPage({
   searchParams,
 }: {
@@ -103,14 +110,19 @@ export default async function JournalPage({
   const structureIds = [
     ...new Set((logs ?? []).map((l) => l.structure_id).filter(Boolean)),
   ] as string[];
-  const [{ data: profiles }, { data: structures }] = await Promise.all([
+  const [{ data: profiles, error: profilesError }, { data: structures }] = await Promise.all([
     userIds.length
-      ? supabase.from("profiles").select("id, full_name, email, role").in("id", userIds)
-      : Promise.resolve({ data: [] }),
+      // profiles has no email column: the address lives in auth.users and,
+      // for auth actions, in audit_log.details.email.
+      ? supabase.from("profiles").select("id, full_name, role").in("id", userIds)
+      : Promise.resolve({ data: [], error: null }),
     user.role === "platform_admin" && structureIds.length
       ? supabase.from("structures").select("id, name").in("id", structureIds)
-      : Promise.resolve({ data: [] }),
+      : Promise.resolve({ data: [], error: null }),
   ]);
+  if (profilesError) {
+    console.error("[journal] profiles:", profilesError.message);
+  }
   const users = new Map((profiles ?? []).map((p) => [p.id, p]));
   const names = new Map((structures ?? []).map((s) => [s.id, s.name]));
 
@@ -154,7 +166,11 @@ export default async function JournalPage({
                     {new Date(log.created_at).toLocaleString("fr-FR")}
                   </td>
                   <td className="py-3 pr-3">
-                    <span className="font-semibold">{profile?.full_name || profile?.email || (log.user_id ? "Compte supprimé" : "—")}</span>
+                    <span className="font-semibold">
+                      {profile?.full_name ||
+                        detailEmail(log.details) ||
+                        (log.user_id ? (profile ? "Utilisateur" : "Compte supprimé") : "—")}
+                    </span>
                     {profile?.role && <span className="block text-[11px] text-muted">{profile.role}</span>}
                   </td>
                   <td className="py-3 pr-3 font-semibold text-ink">{label(log.action)}</td>

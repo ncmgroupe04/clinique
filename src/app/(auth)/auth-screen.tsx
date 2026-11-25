@@ -82,8 +82,8 @@ export default function AuthScreen({
             </pattern>
           </defs>
           <rect width="100%" height="100%" fill="url(#health-cross)" />
-          <path className="health-pulse" d="M0 140h180l24-46 22 90 26-62 20 20h260" fill="none" stroke="#0b7a6b" strokeWidth="4" opacity="0.30" />
-          <path className="health-pulse health-pulse-2" d="M0 800h220l26-54 24 104 28-74 24 26h260" fill="none" stroke="#0b7a6b" strokeWidth="4" opacity="0.30" />
+          <path className="health-pulse" pathLength="100" d="M0 140h180l24-46 22 90 26-62 20 20h4000" fill="none" stroke="#0b7a6b" strokeWidth="4" opacity="0.30" />
+          <path className="health-pulse health-pulse-2" pathLength="100" d="M0 800h220l26-54 24 104 28-74 24 26h4000" fill="none" stroke="#0b7a6b" strokeWidth="4" opacity="0.30" />
           <circle cx="180" cy="180" r="110" fill="#0b7a6b" opacity="0.13" />
           <circle cx="1500" cy="620" r="150" fill="#0b7a6b" opacity="0.13" />
           <g opacity="0.26" stroke="#0b7a6b" strokeWidth="4" fill="none">
