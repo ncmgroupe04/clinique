@@ -2,10 +2,13 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
+import { useEffect, useRef, useState } from "react";
 
 type Role = "platform_admin" | "structure_admin" | "cashier" | "docteur";
 
-function Icon({ name }: { name: "ticket" | "history" | "tag" | "users" | "settings" | "admin" | "care" | "invoice" | "dashboard" | "ordonnance" | "subscription" | "journal" }) {
+type IconName = "ticket" | "history" | "tag" | "users" | "settings" | "admin" | "care" | "invoice" | "dashboard" | "ordonnance" | "subscription" | "journal" | "wallet";
+
+function Icon({ name }: { name: IconName }) {
   const common = {
     width: 20,
     height: 20,
@@ -104,53 +107,129 @@ function Icon({ name }: { name: "ticket" | "history" | "tag" | "users" | "settin
           <path d="M9 12h6M9 16h6M9 8h3" />
         </svg>
       );
+    case "wallet":
+      return (
+        <svg {...common}>
+          <path d="M3 7a2 2 0 0 1 2-2h13a2 2 0 0 1 2 2v10a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z" />
+          <path d="M16 12h.01M3 9h17" />
+        </svg>
+      );
   }
 }
 
-type Item = { href: string; label: string; icon: "ticket" | "history" | "tag" | "users" | "settings" | "admin" | "care" | "invoice" | "dashboard" | "ordonnance" | "subscription" | "journal"; badge?: string };
+type Item = { href: string; label: string; icon: IconName };
+
+type Group = {
+  key: string;
+  label: string;
+  icon: IconName;
+  items: Item[];
+};
 
 export default function SidebarNav({ role }: { role: Role }) {
   const pathname = usePathname();
   const ticketAccess = role === "structure_admin" || role === "cashier" || role === "platform_admin";
   const adminAccess = role === "structure_admin" || role === "platform_admin";
 
-  const items: Item[] = [];
-  if (role === "platform_admin") {
-    items.push({ href: "/admin", label: "Tableau de bord", icon: "dashboard" });
-    items.push({ href: "/admin/inscriptions", label: "Inscriptions", icon: "users" });
-    items.push({ href: "/admin/formules", label: "Formules", icon: "tag" });
-    items.push({ href: "/admin/structures", label: "Structures", icon: "admin" });
-    items.push({ href: "/journal", label: "Journal", icon: "journal" });
-  } else {
-    items.push({ href: "/tableau", label: "Tableau de bord", icon: "dashboard" });
-    if (ticketAccess) {
-      items.push({ href: "/tickets", label: "Tickets", icon: "ticket" });
-      items.push({ href: "/tickets/historique", label: "Historique", icon: "history" });
-      items.push({ href: "/factures", label: "Factures", icon: "invoice" });
+  const [openGroup, setOpenGroup] = useState<string | null>(null);
+  const [anchor, setAnchor] = useState<{ top: number; left: number } | null>(null);
+  const containerRef = useRef<HTMLElement>(null);
+
+  useEffect(() => {
+    function onClickOutside(e: MouseEvent) {
+      if (containerRef.current && !containerRef.current.contains(e.target as Node)) {
+        setOpenGroup(null);
+      }
     }
+    function onEsc(e: KeyboardEvent) {
+      if (e.key === "Escape") setOpenGroup(null);
+    }
+    document.addEventListener("mousedown", onClickOutside);
+    document.addEventListener("keydown", onEsc);
+    return () => {
+      document.removeEventListener("mousedown", onClickOutside);
+      document.removeEventListener("keydown", onEsc);
+    };
+  }, []);
+
+  const groups: Group[] = [];
+
+  if (role === "platform_admin") {
+    groups.push({
+      key: "admin",
+      label: "Admin",
+      icon: "admin",
+      items: [
+        { href: "/admin", label: "Tableau de bord", icon: "dashboard" },
+        { href: "/admin/inscriptions", label: "Inscriptions", icon: "users" },
+        { href: "/admin/formules", label: "Formules", icon: "tag" },
+        { href: "/admin/structures", label: "Structures", icon: "admin" },
+        { href: "/journal", label: "Journal", icon: "journal" },
+      ],
+    });
+  } else {
+    // Tableau de bord (standalone)
+    groups.push({
+      key: "dashboard",
+      label: "Tableau",
+      icon: "dashboard",
+      items: [{ href: "/tableau", label: "Tableau de bord", icon: "dashboard" }],
+    });
+
+    // Caisse
+    const caisseItems: Item[] = [];
+    if (ticketAccess) {
+      caisseItems.push({ href: "/caisse", label: "Caisse du jour", icon: "wallet" });
+      caisseItems.push({ href: "/tickets", label: "Tickets", icon: "ticket" });
+      caisseItems.push({ href: "/tickets/historique", label: "Historique", icon: "history" });
+      caisseItems.push({ href: "/factures", label: "Factures", icon: "invoice" });
+    }
+    if (caisseItems.length) {
+      groups.push({ key: "caisse", label: "Caisse", icon: "ticket", items: caisseItems });
+    }
+
+    // Clinique
+    const cliniqueItems: Item[] = [];
     if (role === "structure_admin" || role === "docteur") {
-      items.push({ href: "/ordonnances", label: "Ordonnances", icon: "ordonnance", badge: "Bientôt" });
+      cliniqueItems.push({ href: "/ordonnances", label: "Ordonnances", icon: "ordonnance" });
     }
     if (adminAccess) {
-      items.push({ href: "/soins", label: "Soins", icon: "care" });
-      items.push({ href: "/tarifs", label: "Tarifs", icon: "tag" });
-      items.push({ href: "/utilisateurs", label: "Utilisateurs", icon: "users" });
-      items.push({ href: "/reglages", label: "Réglages", icon: "settings" });
-      items.push({ href: "/abonnement", label: "Abonnement", icon: "subscription" });
-      items.push({ href: "/journal", label: "Journal", icon: "journal" });
+      cliniqueItems.push({ href: "/soins", label: "Soins", icon: "care" });
+      cliniqueItems.push({ href: "/tarifs", label: "Tarifs", icon: "tag" });
+    }
+    if (cliniqueItems.length) {
+      groups.push({ key: "clinique", label: "Clinique", icon: "care", items: cliniqueItems });
+    }
+
+    // Administration
+    if (adminAccess) {
+      groups.push({
+        key: "admin",
+        label: "Admin",
+        icon: "settings",
+        items: [
+          { href: "/utilisateurs", label: "Utilisateurs", icon: "users" },
+          { href: "/reglages", label: "Réglages", icon: "settings" },
+          { href: "/abonnement", label: "Abonnement", icon: "subscription" },
+          { href: "/journal", label: "Journal", icon: "journal" },
+        ],
+      });
     }
   }
 
-  const isActive = (href: string) => {
-    if (pathname === href) return true;
-    if (href === "/tickets") {
-      return pathname.startsWith("/tickets/") && pathname !== "/tickets/historique";
-    }
-    return false;
-  };
+  const isGroupActive = (g: Group) =>
+    g.items.some((it) => {
+      if (it.href === "/tickets") {
+        return pathname === "/tickets" || (pathname.startsWith("/tickets/") && pathname !== "/tickets/historique");
+      }
+      return pathname === it.href || pathname.startsWith(it.href + "/");
+    });
 
   return (
-    <aside className="print:hidden sticky top-0 flex h-screen w-[104px] shrink-0 flex-col items-center gap-1.5 overflow-hidden bg-ink pb-3 pt-4">
+    <aside
+      ref={containerRef}
+      className="print:hidden sticky top-0 flex h-screen w-[104px] shrink-0 flex-col items-center gap-1.5 overflow-hidden bg-ink pb-3 pt-4"
+    >
       {ticketAccess && role !== "platform_admin" && (
         <>
           <Link
@@ -167,18 +246,84 @@ export default function SidebarNav({ role }: { role: Role }) {
       )}
 
       <nav className="flex flex-col items-center gap-1">
-        {items.map((item) => (
-          <Link
-            key={item.href}
-            href={item.href}
-            aria-current={isActive(item.href) ? "page" : undefined}
-            className={`nv ${isActive(item.href) ? "on" : ""}`}
-          >
-            <Icon name={item.icon} />
-            {item.label}
-            {item.badge && <span className="text-[8px] text-accent font-bold">{item.badge}</span>}
-          </Link>
-        ))}
+        {groups.map((g) => {
+          const active = isGroupActive(g);
+          const isOpen = openGroup === g.key;
+          const single = g.items.length === 1;
+          return (
+            <div key={g.key} className="relative">
+              {single ? (
+                <Link
+                  href={g.items[0].href}
+                  aria-current={active ? "page" : undefined}
+                  className={`nv ${active ? "on" : ""}`}
+                >
+                  <Icon name={g.items[0].icon} />
+                  {g.items[0].label}
+                </Link>
+              ) : (
+                <>
+                  <button
+                    type="button"
+                    onClick={(e) => {
+                      if (isOpen) {
+                        setOpenGroup(null);
+                        setAnchor(null);
+                        return;
+                      }
+                      const r = e.currentTarget.getBoundingClientRect();
+                      const estimatedHeight = g.items.length * 44 + 12;
+                      const top = Math.min(r.top, Math.max(8, window.innerHeight - estimatedHeight - 8));
+                      const left = Math.min(r.right + 6, Math.max(8, window.innerWidth - 196));
+                      setAnchor({ top, left });
+                      setOpenGroup(g.key);
+                    }}
+                    aria-expanded={isOpen}
+                    aria-haspopup="menu"
+                    className={`nv ${active || isOpen ? "on" : ""}`}
+                  >
+                    <Icon name={g.icon} />
+                    {g.label}
+                  </button>
+                  {isOpen && anchor && (
+                    <div
+                      role="menu"
+                      style={{ position: "fixed", top: anchor.top, left: anchor.left }}
+                      className="z-50 max-h-[80vh] min-w-[180px] overflow-y-auto rounded-[12px] bg-white py-1 shadow-xl ring-1 ring-black/5"
+                    >
+                      {g.items.map((it) => {
+                        const itActive =
+                          it.href === "/tickets"
+                            ? pathname === "/tickets" || (pathname.startsWith("/tickets/") && pathname !== "/tickets/historique")
+                            : pathname === it.href || pathname.startsWith(it.href + "/");
+                        return (
+                          <Link
+                            key={it.href}
+                            href={it.href}
+                            role="menuitem"
+                            onClick={() => {
+                              setOpenGroup(null);
+                              setAnchor(null);
+                            }}
+                            className={`flex items-center gap-3 px-4 py-2.5 text-[13px] font-medium transition-colors ${
+                              itActive ? "bg-accent/10 text-accent" : "text-ink hover:bg-ink/5"
+                            }`}
+                          >
+                            <Icon name={it.icon} />
+                            <span>{it.label}</span>
+                            {it.label === "Ordonnances" && (
+                              <span className="ml-auto text-[8px] text-accent font-bold">Bientôt</span>
+                            )}
+                          </Link>
+                        );
+                      })}
+                    </div>
+                  )}
+                </>
+              )}
+            </div>
+          );
+        })}
       </nav>
     </aside>
   );

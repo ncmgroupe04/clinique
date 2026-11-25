@@ -19,7 +19,7 @@ const BOOTSTRAP = `
   grant execute on function auth.uid() to anon, authenticated;
 `;
 
-export async function createDb(): Promise<Db> {
+export async function createDb(extraMigrations: string[] = []): Promise<Db> {
   const db = new PGlite();
   await db.exec(BOOTSTRAP);
   const sql = readFileSync(
@@ -27,6 +27,13 @@ export async function createDb(): Promise<Db> {
     "utf8",
   );
   await db.exec(sql);
+  for (const file of extraMigrations) {
+    const extra = readFileSync(
+      join(process.cwd(), "supabase", "migrations", file),
+      "utf8",
+    );
+    await db.exec(extra);
+  }
   return db;
 }
 
