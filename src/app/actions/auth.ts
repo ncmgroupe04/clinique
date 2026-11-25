@@ -87,7 +87,9 @@ export async function signup(
         active: true,
         registration_fee_paid: false,
         subscription_ends_at: trialEnds.toISOString(),
-        plan_id: planId || null,
+        // Essai gratuit : toutes les fonctionnalités sont débloquées (pas de plan
+        // limitant, pas de quota) pendant les 7 jours d'essai.
+        plan_id: null,
       })
       .select("id")
       .single();
