@@ -1,6 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useRef, useState } from "react";
+import EncaisserButton from "../encaisser-button";
 import {
   CAISSE_PERIODS,
   DEPENSE_CATEGORIES,
@@ -152,6 +153,39 @@ export default function CaisseClient({ initial }: { initial: CaisseData }) {
           <p className="mt-1 text-[11px] text-muted">Filtre des totaux</p>
         </div>
       </div>
+
+      {/* Restes à recouvrer */}
+      {data.outstanding.length > 0 && (
+        <section className="card" id="restes">
+          <div className="mb-3 flex flex-wrap items-center justify-between gap-3">
+            <h2 className="text-lg font-extrabold">Restes à recouvrer</h2>
+            <span className="text-[13px] font-semibold text-muted">
+              {data.outstanding.length} document(s) · {formatCfa(data.outstandingTotal)}
+            </span>
+          </div>
+          <div className="divide-y divide-border">
+            {data.outstanding.map((d) => (
+              <div key={`${d.type}-${d.id}`} className="flex flex-wrap items-center justify-between gap-3 py-3">
+                <div className="min-w-0">
+                  <p className="font-bold text-ink">
+                    {d.reference} · {d.patient_name}
+                  </p>
+                  <p className="text-xs text-muted">
+                    Total {formatCfa(d.total)} · Encaissé {formatCfa(d.advance)} · Reste{" "}
+                    <b className="text-danger">{formatCfa(d.remaining)}</b>
+                  </p>
+                </div>
+                <EncaisserButton
+                  documentType={d.type === "ticket" ? "ticket" : "facture"}
+                  documentId={d.id}
+                  remaining={d.remaining}
+                  onSuccess={() => load(period, categorie)}
+                />
+              </div>
+            ))}
+          </div>
+        </section>
+      )}
 
       {/* Filtres */}
       <div className="flex flex-wrap items-center gap-2">

@@ -5,6 +5,7 @@ import { createClient } from "@/lib/supabase/server";
 import { formatCfa, formatDateTime } from "@/lib/format";
 import PrintButton from "./print-button";
 import Link from "next/link";
+import EncaisserButton from "@/app/(app)/encaisser-button";
 import CancelInvoiceButton from "./cancel-button";
 
 export default async function FactureDetailPage({ params }: { params: Promise<{ id: string }> }) {
@@ -106,6 +107,11 @@ export default async function FactureDetailPage({ params }: { params: Promise<{ 
       <div className="no-print space-y-2">
         <PrintButton invoiceId={invoice.id} />
         {invoice.status === "actif" && <CancelInvoiceButton invoiceId={invoice.id} />}
+        {invoice.status === "actif" && invoice.remaining > 0 && (
+          <div className="flex justify-start">
+            <EncaisserButton documentType="facture" documentId={invoice.id} remaining={invoice.remaining} />
+          </div>
+        )}
         <p className="text-xs text-[#4B5F6B] text-center">
           {invoice.status === "annule" ? "Facture annulée" : "Papier : A4"}
         </p>

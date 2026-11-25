@@ -1,3 +1,5 @@
+import type { OutstandingDocument } from "@/lib/payments";
+
 export const DEPENSE_CATEGORIES = [
   "Fournitures",
   "Loyer",
@@ -45,6 +47,8 @@ export type CaisseSummary = {
 export type CaisseData = {
   summary: CaisseSummary;
   depenses: DepenseRow[];
+  outstanding: OutstandingDocument[];
+  outstandingTotal: number;
   period: CaissePeriod;
   categorie: string | null;
 };

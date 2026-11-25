@@ -5,6 +5,7 @@ import { createClient } from "@/lib/supabase/server";
 import { formatCfa, formatReceipt, formatDateTime } from "@/lib/format";
 import PrintButton from "./print-button";
 import Link from "next/link";
+import EncaisserButton from "@/app/(app)/encaisser-button";
 
 export default async function TicketDetailPage({
   params,
@@ -200,6 +201,11 @@ export default async function TicketDetailPage({
             <p className="text-xs text-[#4B5F6B] text-center">
               Papier : {paperWidth} mm (zone imprimable {zoneWidth} mm)
             </p>
+          )}
+          {ticket.status === "actif" && ticket.remaining > 0 && (
+            <div className="flex justify-center pt-2">
+              <EncaisserButton documentType="ticket" documentId={ticket.id} remaining={ticket.remaining} />
+            </div>
           )}
         </div>
       </div>
