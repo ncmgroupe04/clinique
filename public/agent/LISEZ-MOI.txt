@@ -1,0 +1,76 @@
+AGENT D'IMPRESSION LOCAL - INSTALLATION
+=======================================
+
+Pourquoi cet agent ?
+--------------------
+L'impression par le navigateur depend du pilote installe sur le PC. Quand
+Windows a installe un pilote d'etiquettes (TSPL / ZPL / 4BARCODE) sur une
+imprimante thermique ESC/POS, les tickets sortent en caracteres bizarres.
+
+Cet agent envoie les octets ESC/POS directement a la file d'impression
+Windows en mode RAW. Le pilote n'est plus utilise : le rendu est identique
+quel que soit le modele d'imprimante.
+
+Prerequis
+---------
+- Windows 10 ou 11
+- Aucune installation, aucun droit administrateur
+- L'imprimante thermique doit deja etre installee dans Windows
+  (Parametres > Bluetooth et appareils > Imprimantes et scanners)
+
+Demarrage
+---------
+1. Copiez le dossier "agent" ou vous voulez sur le PC (par exemple
+   C:\Clinique\agent).
+2. Double-cliquez sur "start-print-agent.cmd".
+3. Laissez la fenetre noire ouverte : elle represente l'agent.
+   Pour un demarrage automatique, placez un raccourci de ce fichier dans
+   le dossier Demarrage de Windows (shell:startup).
+
+Au premier lancement, un fichier "agent-config.json" est cree :
+
+{
+  "port": 9100,
+  "origins": [
+    "http://localhost:3000",
+    "http://127.0.0.1:3000",
+    "https://ticketordonnance.vercel.app"
+  ],
+  "printer": ""
+}
+
+- port    : port local de l'agent (9100 par defaut)
+- origins : adresses de l'application autorisees a imprimer.
+            En production, gardez "https://ticketordonnance.vercel.app".
+            Ajoutez votre domaine si vous en utilisez un personnalise.
+- printer : nom exact de la file d'impression a utiliser.
+            Vide = imprimante par defaut de Windows.
+
+Verification
+------------
+Ouvrez dans le navigateur : http://127.0.0.1:9100/health
+
+Vous devez voir un JSON avec la liste des imprimantes installees.
+
+Dans l'application, la page "Aide a l'impression" affiche si l'agent est
+detecte, et propose un ticket de test imprime directement.
+
+Securite
+--------
+- L'agent n'ecoute que sur 127.0.0.1 : il n'est pas accessible depuis le
+  reseau local ni depuis Internet.
+- Seules les origines listees dans "origins" peuvent lui envoyer des
+  impressions (controle de l'en-tete Origin par le navigateur).
+- Taille maximale d'un ticket : 2 Mo.
+- Aucun nom de fichier n'est transmis : les octets sont imprimes en
+  memoire.
+
+Depannage
+---------
+- "Aucun port serie disponible" n'a plus d'importance : l'agent ne passe
+  pas par un port serie.
+- Si l'agent n'est pas detecte dans l'application : verifiez que la
+  fenetre noire est ouverte et que le port 9100 n'est pas utilise par un
+  autre logiciel.
+- Si le ticket est vide ou illisible : verifiez que "printer" designe bien
+  la file de l'imprimante thermique (et non une imprimante laser).

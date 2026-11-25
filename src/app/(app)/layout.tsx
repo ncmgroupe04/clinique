@@ -38,7 +38,7 @@ export default async function AppLayout({
   }
 
   return (
-    <div className="flex min-h-screen bg-bg">
+    <div className="flex min-h-screen bg-bg print:min-h-0 print:bg-white">
       <SidebarNav role={user.role} />
       <div className="flex min-w-0 flex-1 flex-col">
         <header className="print:hidden flex items-center justify-end gap-3 px-6 py-3 lg:px-10 lg:py-4">
@@ -54,7 +54,7 @@ export default async function AppLayout({
           </Link>
           <LogoutButton />
         </header>
-        <main className="flex min-w-0 flex-1 flex-col px-6 pb-6 lg:px-10 lg:pb-9">
+        <main className="flex min-w-0 flex-1 flex-col px-6 pb-6 lg:px-10 lg:pb-9 print:p-0">
           {renewalAlert && (
             <div className="mb-5 flex items-center gap-3 rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-danger">
               <span className="text-lg">⚠</span>

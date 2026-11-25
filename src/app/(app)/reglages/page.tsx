@@ -1,3 +1,4 @@
+import Link from "next/link";
 import { redirect } from "next/navigation";
 import { connection } from "next/server";
 import { requireUser } from "@/lib/auth";
@@ -31,7 +32,14 @@ export default async function ReglagesPage() {
       <ScreenHeader
         title="Réglages · En-tête"
         subtitle="À configurer en premier : l’en-tête s’imprime sur chaque ordonnance et chaque ticket."
-      />
+      >
+        <Link
+          href="/aide-impression"
+          className="inline-flex items-center gap-2 rounded-full border border-border bg-white px-4 py-2.5 text-sm font-semibold text-accent"
+        >
+          Aide à l&apos;impression
+        </Link>
+      </ScreenHeader>
       <ReglagesForm
         defaults={{
           name: structure.name ?? "",

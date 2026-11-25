@@ -171,7 +171,26 @@ export default async function TicketDetailPage({
         )}
 
         <div className="no-print space-y-2">
-          <PrintButton ticketId={ticket.id} />
+          <PrintButton
+            ticketId={ticket.id}
+            thermal={!isA6}
+            paperWidthMm={paperWidth}
+            receipt={{
+              structureName: structure?.name ?? null,
+              address: structure?.address ?? null,
+              phone: structure?.phone ?? null,
+              headerText: structure?.header_text ?? null,
+              receipt: formatReceipt(ticket.year, ticket.number),
+              patientName: ticket.patient_name,
+              serviceName: ticket.service_name,
+              quantity: ticket.quantity,
+              total: formatCfa(ticket.total),
+              advance: formatCfa(ticket.advance),
+              remaining: formatCfa(ticket.remaining),
+              date: formatDateTime(ticket.created_at),
+              duplicate: ticket.print_count > 0,
+            }}
+          />
           {isA6 && (
             <p className="text-xs text-[#4B5F6B] text-center">
               Papier normal A6 · 105 × 148 mm
