@@ -1,3 +1,4 @@
+import Link from "next/link";
 import { redirect } from "next/navigation";
 import { connection } from "next/server";
 import { requireUser } from "@/lib/auth";
@@ -62,6 +63,22 @@ export default async function TableauPage() {
         title="Tableau de bord"
         subtitle={`Connecté en tant que ${user.role}.`}
       />
+
+      {/* Accès rapide */}
+      <div className="card">
+        <p className="text-[13px] font-semibold text-muted">Accès rapide</p>
+        <div className="mt-3 grid grid-cols-1 gap-3 sm:grid-cols-3">
+          <Link href="/tickets/nouveau" className="go" style={{ height: 48, fontSize: 14, borderRadius: 14 }}>
+            Nouveau Ticket
+          </Link>
+          <Link href="/factures/nouvelle" className="go" style={{ height: 48, fontSize: 14, borderRadius: 14 }}>
+            Nouvelle Facture
+          </Link>
+          <Link href="/ordonnances" className="go" style={{ height: 48, fontSize: 14, borderRadius: 14 }}>
+            Nouvelle Ordonnance
+          </Link>
+        </div>
+      </div>
 
       {/* KPIs */}
       <div className="card grid grid-cols-2 gap-4 lg:grid-cols-4">
