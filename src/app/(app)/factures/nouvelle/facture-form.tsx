@@ -8,11 +8,19 @@ type Care = { id: string; name: string; price: number; unit: string; category: s
 type Category = { name: string; slug: string; active: boolean };
 type Line = { careId: string; name: string; price: string; qty: number; unit: string };
 
+const DEFAULT_CATEGORIES: Category[] = [
+  { name: "Diagnostic", slug: "diagnostic", active: true },
+  { name: "Intervention", slug: "intervention", active: true },
+  { name: "Produit", slug: "produit", active: true },
+  { name: "Dentiste", slug: "dentiste", active: true },
+];
+
 function fcfa(v: number): string {
   return `${v.toLocaleString("fr-FR")} F CFA`;
 }
 
 export default function FactureForm({ cares, categories }: { cares: Care[]; categories: Category[] }) {
+  const effectiveCategories = categories.length ? categories : DEFAULT_CATEGORIES;
   const router = useRouter();
   const [state, action, pending] = useActionState<InvoiceState, FormData>(createInvoice, undefined);
   const [lines, setLines] = useState<Line[]>([]);
@@ -95,7 +103,7 @@ export default function FactureForm({ cares, categories }: { cares: Care[]; cate
             <p className="text-sm text-muted">Aucun soin actif dans le catalogue.</p>
           ) : (
             <div className="grid grid-cols-1 gap-3 md:grid-cols-3">
-              {categories.filter((c) => c.active).map((group) => {
+              {effectiveCategories.filter((c) => c.active).map((group) => {
                 const items = cares.filter((c) => (c.category ?? "intervention") === group.slug);
                 return (
                   <div key={group.slug} className="rounded-[18px] border border-border bg-white p-4">

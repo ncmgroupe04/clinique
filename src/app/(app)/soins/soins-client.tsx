@@ -17,6 +17,15 @@ type Category = { id: string; name: string; slug: string; active: boolean };
 const categoryLabel = (categories: Category[], slug: string) =>
   categories.find((c) => c.slug === slug)?.name ?? slug;
 
+// Valeurs par défaut si la table des catégories n'est pas encore disponible :
+// le sélecteur de catégorie d'un soin ne doit jamais être vide.
+const DEFAULT_CATEGORIES: Category[] = [
+  { id: "default-diagnostic", name: "Diagnostic", slug: "diagnostic", active: true },
+  { id: "default-intervention", name: "Intervention", slug: "intervention", active: true },
+  { id: "default-produit", name: "Produit", slug: "produit", active: true },
+  { id: "default-dentiste", name: "Dentiste", slug: "dentiste", active: true },
+];
+
 function fcfa(value: number): string {
   return `${value.toLocaleString("fr-FR")} F`;
 }
@@ -30,7 +39,8 @@ export default function SoinsClient({ cares, categories }: { cares: Care[]; cate
   const [editState, editAction, editPending] = useActionState<CareState, FormData>(updateCare, undefined);
   const [catCreateState, catCreateAction, catCreatePending] = useActionState<CategoryState, FormData>(createCareCategory, undefined);
   const [catEditState, catEditAction, catEditPending] = useActionState<CategoryState, FormData>(updateCareCategory, undefined);
-  const activeCategories = categories.filter((c) => c.active);
+  const effectiveCategories = categories.length ? categories : DEFAULT_CATEGORIES;
+  const activeCategories = effectiveCategories.filter((c) => c.active);
   useEffect(() => {
     // eslint-disable-next-line react-hooks/set-state-in-effect
     if (editState?.success) setEditingId(null);
@@ -86,7 +96,7 @@ export default function SoinsClient({ cares, categories }: { cares: Care[]; cate
                         <label className="lbl" htmlFor={`category-${c.id}`}>Catégorie</label>
                         <select id={`category-${c.id}`} name="category" className="input" defaultValue={c.category ?? "intervention"}>
                           {!activeCategories.some((cat) => cat.slug === c.category) ? (
-                            <option value={c.category}>{categoryLabel(categories, c.category)}</option>
+                            <option value={c.category}>{categoryLabel(effectiveCategories, c.category)}</option>
                           ) : null}
                           {activeCategories.map((cat) => (
                             <option key={cat.id} value={cat.slug}>{cat.name}</option>
@@ -110,7 +120,7 @@ export default function SoinsClient({ cares, categories }: { cares: Care[]; cate
                       {c.name}
                       {c.category && (
                         <span className="ml-2 rounded-md bg-accent-light px-1.5 py-0.5 text-[10px] font-bold text-accent-text">
-                          {categoryLabel(categories, c.category)}
+                          {categoryLabel(effectiveCategories, c.category)}
                         </span>
                       )}
                       {c.unit && c.unit !== "unité" && <span className="ml-2 text-xs font-medium text-muted">({c.unit})</span>}
@@ -183,6 +193,11 @@ export default function SoinsClient({ cares, categories }: { cares: Care[]; cate
           <div>
             <h2 className="text-lg font-extrabold">Catégories</h2>
             <p className="mt-0.5 text-xs text-muted">Liste personnalisable de votre structure, utilisée pour classer les soins.</p>
+            {categories.length === 0 && (
+              <p className="mt-1 text-xs text-danger">
+                Catégories par défaut provisoires : la liste personnalisable sera disponible après application de la migration de la base.
+              </p>
+            )}
           </div>
           <button
             type="button"
