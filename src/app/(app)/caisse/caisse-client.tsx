@@ -68,11 +68,14 @@ export default function CaisseClient({ initial }: { initial: CaisseData }) {
       firstRun.current = false;
       return;
     }
-    if (fromDate || toDate) {
-      void load(period, categorie, fromDate || toDate, toDate || fromDate);
-    } else {
-      void load(period, categorie);
-    }
+    // Différer d'un microtask pour éviter les setState synchrones dans l'effet.
+    void Promise.resolve().then(() => {
+      if (fromDate || toDate) {
+        void load(period, categorie, fromDate || toDate, toDate || fromDate);
+      } else {
+        void load(period, categorie);
+      }
+    });
   }, [period, categorie, fromDate, toDate, load]);
 
   function reload() {
