@@ -16,7 +16,7 @@ export default async function SoinsPage() {
   const supabase = await createClient();
   const { data: cares } = await supabase
     .from("cares")
-    .select("id, name, price, active, unit, category")
+    .select("id, name, price, active, unit, category, cotation")
     .eq("structure_id", user.structureId)
     .order("created_at", { ascending: true });
 

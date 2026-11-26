@@ -4,9 +4,9 @@ import { useActionState, useState } from "react";
 import { createInvoice, type InvoiceState } from "@/app/actions/invoices";
 import { useRouter } from "next/navigation";
 
-type Care = { id: string; name: string; price: number; unit: string; category: string };
+type Care = { id: string; name: string; price: number; unit: string; category: string; cotation?: string | null };
 type Category = { name: string; slug: string; active: boolean };
-type Line = { careId: string; name: string; price: string; qty: number; unit: string };
+type Line = { careId: string; name: string; price: string; qty: number; unit: string; cotation: string };
 
 const DEFAULT_CATEGORIES: Category[] = [
   { name: "Diagnostic", slug: "diagnostic", active: true },
@@ -54,7 +54,7 @@ export default function FactureForm({ cares, categories }: { cares: Care[]; cate
         if (existing >= 0) {
           next[existing] = { ...next[existing], qty: next[existing].qty + qty, price };
         } else {
-          next.push({ careId: care.id, name: care.name, price, qty, unit: care.unit ?? "unité" });
+          next.push({ careId: care.id, name: care.name, price, qty, unit: care.unit ?? "unité", cotation: care.cotation ?? "" });
         }
       }
       return next;
@@ -69,6 +69,8 @@ export default function FactureForm({ cares, categories }: { cares: Care[]; cate
     setLines((prev) => prev.map((l) => (l.careId === careId ? { ...l, qty: Math.max(1, value) } : l)));
   const setPriceLine = (careId: string, value: string) =>
     setLines((prev) => prev.map((l) => (l.careId === careId ? { ...l, price: value.replace(/[^0-9]/g, "") } : l)));
+  const setCotationLine = (careId: string, value: string) =>
+    setLines((prev) => prev.map((l) => (l.careId === careId ? { ...l, cotation: value } : l)));
 
   const discountValue = Number(discount) || 0;
   const advanceValue = Number(advance) || 0;
@@ -77,7 +79,7 @@ export default function FactureForm({ cares, categories }: { cares: Care[]; cate
   const reste = Math.max(0, total - advanceValue);
 
   const itemsJson = JSON.stringify(
-    lines.map((l) => ({ care_name: l.name, quantity: l.qty, unit_price: Number(l.price) || 0 })),
+    lines.map((l) => ({ care_id: l.careId, care_name: l.name, quantity: l.qty, unit_price: Number(l.price) || 0, cotation: l.cotation })),
   );
 
   return (
@@ -166,6 +168,7 @@ export default function FactureForm({ cares, categories }: { cares: Care[]; cate
             <thead>
               <tr className="border-b border-border text-left text-xs font-bold uppercase tracking-wide text-muted">
                 <th className="py-2">Nom du soin</th>
+                <th className="py-2 text-center">Indice</th>
                 <th className="py-2 text-center">Quantité</th>
                 <th className="py-2 text-right">Prix unitaire</th>
                 <th className="py-2 text-right">Total</th>
@@ -174,11 +177,23 @@ export default function FactureForm({ cares, categories }: { cares: Care[]; cate
             </thead>
             <tbody>
               {lines.length === 0 ? (
-                <tr><td colSpan={5} className="py-3 text-sm text-muted">Aucun soin ajouté.</td></tr>
+                <tr><td colSpan={6} className="py-3 text-sm text-muted">Aucun soin ajouté.</td></tr>
               ) : (
                 lines.map((l) => (
                   <tr key={l.careId} className="border-b border-border">
                     <td className="py-2 font-semibold">{l.name}</td>
+                    <td className="py-2 text-center">
+                      <input
+                        type="text"
+                        aria-label={`Indice ${l.name}`}
+                        value={l.cotation}
+                        onChange={(e) => setCotationLine(l.careId, e.target.value)}
+                        maxLength={50}
+                        placeholder="—"
+                        className="input text-center"
+                        style={{ width: 84, height: 38, padding: "0 8px" }}
+                      />
+                    </td>
                     <td className="py-2">
                       <div className="flex items-center justify-center gap-1">
                         <button type="button" onClick={() => setQtyLine(l.careId, l.qty - 1)} className="x" style={{ width: 28, height: 28, fontSize: 14 }}>−</button>

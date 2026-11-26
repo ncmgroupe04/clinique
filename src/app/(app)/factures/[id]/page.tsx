@@ -45,6 +45,8 @@ export default async function FactureDetailPage({ params }: { params: Promise<{ 
   const tpl = {
     title: "Facture",
     number_prefix: "",
+    show_date: true,
+    show_indice: true,
     show_quantity: true,
     show_unit_price: true,
     show_discount: true,
@@ -54,6 +56,8 @@ export default async function FactureDetailPage({ params }: { params: Promise<{ 
   } as {
     title: string;
     number_prefix: string;
+    show_date: boolean;
+    show_indice: boolean;
     show_quantity: boolean;
     show_unit_price: boolean;
     show_discount: boolean;
@@ -106,6 +110,8 @@ export default async function FactureDetailPage({ params }: { params: Promise<{ 
           <thead>
             <tr className="border-b border-gray-400">
               <th className="text-left py-1">Soin</th>
+              {tpl.show_date && <th className="text-center py-1">Date</th>}
+              {tpl.show_indice && <th className="text-center py-1">Indice</th>}
               {tpl.show_quantity && <th className="text-right py-1">Qté</th>}
               {tpl.show_unit_price && <th className="text-right py-1">Prix unit.</th>}
               <th className="text-right py-1">Total</th>
@@ -115,6 +121,8 @@ export default async function FactureDetailPage({ params }: { params: Promise<{ 
             {(items ?? []).map((it) => (
               <tr key={it.id} className="border-b border-gray-200">
                 <td className="py-1">{it.care_name}</td>
+                {tpl.show_date && <td className="text-center py-1">{new Date(invoice.created_at).toLocaleDateString("fr-FR")}</td>}
+                {tpl.show_indice && <td className="text-center py-1 font-semibold">{it.cotation || "—"}</td>}
                 {tpl.show_quantity && <td className="text-right py-1">{it.quantity}</td>}
                 {tpl.show_unit_price && <td className="text-right py-1">{formatCfa(it.unit_price)}</td>}
                 <td className="text-right py-1">{formatCfa(it.line_total)}</td>

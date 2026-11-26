@@ -6,6 +6,8 @@ import { createClient } from "@/lib/supabase/server";
 const invoiceSettingsSchema = z.object({
   title: z.string().trim().max(80).default("Facture"),
   number_prefix: z.string().trim().max(20).default(""),
+  show_date: z.boolean().default(true),
+  show_indice: z.boolean().default(true),
   show_quantity: z.boolean().default(true),
   show_unit_price: z.boolean().default(true),
   show_discount: z.boolean().default(true),

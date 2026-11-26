@@ -7,6 +7,8 @@ type Kind = "ticket" | "facture" | "ordonnance";
 type InvoiceSettings = {
   title: string;
   number_prefix: string;
+  show_date: boolean;
+  show_indice: boolean;
   show_quantity: boolean;
   show_unit_price: boolean;
   show_discount: boolean;
@@ -42,6 +44,8 @@ const DEFAULT_TEMPLATES: Record<Kind, { header_text: string; footer_text: string
 const DEFAULT_INVOICE_SETTINGS: InvoiceSettings = {
   title: "Facture",
   number_prefix: "",
+  show_date: true,
+  show_indice: true,
   show_quantity: true,
   show_unit_price: true,
   show_discount: true,
@@ -212,6 +216,8 @@ export default function ImpressionClient({
               </div>
               <div className="mt-3 grid gap-2 sm:grid-cols-2">
                 {([
+                  ["show_date", "Colonne Date"],
+                  ["show_indice", "Colonne Indice / Cotation"],
                   ["show_quantity", "Colonne Quantité"],
                   ["show_unit_price", "Colonne Prix unitaire"],
                   ["show_discount", "Ligne Remise"],

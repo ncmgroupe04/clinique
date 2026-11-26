@@ -11,7 +11,7 @@ import {
 } from "@/app/actions/care-categories";
 import ConfirmActionButton from "../confirm-action-button";
 
-type Care = { id: string; name: string; price: number; active: boolean; unit: string; category: string };
+type Care = { id: string; name: string; price: number; active: boolean; unit: string; category: string; cotation?: string | null };
 type Category = { id: string; name: string; slug: string; active: boolean };
 
 const categoryLabel = (categories: Category[], slug: string) =>
@@ -103,6 +103,10 @@ export default function SoinsClient({ cares, categories }: { cares: Care[]; cate
                           ))}
                         </select>
                       </div>
+                      <div style={{ width: 120 }}>
+                        <label className="lbl" htmlFor={`cotation-${c.id}`}>Cotation</label>
+                        <input id={`cotation-${c.id}`} name="cotation" defaultValue={c.cotation ?? ""} maxLength={50} placeholder="Ex. D5" className="input" />
+                      </div>
                       <button type="submit" disabled={editPending} className="go" style={{ height: 52, width: "auto", padding: "0 24px", borderRadius: 14, fontSize: 15 }}>
                         {editPending ? "…" : "Enregistrer"}
                       </button>
@@ -123,6 +127,7 @@ export default function SoinsClient({ cares, categories }: { cares: Care[]; cate
                           {categoryLabel(effectiveCategories, c.category)}
                         </span>
                       )}
+                      {c.cotation && <span className="ml-2 rounded-md bg-[#DFF3EF] px-1.5 py-0.5 text-[10px] font-bold text-[#0B5F54]">{c.cotation}</span>}
                       {c.unit && c.unit !== "unité" && <span className="ml-2 text-xs font-medium text-muted">({c.unit})</span>}
                     </div>
                     <b className="text-lg">{fcfa(c.price)}</b>
@@ -177,6 +182,10 @@ export default function SoinsClient({ cares, categories }: { cares: Care[]; cate
                 <option key={cat.id} value={cat.slug}>{cat.name}</option>
               ))}
             </select>
+          </div>
+          <div style={{ flex: 0.6 }}>
+            <label className="lbl" htmlFor="care-cotation">Cotation</label>
+            <input id="care-cotation" name="cotation" maxLength={50} placeholder="Ex. D5" className="input" />
           </div>
           <button type="submit" disabled={createPending} className="go" style={{ height: 52, width: "auto", padding: "0 24px", borderRadius: 14, fontSize: 15 }}>
             {createPending ? "Ajout…" : "Enregistrer"}
