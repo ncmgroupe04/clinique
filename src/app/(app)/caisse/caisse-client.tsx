@@ -265,7 +265,7 @@ export default function CaisseClient({ initial }: { initial: CaisseData }) {
           value={fromDate}
           onChange={(e) => setFromDate(e.target.value)}
           className="in"
-          style={{ height: 44, width: 180 }}
+          style={{ height: 44, width: 220 }}
           aria-label="Date de début"
           title="Du"
         />
@@ -274,7 +274,7 @@ export default function CaisseClient({ initial }: { initial: CaisseData }) {
           value={toDate}
           onChange={(e) => setToDate(e.target.value)}
           className="in"
-          style={{ height: 44, width: 180 }}
+          style={{ height: 44, width: 220 }}
           aria-label="Date de fin"
           title="Au"
         />

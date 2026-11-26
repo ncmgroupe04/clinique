@@ -8,6 +8,18 @@ type Line = { key: string; label: string; posology: string; duration: string };
 
 const POSOLOGIES = ["1×3/jour", "2×2/jour", "1×2/jour", "1×1/jour", "Autre"];
 const DURATIONS = ["3 jours", "5 jours", "7 jours", "10 jours", "15 jours", "30 jours", "1 mois", "2 mois"];
+const CATEGORIES = [
+  { value: "", label: "Toutes" },
+  { value: "diabete", label: "Diabète" },
+  { value: "paludisme", label: "Paludisme" },
+  { value: "cardio", label: "Cœur / HTA" },
+  { value: "antibiotiques", label: "Antibiotiques" },
+  { value: "douleur", label: "Douleur / Fièvre" },
+  { value: "digestif", label: "Digestif" },
+  { value: "respiratoire", label: "Respiratoire" },
+  { value: "grossesse", label: "Grossesse" },
+  { value: "dermato", label: "Peau" },
+];
 
 const durationToDays = (value: string): number | null => {
   const map: Record<string, number> = {
@@ -27,13 +39,17 @@ export default function OrdonnancesClient({ alternatives, structure, logoUrl }: 
   const [lines, setLines] = useState<Line[]>([]);
 
   const [suggestions, setSuggestions] = useState<Med[]>([]);
+  const [category, setCategory] = useState("");
   useEffect(() => {
     const q = query.trim();
-    if (!q) { setSuggestions([]); return; }
+    if (!q && !category) { setSuggestions([]); return; }
     let alive = true;
     const t = setTimeout(async () => {
       try {
-        const res = await fetch(`/api/medicaments?q=${encodeURIComponent(q)}`, { cache: "no-store" });
+        const params = new URLSearchParams();
+        if (q) params.set("q", q);
+        if (category) params.set("category", category);
+        const res = await fetch(`/api/medicaments?${params.toString()}`, { cache: "no-store" });
         const json = await res.json();
         if (alive) setSuggestions(json.medications ?? []);
       } catch {
@@ -41,7 +57,7 @@ export default function OrdonnancesClient({ alternatives, structure, logoUrl }: 
       }
     }, 150);
     return () => { alive = false; clearTimeout(t); };
-  }, [query]);
+  }, [query, category]);
 
   function addLine(med: Med) {
     setLines((prev) => [...prev, { key: crypto.randomUUID(), label: `${med.dci}${med.dosage ? " " + med.dosage : ""} · ${med.form}`, posology, duration }]);
@@ -92,6 +108,28 @@ export default function OrdonnancesClient({ alternatives, structure, logoUrl }: 
               <div className="min-w-0 flex-1">
                 <label className="lbl">Âge</label>
                 <input className="in" value={age} onChange={(e) => setAge(e.target.value)} placeholder="34 ans" />
+              </div>
+            </div>
+            <div>
+              <span className="lbl">Catégorie</span>
+              <div className="flex flex-wrap gap-2">
+                {CATEGORIES.map((c) => (
+                  <button
+                    key={c.value}
+                    type="button"
+                    onClick={() => { setCategory(c.value); setQuery(""); }}
+                    className="chip shrink-0 whitespace-nowrap"
+                    style={{
+                      flex: "none", flexDirection: "row", padding: "8px 14px", borderRadius: 999,
+                      borderColor: category === c.value ? "#0B7A6B" : "#D5E0E6",
+                      background: category === c.value ? "#DFF3EF" : "#fff",
+                      color: category === c.value ? "#0B5F54" : "#0B1F2A",
+                      fontSize: 13,
+                    }}
+                  >
+                    {c.label}
+                  </button>
+                ))}
               </div>
             </div>
             <div>

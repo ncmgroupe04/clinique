@@ -76,10 +76,18 @@ body {
   border-color: #0b7a6b;
   box-shadow: 0 0 0 3px rgba(11, 122, 107, 0.12);
 }
-/* Flèche native des selects : on la recule pour laisser une marge à droite. */
-select.in, select.input { padding-right: 40px; }
-/* Champ date : laisse de la place entre le texte et l'icône calendrier. */
-input[type="date"].in, input[type="date"].input { padding-right: 44px; }
+/* Flèche native des selects : on la remplace par une flèche CSS reculée du bord. */
+select.in, select.input {
+  appearance: none;
+  -webkit-appearance: none;
+  padding-right: 42px;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%230b1f2a' stroke-width='2.5' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 14px center;
+  background-size: 16px 16px;
+}
+/* Champ date : plus de place entre le texte et l'icône calendrier. */
+input[type="date"].in, input[type="date"].input { font-size: 15px; }
 
 .chip {
   flex: 1;
