@@ -5,6 +5,7 @@ import { createClient, createServiceClient } from "@/lib/supabase/server";
 import { redirect } from "next/navigation";
 import Link from "next/link";
 import LogoutButton from "./logout-button";
+import { ensurePlatformNotifications } from "@/app/actions/platform";
 
 export default async function AppLayout({
   children,
@@ -17,6 +18,7 @@ export default async function AppLayout({
   let renewalAlert: string | null = null;
   let unreadNotifications = 0;
   if (user.role === "platform_admin") {
+    await ensurePlatformNotifications();
     const notifClient = await createClient();
     const { count } = await notifClient
       .from("notifications")

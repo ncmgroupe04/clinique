@@ -223,6 +223,7 @@ export default function SidebarNav({ role }: { role: Role }) {
     cliniqueItems.push({ href: "/patients", label: "Patients", icon: "users" });
     cliniqueItems.push({ href: "/agenda", label: "Agenda", icon: "calendar" });
     cliniqueItems.push({ href: "/notifications", label: "Notifications", icon: "bell" });
+    cliniqueItems.push({ href: "/support", label: "Assistance", icon: "users" });
     if (adminAccess) {
       cliniqueItems.push({ href: "/soins", label: "Soins", icon: "care" });
       cliniqueItems.push({ href: "/tarifs", label: "Tarifs", icon: "tag" });

@@ -111,6 +111,59 @@ export async function markAllNotificationsRead(): Promise<void> {
   revalidatePath("/admin/notifications");
 }
 
+export async function ensurePlatformNotifications(): Promise<void> {
+  const admin = createServiceClient();
+  const today = new Date().toISOString().slice(0, 10);
+  const [{ data: admins }, { data: structures }, { data: existing }] = await Promise.all([
+    admin.from("profiles").select("id").eq("role", "platform_admin").eq("active", true),
+    admin.from("structures").select("id, name, subscription_ends_at, active, suspended, registration_fee_paid"),
+    admin.from("notifications").select("title, user_id").gte("created_at", `${today}T00:00:00`),
+  ]);
+
+  const adminIds = (admins ?? []).map((a) => a.id as string);
+  if (!adminIds.length) return;
+
+  const now = new Date();
+  const alerts: { title: string; body: string; type: string }[] = [];
+
+  for (const s of structures ?? []) {
+    if (!s.subscription_ends_at) continue;
+    const days = Math.ceil((new Date(s.subscription_ends_at).getTime() - now.getTime()) / 86_400_000);
+    if (days <= 7) {
+      alerts.push({
+        title: `Abonnement · ${s.name}`,
+        body: days < 0
+          ? "L'abonnement est expiré. Prévenez la structure."
+          : `L'abonnement expire dans ${days} jour(s).`,
+        type: "warning",
+      });
+    }
+  }
+
+  const pending = (structures ?? []).filter((s) => !s.registration_fee_paid).length;
+  if (pending > 0) {
+    alerts.push({
+      title: `${pending} inscription(s) à valider`,
+      body: "Consultez la page Inscriptions.",
+      type: "info",
+    });
+  }
+
+  const seen = new Set((existing ?? []).map((n) => `${n.user_id}|${n.title}`));
+  const toInsert: { user_id: string; title: string; body: string; type: string }[] = [];
+  for (const userId of adminIds) {
+    for (const alert of alerts) {
+      const key = `${userId}|${alert.title}`;
+      if (seen.has(key)) continue;
+      seen.add(key);
+      toInsert.push({ user_id: userId, ...alert });
+    }
+  }
+  if (toInsert.length) {
+    await admin.from("notifications").insert(toInsert);
+  }
+}
+
 export async function updatePlatformSetting(formData: FormData): Promise<void> {
   const user = await requireRole("platform_admin");
   const key = String(formData.get("key") ?? "").trim();
