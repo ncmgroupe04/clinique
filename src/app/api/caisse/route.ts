@@ -20,8 +20,19 @@ export async function GET(request: Request) {
   const periodParam = url.searchParams.get("period");
   const period: CaissePeriod = isCaissePeriod(periodParam) ? periodParam : "today";
   const categorie = url.searchParams.get("categorie");
+  const fromParam = url.searchParams.get("from");
+  const toParam = url.searchParams.get("to");
+  const datePattern = /^\d{4}-\d{2}-\d{2}$/;
+  const from = fromParam && datePattern.test(fromParam) ? fromParam : null;
+  const to = toParam && datePattern.test(toParam) ? toParam : null;
 
   const supabase = await createClient();
-  const data = await getCaisseData(supabase, user.structureId, period, categorie);
+  const data = await getCaisseData(
+    supabase,
+    user.structureId,
+    period,
+    categorie,
+    from && to ? { from, to } : null,
+  );
   return NextResponse.json(data);
 }

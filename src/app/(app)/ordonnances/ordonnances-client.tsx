@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useMemo } from "react";
+import { useState, useEffect } from "react";
 import { createClient } from "@/lib/supabase/client";
 
 type Med = { id: string; dci: string; brand: string | null; class: string; form: string; dosage: string | null };
@@ -18,7 +18,7 @@ const durationToDays = (value: string): number | null => {
 };
 
 type Structure = { name: string; address: string | null; phone: string | null; header_text: string | null };
-export default function OrdonnancesClient({ medications, alternatives, structure, logoUrl }: { medications: Med[]; alternatives: Record<string, string[]>; structure: Structure | null; logoUrl: string | null }) {
+export default function OrdonnancesClient({ alternatives, structure, logoUrl }: { alternatives: Record<string, string[]>; structure: Structure | null; logoUrl: string | null }) {
   const [patient, setPatient] = useState("");
   const [age, setAge] = useState("");
   const [query, setQuery] = useState("");
@@ -26,13 +26,22 @@ export default function OrdonnancesClient({ medications, alternatives, structure
   const [duration, setDuration] = useState("5 jours");
   const [lines, setLines] = useState<Line[]>([]);
 
-  const suggestions = useMemo(() => {
-    const q = query.trim().toLowerCase();
-    if (!q) return [];
-    return medications
-      .filter((m) => (m.dci + " " + (m.brand ?? "") + " " + m.class).toLowerCase().includes(q))
-      .slice(0, 8);
-  }, [query, medications]);
+  const [suggestions, setSuggestions] = useState<Med[]>([]);
+  useEffect(() => {
+    const q = query.trim();
+    if (!q) { setSuggestions([]); return; }
+    let alive = true;
+    const t = setTimeout(async () => {
+      try {
+        const res = await fetch(`/api/medicaments?q=${encodeURIComponent(q)}`, { cache: "no-store" });
+        const json = await res.json();
+        if (alive) setSuggestions(json.medications ?? []);
+      } catch {
+        if (alive) setSuggestions([]);
+      }
+    }, 150);
+    return () => { alive = false; clearTimeout(t); };
+  }, [query]);
 
   function addLine(med: Med) {
     setLines((prev) => [...prev, { key: crypto.randomUUID(), label: `${med.dci}${med.dosage ? " " + med.dosage : ""} · ${med.form}`, posology, duration }]);

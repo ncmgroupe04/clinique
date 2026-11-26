@@ -25,8 +25,9 @@ export async function getCaisseData(
   structureId: string,
   period: CaissePeriod,
   categorie: string | null,
+  range?: { from: string; to: string } | null,
 ): Promise<CaisseData> {
-  const { from, to } = periodRange(period);
+  const { from, to } = range ?? periodRange(period);
   const fromTs = `${from}T00:00:00`;
   const toTs = `${to}T23:59:59`;
 
@@ -142,6 +143,8 @@ export async function getCaisseData(
     outstanding,
     outstandingTotal,
     period,
+    from,
+    to,
     categorie: categorie && categorie !== "all" ? categorie : null,
   };
 }

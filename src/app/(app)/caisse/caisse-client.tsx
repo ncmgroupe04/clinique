@@ -23,6 +23,8 @@ function fmtDate(iso: string): string {
 export default function CaisseClient({ initial }: { initial: CaisseData }) {
   const [period, setPeriod] = useState<CaissePeriod>(initial.period);
   const [categorie, setCategorie] = useState<string>(initial.categorie ?? "all");
+  const [fromDate, setFromDate] = useState("");
+  const [toDate, setToDate] = useState("");
   const [data, setData] = useState<CaisseData>(initial);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -39,13 +41,15 @@ export default function CaisseClient({ initial }: { initial: CaisseData }) {
   const firstRun = useRef(true);
   const reqId = useRef(0);
 
-  const load = useCallback(async (p: CaissePeriod, c: string) => {
+  const load = useCallback(async (p: CaissePeriod, c: string, from?: string, to?: string) => {
     const id = ++reqId.current;
     setLoading(true);
     setError(null);
     try {
       const qs = new URLSearchParams({ period: p });
       if (c && c !== "all") qs.set("categorie", c);
+      if (from) qs.set("from", from);
+      if (to) qs.set("to", to);
       const res = await fetch(`/api/caisse?${qs.toString()}`, { cache: "no-store" });
       const json = await res.json();
       if (!res.ok) throw new Error(json?.error ?? "Chargement impossible.");
@@ -64,8 +68,18 @@ export default function CaisseClient({ initial }: { initial: CaisseData }) {
       firstRun.current = false;
       return;
     }
-    void load(period, categorie);
-  }, [period, categorie, load]);
+    if (fromDate || toDate) {
+      void load(period, categorie, fromDate || toDate, toDate || fromDate);
+    } else {
+      void load(period, categorie);
+    }
+  }, [period, categorie, fromDate, toDate, load]);
+
+  function reload() {
+    return fromDate || toDate
+      ? load(period, categorie, fromDate || toDate, toDate || fromDate)
+      : load(period, categorie);
+  }
 
   async function submitDepense(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
@@ -89,7 +103,7 @@ export default function CaisseClient({ initial }: { initial: CaisseData }) {
       if (!res.ok) throw new Error(json?.error ?? "Ajout impossible.");
       form.reset();
       setShowForm(false);
-      await load(period, categorie);
+      await reload();
     } catch (err) {
       setFormError(err instanceof Error ? err.message : "Ajout impossible.");
     } finally {
@@ -112,7 +126,7 @@ export default function CaisseClient({ initial }: { initial: CaisseData }) {
       if (!res.ok) throw new Error(json?.error ?? "Annulation impossible.");
       setCancelTarget(null);
       setCancelReason("");
-      await load(period, categorie);
+      await reload();
     } catch (err) {
       setCancelError(err instanceof Error ? err.message : "Annulation impossible.");
     } finally {
@@ -131,7 +145,7 @@ export default function CaisseClient({ initial }: { initial: CaisseData }) {
       });
       const json = await res.json().catch(() => ({}));
       if (!res.ok) throw new Error(json?.error ?? "Rétablissement impossible.");
-      await load(period, categorie);
+      await reload();
     } catch (err) {
       setDepenseActionError(err instanceof Error ? err.message : "Rétablissement impossible.");
     } finally {
@@ -168,7 +182,9 @@ export default function CaisseClient({ initial }: { initial: CaisseData }) {
         <div className="text-center">
           <p className="text-[13px] font-semibold text-muted">Période</p>
           <p className="mt-1 text-xl font-extrabold text-ink">
-            {CAISSE_PERIODS.find((p) => p.value === period)?.label ?? "Aujourd'hui"}
+            {fromDate || toDate
+              ? `${fmtDate(fromDate || toDate)} → ${fmtDate(toDate || fromDate)}`
+              : (CAISSE_PERIODS.find((p) => p.value === period)?.label ?? "Aujourd'hui")}
           </p>
           <p className="mt-1 text-[11px] text-muted">Filtre des totaux</p>
         </div>
@@ -199,7 +215,7 @@ export default function CaisseClient({ initial }: { initial: CaisseData }) {
                   documentType={d.type === "ticket" ? "ticket" : "facture"}
                   documentId={d.id}
                   remaining={d.remaining}
-                  onSuccess={() => load(period, categorie)}
+                  onSuccess={() => void reload()}
                 />
               </div>
             ))}
@@ -213,9 +229,13 @@ export default function CaisseClient({ initial }: { initial: CaisseData }) {
           <button
             key={p.value}
             type="button"
-            onClick={() => setPeriod(p.value)}
+            onClick={() => {
+              setFromDate("");
+              setToDate("");
+              setPeriod(p.value);
+            }}
             className={`rounded-full border px-4 py-2 text-sm font-semibold transition-colors ${
-              period === p.value
+              !fromDate && !toDate && period === p.value
                 ? "border-accent bg-accent text-white"
                 : "border-input-border bg-white text-ink hover:bg-bg"
             }`}
@@ -227,7 +247,7 @@ export default function CaisseClient({ initial }: { initial: CaisseData }) {
           value={categorie}
           onChange={(e) => setCategorie(e.target.value)}
           className="in"
-          style={{ height: 44, width: "auto", minWidth: 190 }}
+          style={{ height: 44, width: "auto", minWidth: 210, paddingRight: 40 }}
           aria-label="Filtrer par catégorie"
         >
           <option value="all">Toutes catégories</option>
@@ -237,6 +257,37 @@ export default function CaisseClient({ initial }: { initial: CaisseData }) {
             </option>
           ))}
         </select>
+        <input
+          type="date"
+          value={fromDate}
+          onChange={(e) => setFromDate(e.target.value)}
+          className="in"
+          style={{ height: 44, width: 160 }}
+          aria-label="Date de début"
+          title="Du"
+        />
+        <input
+          type="date"
+          value={toDate}
+          onChange={(e) => setToDate(e.target.value)}
+          className="in"
+          style={{ height: 44, width: 160 }}
+          aria-label="Date de fin"
+          title="Au"
+        />
+        {(fromDate || toDate) && (
+          <button
+            type="button"
+            onClick={() => {
+              setFromDate("");
+              setToDate("");
+            }}
+            className="btn-secondary"
+            style={{ height: 44, padding: "0 14px", borderRadius: 12, fontSize: 13, width: "auto" }}
+          >
+            Effacer
+          </button>
+        )}
         <button
           type="button"
           onClick={() => {
@@ -282,7 +333,14 @@ export default function CaisseClient({ initial }: { initial: CaisseData }) {
               <label className="lbl" htmlFor="dep-categorie">
                 Catégorie
               </label>
-              <select id="dep-categorie" name="categorie" required className="in" defaultValue="Fournitures">
+              <select
+                id="dep-categorie"
+                name="categorie"
+                required
+                className="in"
+                defaultValue="Fournitures"
+                style={{ paddingRight: 40 }}
+              >
                 {DEPENSE_CATEGORIES.map((c) => (
                   <option key={c} value={c}>
                     {c}

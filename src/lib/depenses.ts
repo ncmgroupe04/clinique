@@ -50,6 +50,8 @@ export type CaisseData = {
   outstanding: OutstandingDocument[];
   outstandingTotal: number;
   period: CaissePeriod;
+  from: string;
+  to: string;
   categorie: string | null;
 };
 

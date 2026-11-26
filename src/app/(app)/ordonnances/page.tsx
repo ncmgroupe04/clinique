@@ -12,13 +12,6 @@ export default async function OrdonnancesPage() {
   if (!user.structureId) redirect("/tableau");
 
   const supabase = await createClient();
-  const { data: medications } = await supabase
-    .from("medications")
-    .select("id, dci, brand, class, form, dosage")
-    .eq("is_active", true)
-    .order("dci")
-    .limit(20000);
-
   const { data: structure } = await supabase
     .from("structures")
     .select("*")
@@ -43,7 +36,7 @@ export default async function OrdonnancesPage() {
   return (
     <div className="flex flex-1 flex-col gap-[26px]">
       <ScreenHeader title="Ordonnances" subtitle="Tapez les premières lettres, choisissez, imprimez." />
-      <OrdonnancesClient medications={medications ?? []} alternatives={alternatives} structure={structure ?? null} logoUrl={logoUrl} />
+      <OrdonnancesClient alternatives={alternatives} structure={structure ?? null} logoUrl={logoUrl} />
     </div>
   );
 }
