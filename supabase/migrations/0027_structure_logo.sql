@@ -4,7 +4,7 @@ alter table public.structures add column if not exists logo_path text;
 
 -- Bucket privé : un seul fichier par structure, chemin = <structure_id>/logo.<ext>
 insert into storage.buckets (id, name, public, file_size_limit, allowed_mime_types)
-values ('structure-logos', 'structure-logos', false, 2097152, array['image/png','image/jpeg','image/webp'])
+values ('structure-logos', 'structure-logos', true, 2097152, array['image/png','image/jpeg','image/webp'])
 on conflict (id) do update set
   public = excluded.public,
   file_size_limit = excluded.file_size_limit,
