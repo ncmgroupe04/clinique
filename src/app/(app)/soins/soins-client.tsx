@@ -120,16 +120,98 @@ export default function SoinsClient({ cares, categories }: { cares: Care[]; cate
   return (
     <div className="flex flex-1 flex-col gap-6">
       <section className="card flex min-w-0 flex-1 flex-col">
-        <div className="mb-2 flex flex-wrap items-center justify-between gap-3">
+        <div className="mb-3 flex flex-wrap items-center justify-between gap-3">
           <h2 className="text-lg font-extrabold">Soins et prix</h2>
-          <button
-            type="button"
-            onClick={() => nameRef.current?.focus()}
-            className="go"
-            style={{ height: 48, width: "auto", padding: "0 22px", borderRadius: 14, fontSize: 15 }}
-          >
-            + Ajouter un soin
-          </button>
+        </div>
+
+        <div className="mb-3 grid gap-3 lg:grid-cols-2">
+          <div className="rounded-[18px] border-[1.5px] border-dashed border-accent bg-[#EEF8F6] p-[14px]">
+            <div className="mb-2 flex items-center justify-between gap-2">
+              <h3 className="text-sm font-extrabold text-ink">Ajouter un soin</h3>
+              <button type="button" onClick={() => nameRef.current?.focus()} className="go" style={{ height: 36, width: "auto", padding: "0 14px", borderRadius: 10, fontSize: 12 }}>
+                + Ajouter un soin
+              </button>
+            </div>
+            <form
+              action={categories.length ? createAction : undefined}
+              onSubmit={categories.length ? undefined : (e) => {
+                e.preventDefault();
+                addLocalCare(new FormData(e.currentTarget));
+                e.currentTarget.reset();
+              }}
+              className="flex flex-col gap-2"
+            >
+              <div className="grid grid-cols-2 gap-2">
+                <div className="col-span-2">
+                  <label className="lbl" htmlFor="care-name">Nom du soin</label>
+                  <input ref={nameRef} id="care-name" name="name" placeholder="Injection" required className="input" style={{ height: 44 }} />
+                </div>
+                <div>
+                  <label className="lbl" htmlFor="care-price">Prix (F CFA)</label>
+                  <input id="care-price" name="price" type="number" min={0} step={1} placeholder="1 000" required className="input" style={{ height: 44 }} />
+                </div>
+                <div>
+                  <label className="lbl" htmlFor="care-unit">Comptage</label>
+                  <select id="care-unit" name="unit" className="input" defaultValue="unité" style={{ height: 44 }}>
+                    <option value="unité">Unité</option>
+                    <option value="nuit">Nuit</option>
+                    <option value="jour">Jour</option>
+                    <option value="séance">Séance</option>
+                  </select>
+                </div>
+                <div>
+                  <label className="lbl" htmlFor="care-category">Catégorie</label>
+                  <select id="care-category" name="category" className="input" defaultValue="intervention" style={{ height: 44 }}>
+                    {activeCategories.map((cat) => (
+                      <option key={cat.id} value={cat.slug}>{cat.name}</option>
+                    ))}
+                  </select>
+                </div>
+                <div>
+                  <label className="lbl" htmlFor="care-cotation">Cotation</label>
+                  <input id="care-cotation" name="cotation" maxLength={50} placeholder="Ex. D5" className="input" style={{ height: 44 }} />
+                </div>
+              </div>
+              <button type="submit" disabled={createPending} className="go" style={{ height: 44, width: "auto", padding: "0 20px", borderRadius: 12, fontSize: 14 }}>
+                {createPending ? "Ajout…" : "Enregistrer"}
+              </button>
+            </form>
+            {createState?.message && (
+              <p className={createState.success ? "mt-2 text-sm text-accent" : "mt-2 text-sm text-danger"}>{createState.message}</p>
+            )}
+          </div>
+
+          <div className="rounded-[18px] border-[1.5px] border-dashed border-accent bg-[#EEF8F6] p-[14px]">
+            <div className="mb-2 flex items-center justify-between gap-2">
+              <h3 className="text-sm font-extrabold text-ink">Ajouter une catégorie</h3>
+              <button type="button" onClick={() => categoryNameRef.current?.focus()} className="go" style={{ height: 36, width: "auto", padding: "0 14px", borderRadius: 10, fontSize: 12 }}>
+                + Ajouter une catégorie
+              </button>
+            </div>
+            <form
+              action={categories.length ? catCreateAction : undefined}
+              onSubmit={categories.length ? undefined : (e) => {
+                e.preventDefault();
+                addLocalCategory(new FormData(e.currentTarget));
+                e.currentTarget.reset();
+              }}
+              className="flex items-end gap-2"
+            >
+              <div className="flex-1">
+                <label className="lbl" htmlFor="category-name">Nom de la catégorie</label>
+                <input ref={categoryNameRef} id="category-name" name="name" placeholder="Ex. Hospitalisation" required className="input" style={{ height: 44 }} />
+              </div>
+              <button type="submit" disabled={catCreatePending} className="go" style={{ height: 44, width: "auto", padding: "0 20px", borderRadius: 12, fontSize: 14 }}>
+                {catCreatePending ? "Ajout…" : "Enregistrer"}
+              </button>
+            </form>
+            {catCreateState?.message && (
+              <p className={catCreateState.success ? "mt-2 text-sm text-accent" : "mt-2 text-sm text-danger"}>{catCreateState.message}</p>
+            )}
+            {catCreateState?.errors?.name && (
+              <p className="mt-1 text-sm text-danger">{catCreateState.errors.name}</p>
+            )}
+          </div>
         </div>
 
         {effectiveCares.length === 0 ? (
@@ -137,7 +219,7 @@ export default function SoinsClient({ cares, categories }: { cares: Care[]; cate
         ) : (
           <div>
             {effectiveCares.map((c) => (
-              <div key={c.id} className="ln">
+              <div key={c.id} className="ln" style={{ paddingTop: 6, paddingBottom: 6 }}>
                 {editingId === c.id ? (
                   <div className="flex w-full flex-col gap-3">
                     <form action={editAction} className="flex flex-wrap items-end gap-3">
@@ -224,52 +306,6 @@ export default function SoinsClient({ cares, categories }: { cares: Care[]; cate
           </div>
         )}
 
-        <form
-          action={categories.length ? createAction : undefined}
-          onSubmit={categories.length ? undefined : (e) => {
-            e.preventDefault();
-            addLocalCare(new FormData(e.currentTarget));
-            e.currentTarget.reset();
-          }}
-          className="mt-3.5 flex flex-col gap-3 rounded-[18px] border-[1.5px] border-dashed border-accent bg-[#EEF8F6] p-[18px] sm:flex-row sm:items-end"
-        >
-          <div style={{ flex: 2 }}>
-            <label className="lbl" htmlFor="care-name">Nom du soin</label>
-            <input ref={nameRef} id="care-name" name="name" placeholder="Injection" required className="input" />
-          </div>
-          <div style={{ flex: 1 }}>
-            <label className="lbl" htmlFor="care-price">Prix (F CFA)</label>
-            <input id="care-price" name="price" type="number" min={0} step={1} placeholder="1 000" required className="input" />
-          </div>
-          <div style={{ flex: 0.6 }}>
-            <label className="lbl" htmlFor="care-unit">Comptage</label>
-            <select id="care-unit" name="unit" className="input" defaultValue="unité">
-              <option value="unité">Unité</option>
-              <option value="nuit">Nuit</option>
-              <option value="jour">Jour</option>
-              <option value="séance">Séance</option>
-            </select>
-          </div>
-          <div style={{ flex: 0.7 }}>
-            <label className="lbl" htmlFor="care-category">Catégorie</label>
-            <select id="care-category" name="category" className="input" defaultValue="intervention">
-              {activeCategories.map((cat) => (
-                <option key={cat.id} value={cat.slug}>{cat.name}</option>
-              ))}
-            </select>
-          </div>
-          <div style={{ flex: 0.6 }}>
-            <label className="lbl" htmlFor="care-cotation">Cotation</label>
-            <input id="care-cotation" name="cotation" maxLength={50} placeholder="Ex. D5" className="input" />
-          </div>
-          <button type="submit" disabled={createPending} className="go" style={{ height: 52, width: "auto", padding: "0 24px", borderRadius: 14, fontSize: 15 }}>
-            {createPending ? "Ajout…" : "Enregistrer"}
-          </button>
-        </form>
-
-        {createState?.message && (
-          <p className={createState.success ? "mt-3 text-sm text-accent" : "mt-3 text-sm text-danger"}>{createState.message}</p>
-        )}
       </section>
 
       <section className="card flex min-w-0 flex-col">
@@ -293,36 +329,12 @@ export default function SoinsClient({ cares, categories }: { cares: Care[]; cate
           </button>
         </div>
 
-        <form
-          action={categories.length ? catCreateAction : undefined}
-          onSubmit={categories.length ? undefined : (e) => {
-            e.preventDefault();
-            addLocalCategory(new FormData(e.currentTarget));
-            e.currentTarget.reset();
-          }}
-          className="mb-3 flex flex-col gap-3 rounded-[18px] border-[1.5px] border-dashed border-accent bg-[#EEF8F6] p-[18px] sm:flex-row sm:items-end"
-        >
-          <div style={{ flex: 2 }}>
-            <label className="lbl" htmlFor="category-name">Nom de la catégorie</label>
-            <input ref={categoryNameRef} id="category-name" name="name" placeholder="Ex. Hospitalisation" required className="input" />
-          </div>
-          <button type="submit" disabled={catCreatePending} className="go" style={{ height: 52, width: "auto", padding: "0 24px", borderRadius: 14, fontSize: 15 }}>
-            {catCreatePending ? "Ajout…" : "Enregistrer"}
-          </button>
-        </form>
-        {catCreateState?.message && (
-          <p className={catCreateState.success ? "text-sm text-accent" : "text-sm text-danger"}>{catCreateState.message}</p>
-        )}
-        {catCreateState?.errors?.name && (
-          <p className="mt-2 text-sm text-danger">{catCreateState.errors.name}</p>
-        )}
-
         {effectiveCategories.length === 0 ? (
           <p className="py-3 text-sm text-muted">Aucune catégorie pour le moment.</p>
         ) : (
           <div>
             {effectiveCategories.map((cat) => (
-              <div key={cat.id} className="ln">
+              <div key={cat.id} className="ln" style={{ paddingTop: 6, paddingBottom: 6 }}>
                 {editingCategoryId === cat.id ? (
                   <div className="flex w-full flex-col gap-3">
                     <form action={catEditAction} className="flex flex-wrap items-end gap-3">
