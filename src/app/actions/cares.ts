@@ -145,8 +145,8 @@ export async function deleteCare(
   const id = String(formData.get("id") ?? "");
   if (!id) return { message: "Soin introuvable." };
 
-  const admin = createServiceClient();
-  const { data: care } = await admin
+  const supabase = await createClient();
+  const { data: care } = await supabase
     .from("cares")
     .select("name, structure_id")
     .eq("id", id)
@@ -156,7 +156,7 @@ export async function deleteCare(
   }
 
   // Ne pas supprimer un soin déjà utilisé dans une facture.
-  const { data: used } = await admin
+  const { data: used } = await supabase
     .from("invoice_items")
     .select("id")
     .eq("care_name", care.name)
@@ -165,7 +165,7 @@ export async function deleteCare(
     return { message: "Ce soin a déjà été facturé : désactivez-le plutôt." };
   }
 
-  const { error } = await admin.from("cares").delete().eq("id", id);
+  const { error } = await supabase.from("cares").delete().eq("id", id);
   if (error) return { message: "Suppression impossible." };
   await logAudit({
     structureId: user.structureId,
