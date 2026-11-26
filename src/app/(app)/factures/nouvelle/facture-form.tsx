@@ -5,19 +5,14 @@ import { createInvoice, type InvoiceState } from "@/app/actions/invoices";
 import { useRouter } from "next/navigation";
 
 type Care = { id: string; name: string; price: number; unit: string; category: string };
+type Category = { name: string; slug: string; active: boolean };
 type Line = { careId: string; name: string; price: number; qty: number; unit: string };
-
-const GROUPS = [
-  { value: "diagnostic", label: "Diagnostics" },
-  { value: "intervention", label: "Interventions" },
-  { value: "produit", label: "Produits" },
-];
 
 function fcfa(v: number): string {
   return `${v.toLocaleString("fr-FR")} F CFA`;
 }
 
-export default function FactureForm({ cares }: { cares: Care[] }) {
+export default function FactureForm({ cares, categories }: { cares: Care[]; categories: Category[] }) {
   const router = useRouter();
   const [state, action, pending] = useActionState<InvoiceState, FormData>(createInvoice, undefined);
   const [lines, setLines] = useState<Line[]>([]);
@@ -96,11 +91,11 @@ export default function FactureForm({ cares }: { cares: Care[] }) {
             <p className="text-sm text-muted">Aucun soin actif dans le catalogue.</p>
           ) : (
             <div className="grid grid-cols-1 gap-3 md:grid-cols-3">
-              {GROUPS.map((group) => {
-                const items = cares.filter((c) => (c.category ?? "intervention") === group.value);
+              {categories.filter((c) => c.active).map((group) => {
+                const items = cares.filter((c) => (c.category ?? "intervention") === group.slug);
                 return (
-                  <div key={group.value} className="rounded-[18px] border border-border bg-white p-4">
-                    <h3 className="mb-2 text-sm font-extrabold text-ink">{group.label}</h3>
+                  <div key={group.slug} className="rounded-[18px] border border-border bg-white p-4">
+                    <h3 className="mb-2 text-sm font-extrabold text-ink">{group.name}</h3>
                     <div className="space-y-1.5">
                       {items.length === 0 ? (
                         <p className="text-xs text-muted">Aucun soin.</p>

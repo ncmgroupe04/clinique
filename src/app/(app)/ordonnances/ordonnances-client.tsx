@@ -5,7 +5,7 @@ import { flushSync } from "react-dom";
 import { createClient } from "@/lib/supabase/client";
 
 type Med = { id: string; dci: string; brand: string | null; class: string; form: string; dosage: string | null };
-type Line = { key: string; label: string; dose: string; duration: string; quantity: string; medicationId: string | null };
+type Line = { key: string; label: string; dose: string; duration: string; quantity: string; cotation: string; medicationId: string | null };
 
 const POSOLOGIES = ["1×3/jour", "2×3/jour", "1×2/jour", "2×2/jour", "1×1/jour"];
 const MORE_POSOLOGIES = [
@@ -37,6 +37,7 @@ const CATEGORIES = [
   { value: "enfant", label: "Enfant" },
   { value: "grossesse", label: "Grossesse" },
   { value: "dermato", label: "Dermatologie" },
+  { value: "dentiste", label: "Dentiste" },
 ];
 const MORE_CATEGORIES = [
   { value: "fievre", label: "Fièvre" },
@@ -76,6 +77,7 @@ export default function OrdonnancesClient({ alternatives, structure, logoUrl }: 
   const [posology, setPosology] = useState("1×3/jour");
   const [duration, setDuration] = useState("5");
   const [quantity, setQuantity] = useState("");
+  const [cotation, setCotation] = useState("");
   const [lines, setLines] = useState<Line[]>([]);
   const [number, setNumber] = useState("—");
   const [saving, setSaving] = useState(false);
@@ -107,7 +109,7 @@ export default function OrdonnancesClient({ alternatives, structure, logoUrl }: 
 
   function addLine(label: string, medicationId: string | null = null) {
     if (!label) return;
-    setLines((prev) => [...prev, { key: crypto.randomUUID(), label, dose: posology.trim() || "Posologie à préciser", duration: `${duration} jours`, quantity, medicationId }]);
+    setLines((prev) => [...prev, { key: crypto.randomUUID(), label, dose: posology.trim() || "Posologie à préciser", duration: `${duration} jours`, quantity, cotation: cotation.trim(), medicationId }]);
     setQuery("");
     setSuggestions([]);
   }
@@ -123,7 +125,7 @@ export default function OrdonnancesClient({ alternatives, structure, logoUrl }: 
 
   function reset() {
     setPatient(""); setAge(""); setQuery(""); setCategory(""); setPosology("1×3/jour");
-    setDuration("5"); setQuantity(""); setLines([]); setNumber("—");
+    setDuration("5"); setQuantity(""); setCotation(""); setLines([]); setNumber("—");
   }
 
   async function handlePrint() {
@@ -148,6 +150,7 @@ export default function OrdonnancesClient({ alternatives, structure, logoUrl }: 
           posology: l.dose,
           duration_days: parseInt(l.duration) || null,
           quantity: parseInt(l.quantity) || null,
+          cotation: l.cotation,
           medication_id: l.medicationId,
           sort_order: i + 1,
         })),
@@ -215,7 +218,7 @@ export default function OrdonnancesClient({ alternatives, structure, logoUrl }: 
             </div>
           </div>
 
-          <div className="grid gap-3 sm:grid-cols-[minmax(0,2fr)_auto_96px_auto]">
+          <div className="grid gap-3 sm:grid-cols-[minmax(0,2fr)_auto_96px_110px_auto]">
             <div className="min-w-0">
               <label className="lbl" htmlFor="ordo-med">Médicament</label>
               <input
@@ -263,6 +266,19 @@ export default function OrdonnancesClient({ alternatives, structure, logoUrl }: 
             <div>
               <label className="lbl" htmlFor="ordo-qty">Quantité</label>
               <input id="ordo-qty" className="in" value={quantity} onChange={(e) => setQuantity(e.target.value)} placeholder="—" inputMode="numeric" />
+            </div>
+
+            <div>
+              <label className="lbl" htmlFor="ordo-cotation">Cotation</label>
+              <input
+                id="ordo-cotation"
+                className="in"
+                value={cotation}
+                onChange={(e) => setCotation(e.target.value)}
+                placeholder="HBJD001"
+                maxLength={50}
+                title="Facultatif — lettres et chiffres (ex. HBJD001)"
+              />
             </div>
 
             <div className="flex items-end">
@@ -382,6 +398,14 @@ export default function OrdonnancesClient({ alternatives, structure, logoUrl }: 
                           {l.quantity ? (
                             <span className="rounded-md bg-[#DFF3EF] px-1.5 py-0.5 text-[11.5px] font-bold text-[#0B5F54]">Qté {l.quantity}</span>
                           ) : null}
+                          <input
+                            value={l.cotation}
+                            onChange={(e) => updateLine(l.key, { cotation: e.target.value })}
+                            maxLength={50}
+                            placeholder="Cotation"
+                            className="w-[100px] rounded-md border border-[#D5E0E6] bg-white px-1.5 py-0.5 text-[11.5px] font-bold text-[#0B1F2A] outline-none focus:border-[#0B7A6B]"
+                            aria-label={`Cotation ligne ${i + 1}`}
+                          />
                         </div>
                       </div>
                       <button
@@ -520,7 +544,7 @@ export default function OrdonnancesClient({ alternatives, structure, logoUrl }: 
                       <div className="min-w-0 flex-1">
                         <div className="font-bold text-[#0B1F2A]" style={{ overflowWrap: "anywhere" }}>{l.label}</div>
                         <div className="mt-[1px] text-[10px] font-medium text-[#6B818D]">
-                          {l.dose}{l.quantity ? ` · Qté ${l.quantity}` : ""}
+                          {l.dose}{l.quantity ? ` · Qté ${l.quantity}` : ""}{l.cotation ? ` · Cotation ${l.cotation}` : ""}
                         </div>
                       </div>
                       <span className="shrink-0 whitespace-nowrap pt-[1px] text-[10.5px] font-bold text-[#0B1F2A]">

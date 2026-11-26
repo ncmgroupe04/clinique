@@ -10,7 +10,7 @@ const careSchema = z.object({
   name: z.string().min(1, "Nom requis.").max(200).trim(),
   price: z.coerce.number().int().min(0, "Prix invalide."),
   unit: z.enum(["unité", "nuit", "jour", "séance"]).optional().default("unité"),
-  category: z.enum(["diagnostic", "intervention", "produit"]).optional().default("intervention"),
+  category: z.string().trim().regex(/^[a-z0-9]+(-[a-z0-9]+)*$/, "Catégorie invalide.").optional().default("intervention"),
 });
 
 export type CareState =

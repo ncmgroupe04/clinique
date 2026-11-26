@@ -20,13 +20,19 @@ export default async function SoinsPage() {
     .eq("structure_id", user.structureId)
     .order("created_at", { ascending: true });
 
+  const { data: categories } = await supabase
+    .from("care_categories")
+    .select("id, name, slug, active")
+    .eq("structure_id", user.structureId)
+    .order("name", { ascending: true });
+
   return (
     <div className="flex flex-1 flex-col gap-[26px]">
       <ScreenHeader
         title="Réglages · Soins et prix"
         subtitle="Catalogue des soins facturables (injections, pansements, perfusions, chambres…)."
       />
-      <SoinsClient cares={cares ?? []} />
+      <SoinsClient cares={cares ?? []} categories={categories ?? []} />
     </div>
   );
 }

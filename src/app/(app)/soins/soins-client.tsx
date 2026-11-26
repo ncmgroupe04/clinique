@@ -2,29 +2,43 @@
 
 import { useActionState, useEffect, useRef, useState } from "react";
 import { createCare, updateCare, toggleCare, deleteCare, type CareState } from "@/app/actions/cares";
+import {
+  createCareCategory,
+  updateCareCategory,
+  toggleCareCategory,
+  deleteCareCategory,
+  type CategoryState,
+} from "@/app/actions/care-categories";
 import ConfirmActionButton from "../confirm-action-button";
 
 type Care = { id: string; name: string; price: number; active: boolean; unit: string; category: string };
+type Category = { id: string; name: string; slug: string; active: boolean };
 
-const CATEGORIES = [
-  { value: "diagnostic", label: "Diagnostic" },
-  { value: "intervention", label: "Intervention" },
-  { value: "produit", label: "Produit" },
-];
+const categoryLabel = (categories: Category[], slug: string) =>
+  categories.find((c) => c.slug === slug)?.name ?? slug;
 
 function fcfa(value: number): string {
   return `${value.toLocaleString("fr-FR")} F`;
 }
 
-export default function SoinsClient({ cares }: { cares: Care[] }) {
+export default function SoinsClient({ cares, categories }: { cares: Care[]; categories: Category[] }) {
   const [editingId, setEditingId] = useState<string | null>(null);
+  const [editingCategoryId, setEditingCategoryId] = useState<string | null>(null);
   const nameRef = useRef<HTMLInputElement>(null);
+  const categoryNameRef = useRef<HTMLInputElement>(null);
   const [createState, createAction, createPending] = useActionState<CareState, FormData>(createCare, undefined);
   const [editState, editAction, editPending] = useActionState<CareState, FormData>(updateCare, undefined);
+  const [catCreateState, catCreateAction, catCreatePending] = useActionState<CategoryState, FormData>(createCareCategory, undefined);
+  const [catEditState, catEditAction, catEditPending] = useActionState<CategoryState, FormData>(updateCareCategory, undefined);
+  const activeCategories = categories.filter((c) => c.active);
   useEffect(() => {
     // eslint-disable-next-line react-hooks/set-state-in-effect
     if (editState?.success) setEditingId(null);
   }, [editState]);
+  useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect
+    if (catEditState?.success) setEditingCategoryId(null);
+  }, [catEditState]);
 
   return (
     <div className="flex flex-1 flex-col gap-6">
@@ -71,8 +85,11 @@ export default function SoinsClient({ cares }: { cares: Care[] }) {
                       <div style={{ width: 140 }}>
                         <label className="lbl" htmlFor={`category-${c.id}`}>Catégorie</label>
                         <select id={`category-${c.id}`} name="category" className="input" defaultValue={c.category ?? "intervention"}>
-                          {CATEGORIES.map((cat) => (
-                            <option key={cat.value} value={cat.value}>{cat.label}</option>
+                          {!activeCategories.some((cat) => cat.slug === c.category) ? (
+                            <option value={c.category}>{categoryLabel(categories, c.category)}</option>
+                          ) : null}
+                          {activeCategories.map((cat) => (
+                            <option key={cat.id} value={cat.slug}>{cat.name}</option>
                           ))}
                         </select>
                       </div>
@@ -93,7 +110,7 @@ export default function SoinsClient({ cares }: { cares: Care[] }) {
                       {c.name}
                       {c.category && (
                         <span className="ml-2 rounded-md bg-accent-light px-1.5 py-0.5 text-[10px] font-bold text-accent-text">
-                          {CATEGORIES.find((cat) => cat.value === c.category)?.label ?? c.category}
+                          {categoryLabel(categories, c.category)}
                         </span>
                       )}
                       {c.unit && c.unit !== "unité" && <span className="ml-2 text-xs font-medium text-muted">({c.unit})</span>}
@@ -146,8 +163,8 @@ export default function SoinsClient({ cares }: { cares: Care[] }) {
           <div style={{ flex: 0.7 }}>
             <label className="lbl" htmlFor="care-category">Catégorie</label>
             <select id="care-category" name="category" className="input" defaultValue="intervention">
-              {CATEGORIES.map((cat) => (
-                <option key={cat.value} value={cat.value}>{cat.label}</option>
+              {activeCategories.map((cat) => (
+                <option key={cat.id} value={cat.slug}>{cat.name}</option>
               ))}
             </select>
           </div>
@@ -158,6 +175,93 @@ export default function SoinsClient({ cares }: { cares: Care[] }) {
 
         {createState?.message && (
           <p className={createState.success ? "mt-3 text-sm text-accent" : "mt-3 text-sm text-danger"}>{createState.message}</p>
+        )}
+      </section>
+
+      <section className="card flex min-w-0 flex-col">
+        <div className="mb-2 flex flex-wrap items-center justify-between gap-3">
+          <div>
+            <h2 className="text-lg font-extrabold">Catégories</h2>
+            <p className="mt-0.5 text-xs text-muted">Liste personnalisable de votre structure, utilisée pour classer les soins.</p>
+          </div>
+          <button
+            type="button"
+            onClick={() => categoryNameRef.current?.focus()}
+            className="go"
+            style={{ height: 42, width: "auto", padding: "0 18px", borderRadius: 12, fontSize: 14 }}
+          >
+            + Ajouter une catégorie
+          </button>
+        </div>
+
+        {categories.length === 0 ? (
+          <p className="py-3 text-sm text-muted">Aucune catégorie pour le moment.</p>
+        ) : (
+          <div>
+            {categories.map((cat) => (
+              <div key={cat.id} className="ln">
+                {editingCategoryId === cat.id ? (
+                  <div className="flex w-full flex-col gap-3">
+                    <form action={catEditAction} className="flex flex-wrap items-end gap-3">
+                      <input type="hidden" name="id" value={cat.id} />
+                      <div className="min-w-[180px] flex-1">
+                        <label className="lbl" htmlFor={`cat-name-${cat.id}`}>Nom de la catégorie</label>
+                        <input id={`cat-name-${cat.id}`} name="name" defaultValue={cat.name} required className="input" />
+                      </div>
+                      <button type="submit" disabled={catEditPending} className="go" style={{ height: 52, width: "auto", padding: "0 24px", borderRadius: 14, fontSize: 15 }}>
+                        {catEditPending ? "…" : "Enregistrer"}
+                      </button>
+                      <button type="button" onClick={() => setEditingCategoryId(null)} className="btn-secondary" style={{ height: 52 }}>
+                        Annuler
+                      </button>
+                    </form>
+                    {catEditState?.message && (
+                      <p className={catEditState.success ? "text-sm text-accent" : "text-sm text-danger"}>{catEditState.message}</p>
+                    )}
+                  </div>
+                ) : (
+                  <>
+                    <div className="flex-1 font-bold">{cat.name}</div>
+                    <span className={`cd ${cat.active ? "" : "off"}`} style={{ width: 70 }}>
+                      {cat.active ? "Active" : "Inactive"}
+                    </span>
+                    <button type="button" onClick={() => setEditingCategoryId(cat.id)} aria-label={`Modifier ${cat.name}`} className="x" style={{ width: "auto", padding: "0 16px", fontSize: 13, fontWeight: 600 }}>
+                      Modifier
+                    </button>
+                    <ConfirmActionButton
+                      label={cat.active ? "Désactiver" : "Réactiver"}
+                      confirmTitle={cat.active ? "Désactiver cette catégorie ?" : "Réactiver cette catégorie ?"}
+                      confirmMessage={cat.active ? "La catégorie ne sera plus proposée lors de la création d'un soin." : "La catégorie sera à nouveau disponible."}
+                      formAction={toggleCareCategory}
+                      hiddenInputs={[
+                        { name: "id", value: cat.id },
+                        { name: "active", value: cat.active ? "false" : "true" },
+                      ]}
+                      buttonClassName="text-sm font-medium text-muted underline-offset-2 hover:underline"
+                      buttonStyle={{ padding: "0 6px" }}
+                    />
+                    <DeleteCategoryButton id={cat.id} />
+                  </>
+                )}
+              </div>
+            ))}
+          </div>
+        )}
+
+        <form action={catCreateAction} className="mt-3.5 flex flex-col gap-3 rounded-[18px] border-[1.5px] border-dashed border-accent bg-[#EEF8F6] p-[18px] sm:flex-row sm:items-end">
+          <div style={{ flex: 2 }}>
+            <label className="lbl" htmlFor="category-name">Nom de la catégorie</label>
+            <input ref={categoryNameRef} id="category-name" name="name" placeholder="Ex. Dentiste" required className="input" />
+          </div>
+          <button type="submit" disabled={catCreatePending} className="go" style={{ height: 52, width: "auto", padding: "0 24px", borderRadius: 14, fontSize: 15 }}>
+            {catCreatePending ? "Ajout…" : "Enregistrer"}
+          </button>
+        </form>
+        {catCreateState?.message && (
+          <p className={catCreateState.success ? "mt-3 text-sm text-accent" : "mt-3 text-sm text-danger"}>{catCreateState.message}</p>
+        )}
+        {catCreateState?.errors?.name && (
+          <p className="mt-2 text-sm text-danger">{catCreateState.errors.name}</p>
         )}
       </section>
     </div>
@@ -187,6 +291,55 @@ function DeleteCareButton({ id }: { id: string }) {
             <h3 className="text-lg font-extrabold text-ink">Supprimer ce soin ?</h3>
             <p className="mt-2 text-sm text-muted">
               Cette action est définitive. Un soin déjà utilisé dans une facture ne peut pas être supprimé.
+            </p>
+            {state?.message && <p className="mt-2 text-sm text-danger">{state.message}</p>}
+            <div className="mt-5 flex justify-end gap-2">
+              <button type="button" onClick={() => setOpen(false)} className="btn-secondary" style={{ height: 40, padding: "0 18px", borderRadius: 12, fontSize: 13 }}>
+                Annuler
+              </button>
+              <form action={action}>
+                <input type="hidden" name="id" value={id} />
+                <button
+                  type="submit"
+                  disabled={pending}
+                  className="btn-danger-solid"
+                  style={{ height: 40, padding: "0 18px", borderRadius: 12, fontSize: 13, width: "auto" }}
+                  onClick={() => setOpen(false)}
+                >
+                  {pending ? "…" : "Supprimer"}
+                </button>
+              </form>
+            </div>
+          </div>
+        </div>
+      )}
+    </>
+  );
+}
+
+function DeleteCategoryButton({ id }: { id: string }) {
+  const [state, action, pending] = useActionState(deleteCareCategory, undefined);
+  const [open, setOpen] = useState(false);
+  return (
+    <>
+      <button
+        type="button"
+        onClick={() => setOpen(true)}
+        className="text-xs font-medium text-danger underline-offset-2 hover:underline"
+        title={state?.message}
+      >
+        Supprimer
+      </button>
+      {open && (
+        <div
+          className="fixed inset-0 z-50 flex items-center justify-center p-4"
+          style={{ background: "rgba(11, 31, 42, 0.55)" }}
+          onClick={() => setOpen(false)}
+        >
+          <div className="card w-full max-w-md" onClick={(e) => e.stopPropagation()}>
+            <h3 className="text-lg font-extrabold text-ink">Supprimer cette catégorie ?</h3>
+            <p className="mt-2 text-sm text-muted">
+              Cette action est définitive. Une catégorie utilisée par des soins ne peut pas être supprimée : désactivez-la plutôt.
             </p>
             {state?.message && <p className="mt-2 text-sm text-danger">{state.message}</p>}
             <div className="mt-5 flex justify-end gap-2">
