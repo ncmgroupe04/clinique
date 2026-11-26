@@ -4,7 +4,16 @@ import Link from "next/link";
 import { useState } from "react";
 
 type Kind = "ticket" | "facture" | "ordonnance";
-type Template = { kind: Kind; header_text: string | null; footer_text: string | null };
+type InvoiceSettings = {
+  title: string;
+  number_prefix: string;
+  show_quantity: boolean;
+  show_unit_price: boolean;
+  show_discount: boolean;
+  show_advance: boolean;
+  show_stamp: boolean;
+};
+type Template = { kind: Kind; header_text: string | null; footer_text: string | null; settings?: Partial<InvoiceSettings> | null };
 type Structure = {
   name: string;
   address: string;
@@ -28,6 +37,16 @@ const DEFAULT_TEMPLATES: Record<Kind, { header_text: string; footer_text: string
     header_text: "ORDONNANCE",
     footer_text: "Veuillez rapporter l’ordonnance au prochain rendez-vous !!!",
   },
+};
+
+const DEFAULT_INVOICE_SETTINGS: InvoiceSettings = {
+  title: "Facture",
+  number_prefix: "",
+  show_quantity: true,
+  show_unit_price: true,
+  show_discount: true,
+  show_advance: true,
+  show_stamp: true,
 };
 
 const PRINT_FORMAT_LABELS: Record<string, string> = {
@@ -59,6 +78,10 @@ export default function ImpressionClient({
   }));
   const [message, setMessage] = useState<{ text: string; ok: boolean } | null>(null);
   const [saving, setSaving] = useState(false);
+  const [invoiceSettings, setInvoiceSettings] = useState<InvoiceSettings>(() => ({
+    ...DEFAULT_INVOICE_SETTINGS,
+    ...(templates.find((t) => t.kind === "facture")?.settings ?? {}),
+  }));
 
   const activeModel = KINDS.find((k) => k.kind === active)!;
   const current = values[active];
@@ -77,7 +100,11 @@ export default function ImpressionClient({
       const res = await fetch("/api/print-templates", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ kind: active, ...current }),
+        body: JSON.stringify({
+          kind: active,
+          ...current,
+          ...(active === "facture" ? { settings: invoiceSettings } : {}),
+        }),
       });
       const data = (await res.json().catch(() => ({}))) as { error?: string };
       if (!res.ok) {
@@ -153,6 +180,58 @@ export default function ImpressionClient({
             <p className="mt-1 text-xs text-muted">{current.footer_text.length}/500 caractères</p>
           </div>
 
+          {active === "facture" && (
+            <div className="rounded-[14px] border border-border bg-white p-4">
+              <h3 className="text-sm font-extrabold">Personnalisation de la facture</h3>
+              <p className="mt-1 text-xs text-muted">
+                Numérotation et éléments affichés sur les factures imprimées.
+              </p>
+              <div className="mt-3 grid gap-3 sm:grid-cols-2">
+                <div>
+                  <label className="lbl" htmlFor="invoice-title">Titre du document</label>
+                  <input
+                    id="invoice-title"
+                    className="in"
+                    maxLength={80}
+                    value={invoiceSettings.title}
+                    onChange={(e) => setInvoiceSettings((s) => ({ ...s, title: e.target.value }))}
+                    placeholder="Facture"
+                  />
+                </div>
+                <div>
+                  <label className="lbl" htmlFor="invoice-prefix">Préfixe du numéro</label>
+                  <input
+                    id="invoice-prefix"
+                    className="in"
+                    maxLength={20}
+                    value={invoiceSettings.number_prefix}
+                    onChange={(e) => setInvoiceSettings((s) => ({ ...s, number_prefix: e.target.value }))}
+                    placeholder="Ex. F-"
+                  />
+                </div>
+              </div>
+              <div className="mt-3 grid gap-2 sm:grid-cols-2">
+                {([
+                  ["show_quantity", "Colonne Quantité"],
+                  ["show_unit_price", "Colonne Prix unitaire"],
+                  ["show_discount", "Ligne Remise"],
+                  ["show_advance", "Ligne Avance"],
+                  ["show_stamp", "Cachet / Signature"],
+                ] as const).map(([key, label]) => (
+                  <label key={key} className="flex cursor-pointer items-center gap-2 text-sm text-ink">
+                    <input
+                      type="checkbox"
+                      checked={invoiceSettings[key]}
+                      onChange={(e) => setInvoiceSettings((s) => ({ ...s, [key]: e.target.checked }))}
+                      className="h-4 w-4 accent-accent"
+                    />
+                    {label}
+                  </label>
+                ))}
+              </div>
+            </div>
+          )}
+
           {message && (
             <p className={message.ok ? "text-sm font-semibold text-accent" : "text-sm font-semibold text-danger"}>
               {message.text}
@@ -212,14 +291,19 @@ export default function ImpressionClient({
               <br />
               Tél. {structure.phone || "—"}
               <br />
-              {structure.header_text || "—"}
+              {(active === "facture" ? current.header_text : structure.header_text) || "—"}
             </div>
 
             <div className="border-t-2 border-dashed border-input-border" />
 
             <div className="text-center text-[18px] font-extrabold tracking-[2px]">
-              {current.header_text || activeModel.title}
+              {active === "facture" ? invoiceSettings.title : current.header_text || activeModel.title}
             </div>
+            {active === "facture" && (
+              <div className="text-center text-xs font-bold text-muted">
+                N° {invoiceSettings.number_prefix}{new Date().getFullYear()}-0001
+              </div>
+            )}
 
             <div className="text-sm leading-relaxed">
               {active === "ordonnance" ? (

@@ -3,10 +3,21 @@ import * as z from "zod";
 import { getCurrentUser } from "@/lib/auth";
 import { createClient } from "@/lib/supabase/server";
 
+const invoiceSettingsSchema = z.object({
+  title: z.string().trim().max(80).default("Facture"),
+  number_prefix: z.string().trim().max(20).default(""),
+  show_quantity: z.boolean().default(true),
+  show_unit_price: z.boolean().default(true),
+  show_discount: z.boolean().default(true),
+  show_advance: z.boolean().default(true),
+  show_stamp: z.boolean().default(true),
+});
+
 const printTemplateSchema = z.object({
   kind: z.enum(["ticket", "facture", "ordonnance"]),
   header_text: z.string().max(500).nullish().transform((v) => v ?? null),
   footer_text: z.string().max(500).nullish().transform((v) => v ?? null),
+  settings: invoiceSettingsSchema.optional(),
 });
 
 export async function POST(request: Request) {
@@ -30,7 +41,7 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: "Données invalides." }, { status: 400 });
   }
 
-  const { kind, header_text, footer_text } = parsed.data;
+  const { kind, header_text, footer_text, settings } = parsed.data;
   const supabase = await createClient();
   const { error } = await supabase.from("print_templates").upsert(
     {
@@ -38,6 +49,7 @@ export async function POST(request: Request) {
       kind,
       header_text,
       footer_text,
+      settings: kind === "facture" ? settings ?? {} : {},
       updated_at: new Date().toISOString(),
     },
     { onConflict: "structure_id,kind" },

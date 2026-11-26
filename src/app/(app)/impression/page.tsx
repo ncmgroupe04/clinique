@@ -21,7 +21,7 @@ export default async function ImpressionPage() {
       .maybeSingle(),
     supabase
       .from("print_templates")
-      .select("kind, header_text, footer_text")
+      .select("kind, header_text, footer_text, settings")
       .eq("structure_id", user.structureId),
   ]);
 
