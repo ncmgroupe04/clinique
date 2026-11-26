@@ -42,7 +42,11 @@ export async function createInvoice(
 
   // Tolérance si la migration 0037 (colonne cotation) n'est pas encore appliquée.
   if (error && /cotation|column/i.test(error.message ?? "")) {
-    const fallbackItems = (items as Array<Record<string, unknown>>).map(({ cotation: _c, ...rest }) => rest);
+    const fallbackItems = (items as Array<Record<string, unknown>>).map((item) => {
+      const copy: Record<string, unknown> = { ...item };
+      delete copy.cotation;
+      return copy;
+    });
     const retry = await supabase.rpc("create_invoice", {
       p_patient_name: patientName,
       p_items: fallbackItems,

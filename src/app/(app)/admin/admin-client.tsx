@@ -315,6 +315,7 @@ export function EditPlanButton({ plan }: { plan: PlanEdit }) {
   const [open, setOpen] = useState(false);
   const [state, action, pending] = useActionState(updatePlan, {});
   useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     if (state?.success) setOpen(false);
   }, [state]);
 

@@ -2,7 +2,7 @@
 
 import { revalidatePath } from "next/cache";
 import { requireRole } from "@/lib/auth";
-import { createClient, createServiceClient } from "@/lib/supabase/server";
+import { createClient } from "@/lib/supabase/server";
 import { logAudit } from "@/lib/audit";
 import * as z from "zod";
 

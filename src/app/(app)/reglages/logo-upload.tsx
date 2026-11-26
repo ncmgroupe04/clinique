@@ -10,6 +10,7 @@ export default function LogoUpload({ structureId, initialPath }: { structureId: 
   const [busy, setBusy] = useState(false);
 
   useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     if (!path) { setUrl(null); return; }
     const supabase = createClient();
     const { data } = supabase.storage.from("structure-logos").getPublicUrl(path);

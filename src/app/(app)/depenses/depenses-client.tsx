@@ -221,7 +221,7 @@ export default function DepensesClient({ initial }: { initial: DepensesData }) {
         <div className="text-center">
           <p className="text-[13px] font-semibold text-muted">Dépenses annulées</p>
           <p className="mt-1 text-xl font-extrabold text-ink">{data.totals.countAnnule}</p>
-          <p className="mt-1 text-[11px] text-muted">Conservées pour l'historique</p>
+          <p className="mt-1 text-[11px] text-muted">Conservées pour l&apos;historique</p>
         </div>
       </div>
 

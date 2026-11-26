@@ -83,6 +83,7 @@ export default function OrdonnancesClient({ alternatives, structure, logoUrl }: 
 
   useEffect(() => {
     const q = query.trim();
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     if (!q && !category) { setSuggestions([]); setLoading(false); return; }
     let alive = true;
     setLoading(true);
