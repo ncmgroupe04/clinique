@@ -77,7 +77,7 @@ export default function UtilisateursClient({ users }: { users: User[] }) {
             </div>
             <div>
               <label className="lbl !mb-1 !text-xs" htmlFor="role">Rôle</label>
-              <select id="role" name="role" required className="input" style={{ ...fieldStyle, paddingRight: 36 }} defaultValue="cashier">
+              <select id="role" name="role" required className="input" style={{ ...fieldStyle, paddingRight: 42 }} defaultValue="cashier">
                 <option value="cashier">Caissier (tickets)</option>
                 <option value="docteur">Docteur (lecture)</option>
                 <option value="structure_admin">Administrateur de structure</option>

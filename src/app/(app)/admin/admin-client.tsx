@@ -143,7 +143,7 @@ export default function AdminStructuresTable({
           value={statusFilter}
           onChange={(e) => { setStatusFilter(e.target.value); setPage(1); }}
           className="input appearance-none"
-          style={{ height: 40, fontSize: 14, width: 200, paddingRight: 36 }}
+          style={{ height: 40, fontSize: 14, width: 200, paddingRight: 42 }}
         >
           {STATUS_OPTIONS.map((o) => (
             <option key={o.value} value={o.value}>

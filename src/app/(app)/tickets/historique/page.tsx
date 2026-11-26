@@ -137,8 +137,7 @@ export default async function HistoriquePage({
             <select
               name={sel.name}
               defaultValue={sel.value}
-              className="in appearance-none"
-              style={{ paddingRight: 42 }}
+              className="in"
             >
               <option value="">{sel.label}</option>
               {sel.options.map((o) => (
@@ -147,21 +146,6 @@ export default async function HistoriquePage({
                 </option>
               ))}
             </select>
-            <svg
-              className="pointer-events-none absolute top-1/2 -translate-y-1/2"
-              style={{ right: 16 }}
-              width="18"
-              height="18"
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="#0b7a6b"
-              strokeWidth="2"
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              aria-hidden="true"
-            >
-              <path d="m6 9 6 6 6-6" />
-            </svg>
           </div>
         ))}
 
