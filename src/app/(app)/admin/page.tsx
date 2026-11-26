@@ -36,7 +36,6 @@ export default async function AdminPage() {
   const daily = Math.round(mrr / 30);
   const weekly = Math.round(mrr / 4.33);
   const monthly = mrr;
-  const regFees = (structures ?? []).filter((s) => s.registration_fee_paid).length * 50000;
 
   return (
     <div className="flex flex-1 flex-col gap-[26px]">
@@ -46,12 +45,11 @@ export default async function AdminPage() {
       />
 
       {/* KPIs */}
-      <div className="card grid grid-cols-2 gap-4 lg:grid-cols-4">
+      <div className="card grid grid-cols-2 gap-4 lg:grid-cols-3">
         {[
           { label: "Abonnés actifs", value: String(activeSubs.length) },
           { label: "MRR (mensuel)", value: `${mrr.toLocaleString("fr-FR")} F` },
           { label: "ARR (annuel)", value: `${arr.toLocaleString("fr-FR")} F` },
-          { label: "Inscriptions payées", value: `${regFees.toLocaleString("fr-FR")} F` },
         ].map((k) => (
           <div key={k.label} className="text-center">
             <p className="text-[13px] font-semibold text-muted">{k.label}</p>
