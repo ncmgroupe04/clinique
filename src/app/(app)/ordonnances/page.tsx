@@ -17,7 +17,7 @@ export default async function OrdonnancesPage() {
     .select("id, dci, brand, class, form, dosage")
     .eq("is_active", true)
     .order("dci")
-    .limit(2000);
+    .limit(20000);
 
   const { data: structure } = await supabase
     .from("structures")
