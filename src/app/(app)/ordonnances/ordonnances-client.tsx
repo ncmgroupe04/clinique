@@ -335,7 +335,7 @@ export default function OrdonnancesClient({ alternatives, structure, logoUrl }: 
                   <p className="mt-1 text-[12px] text-[#A9BAC3]">Choisissez une catégorie ou tapez le nom d&apos;un médicament.</p>
                 </div>
               ) : (
-                <div className="max-h-[320px] overflow-y-auto">
+                <div>
                   {lines.map((l, i) => (
                     <div key={l.key} className="flex items-center gap-3 border-b border-[#EEF3F6] px-4 py-2.5 last:border-b-0">
                       <span className="w-4 shrink-0 text-[13px] font-bold text-[#A0B2BC]">{i + 1}.</span>
