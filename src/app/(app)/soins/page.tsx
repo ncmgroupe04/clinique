@@ -38,7 +38,6 @@ export default async function SoinsPage() {
           { structure_id: user.structureId, name: "Diagnostic", slug: "diagnostic" },
           { structure_id: user.structureId, name: "Intervention", slug: "intervention" },
           { structure_id: user.structureId, name: "Produit", slug: "produit" },
-          { structure_id: user.structureId, name: "Dentiste", slug: "dentiste" },
         ],
         { onConflict: "structure_id,slug", ignoreDuplicates: true },
       );

@@ -23,8 +23,16 @@ const DEFAULT_CATEGORIES: Category[] = [
   { id: "default-diagnostic", name: "Diagnostic", slug: "diagnostic", active: true },
   { id: "default-intervention", name: "Intervention", slug: "intervention", active: true },
   { id: "default-produit", name: "Produit", slug: "produit", active: true },
-  { id: "default-dentiste", name: "Dentiste", slug: "dentiste", active: true },
 ];
+
+function slugify(name: string): string {
+  return name
+    .toLowerCase()
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .replace(/[^a-z0-9]+/g, "-")
+    .replace(/^-+|-+$/g, "");
+}
 
 function fcfa(value: number): string {
   return `${value.toLocaleString("fr-FR")} F`;
@@ -39,8 +47,36 @@ export default function SoinsClient({ cares, categories }: { cares: Care[]; cate
   const [editState, editAction, editPending] = useActionState<CareState, FormData>(updateCare, undefined);
   const [catCreateState, catCreateAction, catCreatePending] = useActionState<CategoryState, FormData>(createCareCategory, undefined);
   const [catEditState, catEditAction, catEditPending] = useActionState<CategoryState, FormData>(updateCareCategory, undefined);
-  const effectiveCategories = categories.length ? categories : DEFAULT_CATEGORIES;
+  const [localCategories, setLocalCategories] = useState<Category[]>(() => {
+    if (typeof window === "undefined") return [];
+    try {
+      return JSON.parse(localStorage.getItem("care_categories_fallback") ?? "[]") as Category[];
+    } catch {
+      return [];
+    }
+  });
+  const effectiveCategories = categories.length
+    ? categories
+    : localCategories.length
+      ? localCategories
+      : DEFAULT_CATEGORIES;
   const activeCategories = effectiveCategories.filter((c) => c.active);
+  useEffect(() => {
+    if (typeof window !== "undefined" && categories.length === 0) {
+      localStorage.setItem("care_categories_fallback", JSON.stringify(localCategories));
+    }
+  }, [localCategories, categories.length]);
+
+  function addLocalCategory(formData: FormData) {
+    const name = String(formData.get("name") ?? "").trim();
+    const slug = slugify(name);
+    if (!name || !slug) return;
+    setLocalCategories((prev) =>
+      prev.some((c) => c.slug === slug)
+        ? prev
+        : [...prev, { id: `local-${Date.now()}`, name, slug, active: true }],
+    );
+  }
   useEffect(() => {
     // eslint-disable-next-line react-hooks/set-state-in-effect
     if (editState?.success) setEditingId(null);
@@ -204,7 +240,7 @@ export default function SoinsClient({ cares, categories }: { cares: Care[]; cate
             <p className="mt-0.5 text-xs text-muted">Liste personnalisable de votre structure, utilisée pour classer les soins.</p>
             {categories.length === 0 && (
               <p className="mt-1 text-xs text-danger">
-                Catégories par défaut provisoires : la liste personnalisable sera disponible après application de la migration de la base.
+                Mode local de test : les ajouts sont conservés dans ce navigateur et alimentent immédiatement la liste déroulante des soins et de la facture.
               </p>
             )}
           </div>
@@ -218,11 +254,11 @@ export default function SoinsClient({ cares, categories }: { cares: Care[]; cate
           </button>
         </div>
 
-        {categories.length === 0 ? (
+        {effectiveCategories.length === 0 ? (
           <p className="py-3 text-sm text-muted">Aucune catégorie pour le moment.</p>
         ) : (
           <div>
-            {categories.map((cat) => (
+            {effectiveCategories.map((cat) => (
               <div key={cat.id} className="ln">
                 {editingCategoryId === cat.id ? (
                   <div className="flex w-full flex-col gap-3">
@@ -249,22 +285,44 @@ export default function SoinsClient({ cares, categories }: { cares: Care[]; cate
                     <span className={`cd ${cat.active ? "" : "off"}`} style={{ width: 70 }}>
                       {cat.active ? "Active" : "Inactive"}
                     </span>
-                    <button type="button" onClick={() => setEditingCategoryId(cat.id)} aria-label={`Modifier ${cat.name}`} className="x" style={{ width: "auto", padding: "0 16px", fontSize: 13, fontWeight: 600 }}>
-                      Modifier
-                    </button>
-                    <ConfirmActionButton
-                      label={cat.active ? "Désactiver" : "Réactiver"}
-                      confirmTitle={cat.active ? "Désactiver cette catégorie ?" : "Réactiver cette catégorie ?"}
-                      confirmMessage={cat.active ? "La catégorie ne sera plus proposée lors de la création d'un soin." : "La catégorie sera à nouveau disponible."}
-                      formAction={toggleCareCategory}
-                      hiddenInputs={[
-                        { name: "id", value: cat.id },
-                        { name: "active", value: cat.active ? "false" : "true" },
-                      ]}
-                      buttonClassName="text-sm font-medium text-muted underline-offset-2 hover:underline"
-                      buttonStyle={{ padding: "0 6px" }}
-                    />
-                    <DeleteCategoryButton id={cat.id} />
+                    {categories.length === 0 ? (
+                      <>
+                        <button
+                          type="button"
+                          onClick={() => setLocalCategories((prev) => prev.map((x) => (x.id === cat.id ? { ...x, active: !x.active } : x)))}
+                          className="text-sm font-medium text-muted underline-offset-2 hover:underline"
+                          style={{ padding: "0 6px" }}
+                        >
+                          {cat.active ? "Désactiver" : "Réactiver"}
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => setLocalCategories((prev) => prev.filter((x) => x.id !== cat.id))}
+                          className="text-xs font-medium text-danger underline-offset-2 hover:underline"
+                        >
+                          Supprimer
+                        </button>
+                      </>
+                    ) : (
+                      <>
+                        <button type="button" onClick={() => setEditingCategoryId(cat.id)} aria-label={`Modifier ${cat.name}`} className="x" style={{ width: "auto", padding: "0 16px", fontSize: 13, fontWeight: 600 }}>
+                          Modifier
+                        </button>
+                        <ConfirmActionButton
+                          label={cat.active ? "Désactiver" : "Réactiver"}
+                          confirmTitle={cat.active ? "Désactiver cette catégorie ?" : "Réactiver cette catégorie ?"}
+                          confirmMessage={cat.active ? "La catégorie ne sera plus proposée lors de la création d'un soin." : "La catégorie sera à nouveau disponible."}
+                          formAction={toggleCareCategory}
+                          hiddenInputs={[
+                            { name: "id", value: cat.id },
+                            { name: "active", value: cat.active ? "false" : "true" },
+                          ]}
+                          buttonClassName="text-sm font-medium text-muted underline-offset-2 hover:underline"
+                          buttonStyle={{ padding: "0 6px" }}
+                        />
+                        <DeleteCategoryButton id={cat.id} />
+                      </>
+                    )}
                   </>
                 )}
               </div>
@@ -272,10 +330,18 @@ export default function SoinsClient({ cares, categories }: { cares: Care[]; cate
           </div>
         )}
 
-        <form action={catCreateAction} className="mt-3.5 flex flex-col gap-3 rounded-[18px] border-[1.5px] border-dashed border-accent bg-[#EEF8F6] p-[18px] sm:flex-row sm:items-end">
+        <form
+          action={categories.length ? catCreateAction : undefined}
+          onSubmit={categories.length ? undefined : (e) => {
+            e.preventDefault();
+            addLocalCategory(new FormData(e.currentTarget));
+            e.currentTarget.reset();
+          }}
+          className="mt-3.5 flex flex-col gap-3 rounded-[18px] border-[1.5px] border-dashed border-accent bg-[#EEF8F6] p-[18px] sm:flex-row sm:items-end"
+        >
           <div style={{ flex: 2 }}>
             <label className="lbl" htmlFor="category-name">Nom de la catégorie</label>
-            <input ref={categoryNameRef} id="category-name" name="name" placeholder="Ex. Dentiste" required className="input" />
+            <input ref={categoryNameRef} id="category-name" name="name" placeholder="Ex. Hospitalisation" required className="input" />
           </div>
           <button type="submit" disabled={catCreatePending} className="go" style={{ height: 52, width: "auto", padding: "0 24px", borderRadius: 14, fontSize: 15 }}>
             {catCreatePending ? "Ajout…" : "Enregistrer"}

@@ -12,7 +12,6 @@ const DEFAULT_CATEGORIES: Category[] = [
   { name: "Diagnostic", slug: "diagnostic", active: true },
   { name: "Intervention", slug: "intervention", active: true },
   { name: "Produit", slug: "produit", active: true },
-  { name: "Dentiste", slug: "dentiste", active: true },
 ];
 
 function fcfa(v: number): string {

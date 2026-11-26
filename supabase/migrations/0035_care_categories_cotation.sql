@@ -64,8 +64,7 @@ from public.structures s
 cross join (values
   ('Diagnostic'::text, 'diagnostic'::text),
   ('Intervention'::text, 'intervention'::text),
-  ('Produit'::text, 'produit'::text),
-  ('Dentiste'::text, 'dentiste'::text)
+  ('Produit'::text, 'produit'::text)
 ) as v(name, slug)
 on conflict (structure_id, slug) do nothing;
 
@@ -79,8 +78,7 @@ begin
   values
     (new.id, 'Diagnostic', 'diagnostic'),
     (new.id, 'Intervention', 'intervention'),
-    (new.id, 'Produit', 'produit'),
-    (new.id, 'Dentiste', 'dentiste')
+    (new.id, 'Produit', 'produit')
   on conflict (structure_id, slug) do nothing;
   return new;
 end $$;
