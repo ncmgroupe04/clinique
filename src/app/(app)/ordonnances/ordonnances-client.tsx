@@ -7,7 +7,15 @@ type Med = { id: string; dci: string; brand: string | null; class: string; form:
 type Line = { key: string; label: string; posology: string; duration: string };
 
 const POSOLOGIES = ["1×3/jour", "2×2/jour", "1×2/jour", "1×1/jour", "Autre"];
-const DURATIONS = ["3 jours", "5 jours", "7 jours", "10 jours"];
+const DURATIONS = ["3 jours", "5 jours", "7 jours", "10 jours", "15 jours", "30 jours", "1 mois", "2 mois"];
+
+const durationToDays = (value: string): number | null => {
+  const map: Record<string, number> = {
+    "3 jours": 3, "5 jours": 5, "7 jours": 7, "10 jours": 10,
+    "15 jours": 15, "30 jours": 30, "1 mois": 30, "2 mois": 60,
+  };
+  return map[value] ?? null;
+};
 
 type Structure = { name: string; address: string | null; phone: string | null; header_text: string | null };
 export default function OrdonnancesClient({ medications, alternatives, structure, logoUrl }: { medications: Med[]; alternatives: Record<string, string[]>; structure: Structure | null; logoUrl: string | null }) {
@@ -47,7 +55,7 @@ export default function OrdonnancesClient({ medications, alternatives, structure
     const items = lines.map((l, i) => ({
       label: l.label,
       posology: l.posology,
-      duration_days: parseInt(l.duration) || null,
+      duration_days: durationToDays(l.duration),
       quantity: null,
       sort_order: i + 1,
     }));
