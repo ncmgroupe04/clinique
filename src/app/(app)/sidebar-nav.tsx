@@ -6,7 +6,7 @@ import { useEffect, useRef, useState } from "react";
 
 type Role = "platform_admin" | "structure_admin" | "cashier" | "docteur";
 
-type IconName = "ticket" | "history" | "tag" | "users" | "settings" | "admin" | "care" | "invoice" | "dashboard" | "ordonnance" | "subscription" | "journal" | "wallet";
+type IconName = "ticket" | "history" | "tag" | "users" | "settings" | "admin" | "care" | "invoice" | "dashboard" | "ordonnance" | "subscription" | "journal" | "wallet" | "calendar" | "bell" | "printer";
 
 function Icon({ name }: { name: IconName }) {
   const common = {
@@ -114,6 +114,27 @@ function Icon({ name }: { name: IconName }) {
           <path d="M16 12h.01M3 9h17" />
         </svg>
       );
+    case "calendar":
+      return (
+        <svg {...common}>
+          <rect x="3" y="5" width="18" height="16" rx="2" />
+          <path d="M3 10h18M8 3v4M16 3v4" />
+        </svg>
+      );
+    case "bell":
+      return (
+        <svg {...common}>
+          <path d="M18 8a6 6 0 0 0-12 0c0 7-3 7-3 9h18c0-2-3-2-3-9z" />
+          <path d="M10 21h4" />
+        </svg>
+      );
+    case "printer":
+      return (
+        <svg {...common}>
+          <path d="M6 9V3h12v6M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2" />
+          <rect x="6" y="14" width="12" height="7" rx="1" />
+        </svg>
+      );
   }
 }
 
@@ -182,6 +203,7 @@ export default function SidebarNav({ role }: { role: Role }) {
       caisseItems.push({ href: "/tickets", label: "Tickets", icon: "ticket" });
       caisseItems.push({ href: "/tickets/historique", label: "Historique", icon: "history" });
       caisseItems.push({ href: "/factures", label: "Factures", icon: "invoice" });
+      caisseItems.push({ href: "/depenses", label: "Dépenses", icon: "wallet" });
     }
     if (caisseItems.length) {
       groups.push({ key: "caisse", label: "Caisse", icon: "ticket", items: caisseItems });
@@ -192,6 +214,9 @@ export default function SidebarNav({ role }: { role: Role }) {
     if (role === "structure_admin" || role === "docteur") {
       cliniqueItems.push({ href: "/ordonnances", label: "Ordonnances", icon: "ordonnance" });
     }
+    cliniqueItems.push({ href: "/patients", label: "Patients", icon: "users" });
+    cliniqueItems.push({ href: "/agenda", label: "Agenda", icon: "calendar" });
+    cliniqueItems.push({ href: "/notifications", label: "Notifications", icon: "bell" });
     if (adminAccess) {
       cliniqueItems.push({ href: "/soins", label: "Soins", icon: "care" });
       cliniqueItems.push({ href: "/tarifs", label: "Tarifs", icon: "tag" });
@@ -211,6 +236,7 @@ export default function SidebarNav({ role }: { role: Role }) {
           { href: "/reglages", label: "Réglages", icon: "settings" },
           { href: "/abonnement", label: "Abonnement", icon: "subscription" },
           { href: "/journal", label: "Journal", icon: "journal" },
+          { href: "/impression", label: "Config. impression", icon: "printer" },
         ],
       });
     }
