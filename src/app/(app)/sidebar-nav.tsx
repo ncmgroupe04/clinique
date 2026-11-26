@@ -249,6 +249,21 @@ export default function SidebarNav({ role }: { role: Role }) {
           </>
         )}
 
+        {role === "docteur" && (
+          <>
+            <Link
+              href="/ordonnances"
+              aria-label="Nouvelle ordonnance"
+              className="mb-1 flex h-12 w-12 shrink-0 items-center justify-center rounded-[16px] bg-accent shadow-[0_0_0_4px_#163545]"
+            >
+              <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#fff" strokeWidth="2.4" strokeLinecap="round" aria-hidden="true">
+                <path d="M12 5v14M5 12h14" />
+              </svg>
+            </Link>
+            <div className="mb-2 text-[10px] font-bold text-white">Nouvelle ordonnance</div>
+          </>
+        )}
+
         <nav className="flex flex-col items-center gap-1">
           {groups.map((g) => {
             const active = isGroupActive(g);

@@ -68,15 +68,21 @@ export default async function TableauPage() {
       <div className="card">
         <p className="text-[13px] font-semibold text-muted">Accès rapide</p>
         <div className="mt-3 grid grid-cols-1 gap-3 sm:grid-cols-3">
-          <Link href="/tickets/nouveau" className="go" style={{ height: 48, fontSize: 14, borderRadius: 14 }}>
-            Nouveau Ticket
-          </Link>
-          <Link href="/factures/nouvelle" className="go" style={{ height: 48, fontSize: 14, borderRadius: 14 }}>
-            Nouvelle Facture
-          </Link>
-          <Link href="/ordonnances" className="go" style={{ height: 48, fontSize: 14, borderRadius: 14 }}>
-            Nouvelle Ordonnance
-          </Link>
+          {(user.role === "structure_admin" || user.role === "cashier") && (
+            <>
+              <Link href="/tickets/nouveau" className="go" style={{ height: 48, fontSize: 14, borderRadius: 14 }}>
+                Nouveau Ticket
+              </Link>
+              <Link href="/factures/nouvelle" className="go" style={{ height: 48, fontSize: 14, borderRadius: 14 }}>
+                Nouvelle Facture
+              </Link>
+            </>
+          )}
+          {(user.role === "structure_admin" || user.role === "docteur") && (
+            <Link href="/ordonnances" className="go" style={{ height: 48, fontSize: 14, borderRadius: 14 }}>
+              Nouvelle Ordonnance
+            </Link>
+          )}
         </div>
       </div>
 
