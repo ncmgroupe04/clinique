@@ -76,6 +76,10 @@ body {
   border-color: #0b7a6b;
   box-shadow: 0 0 0 3px rgba(11, 122, 107, 0.12);
 }
+/* Flèche native des selects : on la recule pour laisser une marge à droite. */
+select.in, select.input { padding-right: 40px; }
+/* Champ date : laisse de la place entre le texte et l'icône calendrier. */
+input[type="date"].in, input[type="date"].input { padding-right: 44px; }
 
 .chip {
   flex: 1;

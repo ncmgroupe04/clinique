@@ -250,7 +250,7 @@ export default function CaisseClient({ initial }: { initial: CaisseData }) {
           value={categorie}
           onChange={(e) => setCategorie(e.target.value)}
           className="in"
-          style={{ height: 44, width: "auto", minWidth: 210, paddingRight: 40 }}
+          style={{ height: 44, width: "auto", minWidth: 210 }}
           aria-label="Filtrer par catégorie"
         >
           <option value="all">Toutes catégories</option>
@@ -265,7 +265,7 @@ export default function CaisseClient({ initial }: { initial: CaisseData }) {
           value={fromDate}
           onChange={(e) => setFromDate(e.target.value)}
           className="in"
-          style={{ height: 44, width: 160 }}
+          style={{ height: 44, width: 180 }}
           aria-label="Date de début"
           title="Du"
         />
@@ -274,7 +274,7 @@ export default function CaisseClient({ initial }: { initial: CaisseData }) {
           value={toDate}
           onChange={(e) => setToDate(e.target.value)}
           className="in"
-          style={{ height: 44, width: 160 }}
+          style={{ height: 44, width: 180 }}
           aria-label="Date de fin"
           title="Au"
         />
@@ -342,7 +342,6 @@ export default function CaisseClient({ initial }: { initial: CaisseData }) {
                 required
                 className="in"
                 defaultValue="Fournitures"
-                style={{ paddingRight: 40 }}
               >
                 {DEPENSE_CATEGORIES.map((c) => (
                   <option key={c} value={c}>
