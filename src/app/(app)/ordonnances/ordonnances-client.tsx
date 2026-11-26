@@ -39,6 +39,7 @@ const CATEGORIES = [
   { value: "urgences", label: "Urgences" },
   { value: "contraception", label: "Contraception" },
   { value: "homeopathie", label: "Homéopathie" },
+  { value: "enfant", label: "Enfant" },
 ];
 
 const durationToDays = (value: string): number | null => {

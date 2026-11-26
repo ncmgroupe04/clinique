@@ -32,6 +32,7 @@ const CATEGORY_KEYWORDS: Record<string, string[]> = {
   urgences: ["adrénaline", "naloxone", "morphine", "atropine", "glucagon", "diazépam", "nicardipine", "urgence", "réanimation"],
   contraception: ["lévonorgestrel", "étonogestrel", "contraceptif", "préservatif", "diu", "norlevo", "dépo", "microgynon", "jadelle", "implanon"],
   homeopathie: ["homéopathie", "tot'héma", "arnica", "nux vomica", "belladonna", "aconitum", "gentiane"],
+  enfant: ["sirop", "suspension", "dispersible", "nourrisson", "enfant", "pédiatrique", "100 mg/5 ml", "125 mg/5 ml", "250 mg/5 ml", "sro", "zinc", "vitamine a", "gouttes"],
 };
 
 export async function GET(request: Request) {
@@ -51,11 +52,11 @@ export async function GET(request: Request) {
 
   if (q) {
     const escaped = q.replace(/[%,()]/g, " ");
-    query = query.or(`dci.ilike.%${escaped}%,brand.ilike.%${escaped}%,class.ilike.%${escaped}%`);
+    query = query.or(`dci.ilike.%${escaped}%,brand.ilike.%${escaped}%,class.ilike.%${escaped}%,form.ilike.%${escaped}%`);
   }
   if (category && CATEGORY_KEYWORDS[category]) {
     const parts = CATEGORY_KEYWORDS[category]
-      .map((k) => `dci.ilike.%${k}%,brand.ilike.%${k}%,class.ilike.%${k}%`)
+      .map((k) => `dci.ilike.%${k}%,brand.ilike.%${k}%,class.ilike.%${k}%,form.ilike.%${k}%`)
       .join(",");
     query = query.or(parts);
   }
