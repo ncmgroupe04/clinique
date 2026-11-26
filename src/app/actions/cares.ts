@@ -37,7 +37,7 @@ export async function createCare(
   }
 
   const supabase = await createClient();
-  const { error } = await supabase.from("cares").insert({
+  let { error } = await supabase.from("cares").insert({
     structure_id: user.structureId,
     name: parsed.data.name,
     price: parsed.data.price,
@@ -45,6 +45,16 @@ export async function createCare(
     category: parsed.data.category,
     cotation: parsed.data.cotation || null,
   });
+  if (error && /cotation|column/i.test(error.message ?? "")) {
+    const retry = await supabase.from("cares").insert({
+      structure_id: user.structureId,
+      name: parsed.data.name,
+      price: parsed.data.price,
+      unit: parsed.data.unit,
+      category: parsed.data.category,
+    });
+    error = retry.error;
+  }
   if (error) return { message: "Création impossible." };
   await logAudit({
     structureId: user.structureId,
@@ -77,11 +87,19 @@ export async function updateCare(
   }
 
   const supabase = await createClient();
-  const { error } = await supabase
+  let { error } = await supabase
     .from("cares")
     .update({ name: parsed.data.name, price: parsed.data.price, unit: parsed.data.unit, category: parsed.data.category, cotation: parsed.data.cotation || null })
     .eq("id", id)
     .eq("structure_id", user.structureId);
+  if (error && /cotation|column/i.test(error.message ?? "")) {
+    const retry = await supabase
+      .from("cares")
+      .update({ name: parsed.data.name, price: parsed.data.price, unit: parsed.data.unit, category: parsed.data.category })
+      .eq("id", id)
+      .eq("structure_id", user.structureId);
+    error = retry.error;
+  }
   if (error) return { message: "Mise à jour impossible." };
   await logAudit({
     structureId: user.structureId,

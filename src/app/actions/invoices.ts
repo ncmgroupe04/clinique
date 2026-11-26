@@ -33,12 +33,25 @@ export async function createInvoice(
   }
 
   const supabase = await createClient();
-  const { data, error } = await supabase.rpc("create_invoice", {
+  let { data, error } = await supabase.rpc("create_invoice", {
     p_patient_name: patientName,
     p_items: items,
     p_discount: discount,
     p_advance: advance,
   });
+
+  // Tolérance si la migration 0037 (colonne cotation) n'est pas encore appliquée.
+  if (error && /cotation|column/i.test(error.message ?? "")) {
+    const fallbackItems = (items as Array<Record<string, unknown>>).map(({ cotation: _c, ...rest }) => rest);
+    const retry = await supabase.rpc("create_invoice", {
+      p_patient_name: patientName,
+      p_items: fallbackItems,
+      p_discount: discount,
+      p_advance: advance,
+    });
+    data = retry.data;
+    error = retry.error;
+  }
 
   if (error) return { message: error.message ?? "Création impossible." };
 
