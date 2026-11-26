@@ -46,9 +46,9 @@ export default function InscriptionsClient({ structures }: { structures: Inscrip
   const [detail, setDetail] = useState<Inscription | null>(null);
   const PAGE_SIZE = 10;
 
-  const pending = structures.filter((s) => !s.registration_fee_paid);
+  const pending = structures.filter((s) => !s.registration_fee_paid && !s.suspended);
   const validated = structures.filter((s) => s.registration_fee_paid && s.active && !s.suspended);
-  const invalid = structures.filter((s) => s.registration_fee_paid && (!s.active || s.suspended));
+  const invalid = structures.filter((s) => s.suspended || (s.registration_fee_paid && !s.active));
 
   const list = tab === "pending" ? pending : tab === "validated" ? validated : invalid;
   const start = (page - 1) * PAGE_SIZE;

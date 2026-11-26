@@ -64,8 +64,20 @@ export async function signup(
   }
   const { email, password, structureName, fullName, address, phone, headerText, planId } = parsed.data;
 
+  // Empêche qu'une même adresse e-mail soit utilisée pour plusieurs comptes vérifiés.
+  const admin = createServiceClient();
+  const { data: existingUsers } = await admin.auth.admin.listUsers();
+  const alreadyExists = existingUsers?.users?.some(
+    (u) => u.email?.toLowerCase() === email.toLowerCase() && u.email_confirmed_at,
+  );
+  if (alreadyExists) {
+    return {
+      message: "Un compte vérifié existe déjà avec cette adresse e-mail. Connectez-vous ou utilisez une autre adresse.",
+    };
+  }
+
   const supabase = await createClient();
-  const { data, error } = await supabase.auth.signUp({ email, password });
+  const { data, error } = await supabase.auth.signUp({ email, password, options: { emailRedirectTo: `${(await headers()).get("origin") ?? "https://ticketordonnance.vercel.app"}/connexion` } });
   if (error || !data.user) {
     return { message: error?.message ?? "Inscription impossible." };
   }
