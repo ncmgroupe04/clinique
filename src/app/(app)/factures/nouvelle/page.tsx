@@ -27,10 +27,29 @@ export default async function NouvelleFacturePage() {
     .eq("structure_id", user.structureId)
     .order("name", { ascending: true });
 
+  const [{ data: structure }, { data: template }] = await Promise.all([
+    supabase
+      .from("structures")
+      .select("name, address, phone, header_text")
+      .eq("id", user.structureId)
+      .maybeSingle(),
+    supabase
+      .from("print_templates")
+      .select("header_text, footer_text, settings")
+      .eq("structure_id", user.structureId)
+      .eq("kind", "facture")
+      .maybeSingle(),
+  ]);
+
   return (
     <div className="flex flex-1 flex-col gap-[26px]">
       <ScreenHeader title="Nouvelle facture" subtitle="Étape unique · Patient et soins" />
-      <FactureForm cares={cares ?? []} categories={categories ?? []} />
+      <FactureForm
+        cares={cares ?? []}
+        categories={categories ?? []}
+        structure={structure ?? null}
+        template={template ?? null}
+      />
     </div>
   );
 }

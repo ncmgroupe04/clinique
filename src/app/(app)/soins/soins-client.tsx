@@ -74,6 +74,40 @@ export default function SoinsClient({ cares, categories }: { cares: Care[]; cate
         : [...prev, { id: `local-${Date.now()}`, name, slug, active: true }],
     );
   }
+
+  const [localCares, setLocalCares] = useState<Care[]>(() => {
+    if (typeof window === "undefined") return cares;
+    try {
+      const stored = JSON.parse(localStorage.getItem("cares_fallback") ?? "null");
+      return Array.isArray(stored) ? (stored as Care[]) : cares;
+    } catch {
+      return cares;
+    }
+  });
+  const effectiveCares = categories.length ? cares : localCares;
+  useEffect(() => {
+    if (typeof window !== "undefined" && categories.length === 0) {
+      localStorage.setItem("cares_fallback", JSON.stringify(localCares));
+    }
+  }, [localCares, categories.length]);
+
+  function addLocalCare(formData: FormData) {
+    const name = String(formData.get("name") ?? "").trim();
+    const price = Number(formData.get("price") ?? 0) || 0;
+    if (!name) return;
+    setLocalCares((prev) => [
+      ...prev,
+      {
+        id: `local-care-${Date.now()}`,
+        name,
+        price,
+        active: true,
+        unit: String(formData.get("unit") ?? "unité"),
+        category: String(formData.get("category") ?? "intervention"),
+        cotation: String(formData.get("cotation") ?? "") || null,
+      },
+    ]);
+  }
   useEffect(() => {
     // eslint-disable-next-line react-hooks/set-state-in-effect
     if (editState?.success) setEditingId(null);
@@ -98,11 +132,11 @@ export default function SoinsClient({ cares, categories }: { cares: Care[]; cate
           </button>
         </div>
 
-        {cares.length === 0 ? (
+        {effectiveCares.length === 0 ? (
           <p className="py-3 text-sm text-muted">Aucun soin pour le moment.</p>
         ) : (
           <div>
-            {cares.map((c) => (
+            {effectiveCares.map((c) => (
               <div key={c.id} className="ln">
                 {editingId === c.id ? (
                   <div className="flex w-full flex-col gap-3">
@@ -190,7 +224,15 @@ export default function SoinsClient({ cares, categories }: { cares: Care[]; cate
           </div>
         )}
 
-        <form action={createAction} className="mt-3.5 flex flex-col gap-3 rounded-[18px] border-[1.5px] border-dashed border-accent bg-[#EEF8F6] p-[18px] sm:flex-row sm:items-end">
+        <form
+          action={categories.length ? createAction : undefined}
+          onSubmit={categories.length ? undefined : (e) => {
+            e.preventDefault();
+            addLocalCare(new FormData(e.currentTarget));
+            e.currentTarget.reset();
+          }}
+          className="mt-3.5 flex flex-col gap-3 rounded-[18px] border-[1.5px] border-dashed border-accent bg-[#EEF8F6] p-[18px] sm:flex-row sm:items-end"
+        >
           <div style={{ flex: 2 }}>
             <label className="lbl" htmlFor="care-name">Nom du soin</label>
             <input ref={nameRef} id="care-name" name="name" placeholder="Injection" required className="input" />

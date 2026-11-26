@@ -7,6 +7,8 @@ import { useRouter } from "next/navigation";
 type Care = { id: string; name: string; price: number; unit: string; category: string; cotation?: string | null };
 type Category = { name: string; slug: string; active: boolean };
 type Line = { careId: string; name: string; price: string; qty: number; unit: string; cotation: string };
+type StructureInfo = { name: string | null; address: string | null; phone: string | null; header_text: string | null };
+type TemplateInfo = { header_text: string | null; footer_text: string | null; settings?: Record<string, unknown> | null };
 
 const DEFAULT_CATEGORIES: Category[] = [
   { name: "Diagnostic", slug: "diagnostic", active: true },
@@ -18,7 +20,17 @@ function fcfa(v: number): string {
   return `${v.toLocaleString("fr-FR")} F CFA`;
 }
 
-export default function FactureForm({ cares, categories }: { cares: Care[]; categories: Category[] }) {
+export default function FactureForm({
+  cares,
+  categories,
+  structure,
+  template,
+}: {
+  cares: Care[];
+  categories: Category[];
+  structure: StructureInfo | null;
+  template: TemplateInfo | null;
+}) {
   const effectiveCategories = categories.length ? categories : DEFAULT_CATEGORIES;
   const router = useRouter();
   const [state, action, pending] = useActionState<InvoiceState, FormData>(createInvoice, undefined);
@@ -31,6 +43,7 @@ export default function FactureForm({ cares, categories }: { cares: Care[]; cate
   const [selected, setSelected] = useState<string[]>([]);
   const [qty, setQty] = useState(1);
   const [priceOverride, setPriceOverride] = useState("");
+  const [showPreview, setShowPreview] = useState(false);
 
   if (state?.success && state.invoiceId) {
     router.push(`/factures/${state.invoiceId}`);
@@ -81,7 +94,31 @@ export default function FactureForm({ cares, categories }: { cares: Care[]; cate
     lines.map((l) => ({ care_id: l.careId, care_name: l.name, quantity: l.qty, unit_price: Number(l.price) || 0, cotation: l.cotation })),
   );
 
+  const tpl = {
+    title: "Facture",
+    number_prefix: "",
+    show_date: true,
+    show_indice: true,
+    show_quantity: true,
+    show_unit_price: true,
+    show_discount: true,
+    show_advance: true,
+    show_stamp: true,
+    ...(template?.settings ?? {}),
+  } as {
+    title: string;
+    number_prefix: string;
+    show_date: boolean;
+    show_indice: boolean;
+    show_quantity: boolean;
+    show_unit_price: boolean;
+    show_discount: boolean;
+    show_advance: boolean;
+    show_stamp: boolean;
+  };
+
   return (
+    <>
     <form action={action} className="flex flex-1 flex-col gap-6 lg:flex-row">
       <input type="hidden" name="items" value={itemsJson} />
       <section className="card flex min-w-0 flex-1 flex-col gap-5">
@@ -269,10 +306,90 @@ export default function FactureForm({ cares, categories }: { cares: Care[]; cate
             <span>Reste à payer</span><span>{fcfa(reste)}</span>
           </div>
         </section>
+        <button
+          type="button"
+          onClick={() => setShowPreview(true)}
+          disabled={lines.length === 0}
+          className="btn-secondary"
+          style={{ height: 52, width: "100%", opacity: lines.length === 0 ? 0.55 : 1 }}
+        >
+          Aperçu de la facture
+        </button>
         <button type="submit" disabled={pending || lines.length === 0} className="go">
           {pending ? "Enregistrement…" : "Enregistrer la facture"}
         </button>
       </aside>
     </form>
+
+    {showPreview && (
+      <div
+        className="fixed inset-0 z-50 flex items-center justify-center overflow-auto p-4"
+        style={{ background: "rgba(11,31,42,0.6)" }}
+        onClick={() => setShowPreview(false)}
+      >
+        <div className="card w-full max-w-[760px]" onClick={(e) => e.stopPropagation()}>
+          <div className="no-print mb-3 flex items-center justify-between">
+            <h3 className="text-lg font-extrabold">Aperçu de la facture</h3>
+            <button type="button" onClick={() => setShowPreview(false)} className="btn-secondary" style={{ height: 40, padding: "0 16px" }}>
+              Fermer
+            </button>
+          </div>
+          <div className="mx-auto bg-white p-6" style={{ maxWidth: "210mm", fontFamily: "Arial, Helvetica, sans-serif" }}>
+            <div className="text-center">
+              <p className="font-bold text-lg leading-tight">{structure?.name || "Nom de la structure"}</p>
+              {structure?.address && <p className="text-xs leading-tight">{structure.address}</p>}
+              {structure?.phone && <p className="text-xs leading-tight">Tél. {structure.phone}</p>}
+              {template?.header_text?.trim() && <p className="text-xs leading-tight mt-1">{template.header_text}</p>}
+            </div>
+            <div className="border-t border-dashed border-gray-400 my-2" />
+            <p className="text-center font-bold" style={{ fontSize: 20 }}>
+              {`${tpl.title || "Facture"} ${tpl.number_prefix}${new Date().getFullYear()}-0001`}
+            </p>
+            <p className="text-xs text-center mt-1">{new Date().toLocaleDateString("fr-FR")}</p>
+            <div className="border-t border-dashed border-gray-400 my-2" />
+            <p className="text-sm"><span className="font-bold">Patient :</span> {patientName || "—"}</p>
+            <div className="border-t border-dashed border-gray-400 my-2" />
+            <table className="w-full text-sm border-collapse">
+              <thead>
+                <tr className="border-b border-gray-400">
+                  <th className="text-left py-1">Soin</th>
+                  {tpl.show_date && <th className="text-center py-1">Date</th>}
+                  {tpl.show_indice && <th className="text-center py-1">Indice</th>}
+                  {tpl.show_quantity && <th className="text-right py-1">Qté</th>}
+                  {tpl.show_unit_price && <th className="text-right py-1">Prix unit.</th>}
+                  <th className="text-right py-1">Total</th>
+                </tr>
+              </thead>
+              <tbody>
+                {lines.map((l) => (
+                  <tr key={l.careId} className="border-b border-gray-200">
+                    <td className="py-1">{l.name}</td>
+                    {tpl.show_date && <td className="text-center py-1">{new Date().toLocaleDateString("fr-FR")}</td>}
+                    {tpl.show_indice && <td className="text-center py-1 font-semibold">{l.cotation || "—"}</td>}
+                    {tpl.show_quantity && <td className="text-right py-1">{l.qty}</td>}
+                    {tpl.show_unit_price && <td className="text-right py-1">{fcfa(Number(l.price) || 0)}</td>}
+                    <td className="text-right py-1">{fcfa((Number(l.price) || 0) * l.qty)}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+            <div className="border-t border-dashed border-gray-400 my-2" />
+            <div className="text-sm space-y-1">
+              <div className="flex justify-between"><span>Sous-total</span><span>{fcfa(subtotal)}</span></div>
+              {tpl.show_discount && <div className="flex justify-between"><span>Remise</span><span>−{fcfa(discountValue)}</span></div>}
+              <div className="flex justify-between font-bold"><span>Total</span><span>{fcfa(total)}</span></div>
+              {tpl.show_advance && <div className="flex justify-between"><span>Avance</span><span>{fcfa(advanceValue)}</span></div>}
+              <div className="flex justify-between font-bold"><span>Reste à payer</span><span>{fcfa(reste)}</span></div>
+            </div>
+            <div className="border-t border-dashed border-gray-400 my-2" />
+            <div className="flex justify-between items-end text-xs mt-4">
+              <span>{template?.footer_text?.trim() || "Merci de votre visite."}</span>
+              {tpl.show_stamp && <span className="w-[120px] border-t border-black pt-1 text-center">Cachet / Signature</span>}
+            </div>
+          </div>
+        </div>
+      </div>
+    )}
+    </>
   );
 }
