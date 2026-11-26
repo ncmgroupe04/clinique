@@ -293,6 +293,30 @@ export default function SoinsClient({ cares, categories }: { cares: Care[]; cate
           </button>
         </div>
 
+        <form
+          action={categories.length ? catCreateAction : undefined}
+          onSubmit={categories.length ? undefined : (e) => {
+            e.preventDefault();
+            addLocalCategory(new FormData(e.currentTarget));
+            e.currentTarget.reset();
+          }}
+          className="mb-3 flex flex-col gap-3 rounded-[18px] border-[1.5px] border-dashed border-accent bg-[#EEF8F6] p-[18px] sm:flex-row sm:items-end"
+        >
+          <div style={{ flex: 2 }}>
+            <label className="lbl" htmlFor="category-name">Nom de la catégorie</label>
+            <input ref={categoryNameRef} id="category-name" name="name" placeholder="Ex. Hospitalisation" required className="input" />
+          </div>
+          <button type="submit" disabled={catCreatePending} className="go" style={{ height: 52, width: "auto", padding: "0 24px", borderRadius: 14, fontSize: 15 }}>
+            {catCreatePending ? "Ajout…" : "Enregistrer"}
+          </button>
+        </form>
+        {catCreateState?.message && (
+          <p className={catCreateState.success ? "text-sm text-accent" : "text-sm text-danger"}>{catCreateState.message}</p>
+        )}
+        {catCreateState?.errors?.name && (
+          <p className="mt-2 text-sm text-danger">{catCreateState.errors.name}</p>
+        )}
+
         {effectiveCategories.length === 0 ? (
           <p className="py-3 text-sm text-muted">Aucune catégorie pour le moment.</p>
         ) : (
@@ -367,30 +391,6 @@ export default function SoinsClient({ cares, categories }: { cares: Care[]; cate
               </div>
             ))}
           </div>
-        )}
-
-        <form
-          action={categories.length ? catCreateAction : undefined}
-          onSubmit={categories.length ? undefined : (e) => {
-            e.preventDefault();
-            addLocalCategory(new FormData(e.currentTarget));
-            e.currentTarget.reset();
-          }}
-          className="mt-3.5 flex flex-col gap-3 rounded-[18px] border-[1.5px] border-dashed border-accent bg-[#EEF8F6] p-[18px] sm:flex-row sm:items-end"
-        >
-          <div style={{ flex: 2 }}>
-            <label className="lbl" htmlFor="category-name">Nom de la catégorie</label>
-            <input ref={categoryNameRef} id="category-name" name="name" placeholder="Ex. Hospitalisation" required className="input" />
-          </div>
-          <button type="submit" disabled={catCreatePending} className="go" style={{ height: 52, width: "auto", padding: "0 24px", borderRadius: 14, fontSize: 15 }}>
-            {catCreatePending ? "Ajout…" : "Enregistrer"}
-          </button>
-        </form>
-        {catCreateState?.message && (
-          <p className={catCreateState.success ? "mt-3 text-sm text-accent" : "mt-3 text-sm text-danger"}>{catCreateState.message}</p>
-        )}
-        {catCreateState?.errors?.name && (
-          <p className="mt-2 text-sm text-danger">{catCreateState.errors.name}</p>
         )}
       </section>
     </div>
