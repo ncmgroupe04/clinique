@@ -4,7 +4,13 @@ import { useActionState, useEffect, useRef, useState } from "react";
 import { createCare, updateCare, toggleCare, deleteCare, type CareState } from "@/app/actions/cares";
 import ConfirmActionButton from "../confirm-action-button";
 
-type Care = { id: string; name: string; price: number; active: boolean; unit: string };
+type Care = { id: string; name: string; price: number; active: boolean; unit: string; category: string };
+
+const CATEGORIES = [
+  { value: "diagnostic", label: "Diagnostic" },
+  { value: "intervention", label: "Intervention" },
+  { value: "produit", label: "Produit" },
+];
 
 function fcfa(value: number): string {
   return `${value.toLocaleString("fr-FR")} F`;
@@ -62,6 +68,14 @@ export default function SoinsClient({ cares }: { cares: Care[] }) {
                           <option value="séance">Séance</option>
                         </select>
                       </div>
+                      <div style={{ width: 140 }}>
+                        <label className="lbl" htmlFor={`category-${c.id}`}>Catégorie</label>
+                        <select id={`category-${c.id}`} name="category" className="input" defaultValue={c.category ?? "intervention"}>
+                          {CATEGORIES.map((cat) => (
+                            <option key={cat.value} value={cat.value}>{cat.label}</option>
+                          ))}
+                        </select>
+                      </div>
                       <button type="submit" disabled={editPending} className="go" style={{ height: 52, width: "auto", padding: "0 24px", borderRadius: 14, fontSize: 15 }}>
                         {editPending ? "…" : "Enregistrer"}
                       </button>
@@ -76,7 +90,13 @@ export default function SoinsClient({ cares }: { cares: Care[] }) {
                 ) : (
                   <>
                     <div className="flex-1 font-bold">
-                      {c.name} {c.unit && c.unit !== "unité" && <span className="text-xs font-medium text-muted">({c.unit})</span>}
+                      {c.name}
+                      {c.category && (
+                        <span className="ml-2 rounded-md bg-accent-light px-1.5 py-0.5 text-[10px] font-bold text-accent-text">
+                          {CATEGORIES.find((cat) => cat.value === c.category)?.label ?? c.category}
+                        </span>
+                      )}
+                      {c.unit && c.unit !== "unité" && <span className="ml-2 text-xs font-medium text-muted">({c.unit})</span>}
                     </div>
                     <b className="text-lg">{fcfa(c.price)}</b>
                     <span className={`cd ${c.active ? "" : "off"}`} style={{ width: 70 }}>
@@ -121,6 +141,14 @@ export default function SoinsClient({ cares }: { cares: Care[] }) {
               <option value="nuit">Nuit</option>
               <option value="jour">Jour</option>
               <option value="séance">Séance</option>
+            </select>
+          </div>
+          <div style={{ flex: 0.7 }}>
+            <label className="lbl" htmlFor="care-category">Catégorie</label>
+            <select id="care-category" name="category" className="input" defaultValue="intervention">
+              {CATEGORIES.map((cat) => (
+                <option key={cat.value} value={cat.value}>{cat.label}</option>
+              ))}
             </select>
           </div>
           <button type="submit" disabled={createPending} className="go" style={{ height: 52, width: "auto", padding: "0 24px", borderRadius: 14, fontSize: 15 }}>

@@ -4,11 +4,17 @@ import { useActionState, useState } from "react";
 import { createInvoice, type InvoiceState } from "@/app/actions/invoices";
 import { useRouter } from "next/navigation";
 
-type Care = { id: string; name: string; price: number; unit: string };
+type Care = { id: string; name: string; price: number; unit: string; category: string };
 type Line = { careId: string; name: string; price: number; qty: number; unit: string };
 
+const GROUPS = [
+  { value: "diagnostic", label: "Diagnostics" },
+  { value: "intervention", label: "Interventions" },
+  { value: "produit", label: "Produits" },
+];
+
 function fcfa(v: number): string {
-  return `${v.toLocaleString("fr-FR")} F`;
+  return `${v.toLocaleString("fr-FR")} F CFA`;
 }
 
 export default function FactureForm({ cares }: { cares: Care[] }) {
@@ -19,24 +25,45 @@ export default function FactureForm({ cares }: { cares: Care[] }) {
   const [discount, setDiscount] = useState(0);
   const [advance, setAdvance] = useState(0);
 
-  // redirect on success
+  // Sélection en cours (cases cochées)
+  const [selected, setSelected] = useState<string[]>([]);
+  const [qty, setQty] = useState(1);
+  const [priceOverride, setPriceOverride] = useState("");
+
   if (state?.success && state.invoiceId) {
     router.push(`/factures/${state.invoiceId}`);
   }
 
-  const addLine = (care: Care) => {
+  function toggleCare(id: string) {
+    setSelected((prev) => (prev.includes(id) ? prev.filter((x) => x !== id) : [...prev, id]));
+  }
+
+  function addSelected() {
+    if (selected.length === 0) return;
+    const override = priceOverride.trim() === "" ? null : Number(priceOverride);
     setLines((prev) => {
-      const existing = prev.find((l) => l.careId === care.id);
-      if (existing) {
-        return prev.map((l) => (l.careId === care.id ? { ...l, qty: l.qty + 1 } : l));
+      const next = [...prev];
+      for (const id of selected) {
+        const care = cares.find((c) => c.id === id);
+        if (!care) continue;
+        const price = override !== null && Number.isFinite(override) && override >= 0 ? override : care.price;
+        const existing = next.findIndex((l) => l.careId === care.id);
+        if (existing >= 0) {
+          next[existing] = { ...next[existing], qty: next[existing].qty + qty, price };
+        } else {
+          next.push({ careId: care.id, name: care.name, price, qty, unit: care.unit ?? "unité" });
+        }
       }
-      return [...prev, { careId: care.id, name: care.name, price: care.price, qty: 1, unit: care.unit ?? "unité" }];
+      return next;
     });
-  };
+    setSelected([]);
+    setQty(1);
+    setPriceOverride("");
+  }
 
   const removeLine = (careId: string) => setLines((prev) => prev.filter((l) => l.careId !== careId));
-  const setQty = (careId: string, qty: number) =>
-    setLines((prev) => prev.map((l) => (l.careId === careId ? { ...l, qty: Math.max(1, qty) } : l)));
+  const setQtyLine = (careId: string, value: number) =>
+    setLines((prev) => prev.map((l) => (l.careId === careId ? { ...l, qty: Math.max(1, value) } : l)));
 
   const subtotal = lines.reduce((s, l) => s + l.price * l.qty, 0);
   const total = Math.max(0, subtotal - discount);
@@ -62,49 +89,106 @@ export default function FactureForm({ cares }: { cares: Care[] }) {
           />
         </div>
 
+        {/* Liste à cocher groupée par catégorie */}
         <div>
-          <label className="lbl" htmlFor="care-select">Ajouter un soin</label>
-          <div className="flex gap-2">
-            <select
-              id="care-select"
-              value=""
-              onChange={(e) => {
-                const care = cares.find((c) => c.id === e.target.value);
-                if (care) addLine(care);
-              }}
+          <span className="lbl">Ajouter un soin</span>
+          {cares.length === 0 ? (
+            <p className="text-sm text-muted">Aucun soin actif dans le catalogue.</p>
+          ) : (
+            <div className="grid grid-cols-1 gap-3 md:grid-cols-3">
+              {GROUPS.map((group) => {
+                const items = cares.filter((c) => (c.category ?? "intervention") === group.value);
+                return (
+                  <div key={group.value} className="rounded-[18px] border border-border bg-white p-4">
+                    <h3 className="mb-2 text-sm font-extrabold text-ink">{group.label}</h3>
+                    <div className="space-y-1.5">
+                      {items.length === 0 ? (
+                        <p className="text-xs text-muted">Aucun soin.</p>
+                      ) : (
+                        items.map((care) => (
+                          <label
+                            key={care.id}
+                            className="flex cursor-pointer items-center gap-2 rounded-lg px-1 py-1 text-sm text-ink hover:bg-bg"
+                          >
+                            <input
+                              type="checkbox"
+                              checked={selected.includes(care.id)}
+                              onChange={() => toggleCare(care.id)}
+                              className="h-4 w-4 shrink-0 accent-accent"
+                            />
+                            <span className="truncate">{care.name}</span>
+                          </label>
+                        ))
+                      )}
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+          )}
+
+          <div className="mt-3 flex flex-wrap items-end gap-2">
+            <div className="flex items-center gap-1 rounded-xl border border-input-border bg-white px-2" style={{ height: 52 }}>
+              <button type="button" onClick={() => setQty((q) => Math.max(1, q - 1))} className="x" style={{ width: 30, height: 30, fontSize: 16 }}>−</button>
+              <span className="w-8 text-center font-bold">{qty}</span>
+              <button type="button" onClick={() => setQty((q) => q + 1)} className="x" style={{ width: 30, height: 30, fontSize: 16 }}>+</button>
+            </div>
+            <input
+              value={priceOverride}
+              onChange={(e) => setPriceOverride(e.target.value.replace(/[^0-9]/g, ""))}
+              inputMode="numeric"
+              placeholder="Prix ou remise (optionnel)"
               className="input flex-1"
+              style={{ minWidth: 180 }}
+            />
+            <button
+              type="button"
+              onClick={addSelected}
+              disabled={selected.length === 0}
+              className="btn-secondary"
+              style={{ height: 52, borderRadius: 14, fontSize: 14, width: "auto" }}
             >
-              <option value="">Choisir un soin…</option>
-              {cares.map((c) => (
-                <option key={c.id} value={c.id}>
-                  {c.name} — {fcfa(c.price)}{c.unit && c.unit !== "unité" ? ` / ${c.unit}` : ""}
-                </option>
-              ))}
-            </select>
+              Ajouter à la facture
+            </button>
           </div>
         </div>
 
-        <div className="space-y-2">
-          <h3 className="text-sm font-bold text-ink">Soins</h3>
-          {lines.length === 0 ? (
-            <p className="text-sm text-muted">Aucun soin ajouté.</p>
-          ) : (
-            lines.map((l) => (
-              <div key={l.careId} className="flex items-center gap-2 rounded-xl border border-border bg-bg p-2">
-                <div className="min-w-0 flex-1">
-                  <p className="text-sm font-semibold text-ink">{l.name}</p>
-                  <p className="text-xs text-muted">{fcfa(l.price)} / {l.unit === "unité" ? "unité" : l.unit}</p>
-                </div>
-                <div className="flex items-center gap-1">
-                  <button type="button" onClick={() => setQty(l.careId, l.qty - 1)} className="x" style={{ width: 32, height: 32, fontSize: 16 }}>−</button>
-                  <span className="w-8 text-center font-bold">{l.qty}</span>
-                  <button type="button" onClick={() => setQty(l.careId, l.qty + 1)} className="x" style={{ width: 32, height: 32, fontSize: 16 }}>+</button>
-                </div>
-                <span className="w-20 text-right text-sm font-bold">{fcfa(l.price * l.qty)}</span>
-                <button type="button" onClick={() => removeLine(l.careId)} className="x" style={{ width: 32, height: 32, fontSize: 14 }}>×</button>
-              </div>
-            ))
-          )}
+        {/* Lignes de la facture */}
+        <div className="overflow-x-auto">
+          <table className="w-full border-collapse text-sm">
+            <thead>
+              <tr className="border-b border-border text-left text-xs font-bold uppercase tracking-wide text-muted">
+                <th className="py-2">Nom du soin</th>
+                <th className="py-2 text-center">Quantité</th>
+                <th className="py-2 text-right">Prix unitaire</th>
+                <th className="py-2 text-right">Total</th>
+                <th className="py-2" />
+              </tr>
+            </thead>
+            <tbody>
+              {lines.length === 0 ? (
+                <tr><td colSpan={5} className="py-3 text-sm text-muted">Aucun soin ajouté.</td></tr>
+              ) : (
+                lines.map((l) => (
+                  <tr key={l.careId} className="border-b border-border">
+                    <td className="py-2 font-semibold">{l.name}</td>
+                    <td className="py-2">
+                      <div className="flex items-center justify-center gap-1">
+                        <button type="button" onClick={() => setQtyLine(l.careId, l.qty - 1)} className="x" style={{ width: 28, height: 28, fontSize: 14 }}>−</button>
+                        <span className="w-7 text-center font-bold">{l.qty}</span>
+                        <button type="button" onClick={() => setQtyLine(l.careId, l.qty + 1)} className="x" style={{ width: 28, height: 28, fontSize: 14 }}>+</button>
+                      </div>
+                    </td>
+                    <td className="py-2 text-right">{fcfa(l.price)}</td>
+                    <td className="py-2 text-right font-bold">{fcfa(l.price * l.qty)}</td>
+                    <td className="py-2 text-right">
+                      <button type="button" onClick={() => removeLine(l.careId)} className="x" style={{ width: 28, height: 28, fontSize: 13 }}>×</button>
+                    </td>
+                  </tr>
+                ))
+              )}
+            </tbody>
+          </table>
         </div>
 
         <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">

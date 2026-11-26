@@ -10,6 +10,7 @@ const careSchema = z.object({
   name: z.string().min(1, "Nom requis.").max(200).trim(),
   price: z.coerce.number().int().min(0, "Prix invalide."),
   unit: z.enum(["unité", "nuit", "jour", "séance"]).optional().default("unité"),
+  category: z.enum(["diagnostic", "intervention", "produit"]).optional().default("intervention"),
 });
 
 export type CareState =
@@ -27,6 +28,7 @@ export async function createCare(
     name: formData.get("name"),
     price: formData.get("price"),
     unit: formData.get("unit") ?? undefined,
+    category: formData.get("category") ?? undefined,
   });
   if (!parsed.success) {
     return { errors: parsed.error.flatten().fieldErrors };
@@ -38,6 +40,7 @@ export async function createCare(
     name: parsed.data.name,
     price: parsed.data.price,
     unit: parsed.data.unit,
+    category: parsed.data.category,
   });
   if (error) return { message: "Création impossible." };
   await logAudit({
@@ -63,6 +66,7 @@ export async function updateCare(
     name: formData.get("name"),
     price: formData.get("price"),
     unit: formData.get("unit") ?? undefined,
+    category: formData.get("category") ?? undefined,
   });
   if (!parsed.success) {
     return { errors: parsed.error.flatten().fieldErrors };
@@ -71,7 +75,7 @@ export async function updateCare(
   const supabase = await createClient();
   const { error } = await supabase
     .from("cares")
-    .update({ name: parsed.data.name, price: parsed.data.price, unit: parsed.data.unit })
+    .update({ name: parsed.data.name, price: parsed.data.price, unit: parsed.data.unit, category: parsed.data.category })
     .eq("id", id)
     .eq("structure_id", user.structureId);
   if (error) return { message: "Mise à jour impossible." };
