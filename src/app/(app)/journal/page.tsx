@@ -81,7 +81,7 @@ function detailEmail(details: unknown): string | null {
 export default async function JournalPage({
   searchParams,
 }: {
-  searchParams: Promise<{ q?: string; page?: string }>;
+  searchParams: Promise<{ q?: string; page?: string; action?: string; structure?: string }>;
 }) {
   await connection();
   const user = await requireRole("structure_admin", "platform_admin");
@@ -103,6 +103,16 @@ export default async function JournalPage({
   if (params.q?.trim()) {
     query = query.ilike("action", `%${params.q.trim()}%`);
   }
+  if (params.action?.trim()) {
+    query = query.eq("action", params.action.trim());
+  }
+  if (params.structure?.trim() && user.role === "platform_admin") {
+    query = query.eq("structure_id", params.structure.trim());
+  }
+
+  const { data: allStructures } = user.role === "platform_admin"
+    ? await supabase.from("structures").select("id, name").order("name")
+    : { data: [] as { id: string; name: string }[] };
 
   const { data: logs, count } = await query;
 
@@ -128,22 +138,43 @@ export default async function JournalPage({
 
   const total = count ?? 0;
   const pages = Math.max(1, Math.ceil(total / PAGE_SIZE));
-  const href = (p: number) => `/journal?page=${p}${params.q ? `&q=${encodeURIComponent(params.q)}` : ""}`;
+  const href = (p: number) =>
+    `/journal?page=${p}&q=${encodeURIComponent(params.q ?? "")}&action=${encodeURIComponent(params.action ?? "")}&structure=${encodeURIComponent(params.structure ?? "")}`;
 
   return (
     <div className="flex flex-1 flex-col gap-[26px]">
       <ScreenHeader
         title="Journal d'activité"
         subtitle="Trace des connexions et des actions effectuées par les utilisateurs."
-      />
+      >
+        {user.role === "platform_admin" && (
+          <Link href="/api/admin/export?type=journal" className="btn-secondary" style={{ height: 40, padding: "0 14px", borderRadius: 12, fontSize: 13, width: "auto" }}>Exporter CSV</Link>
+        )}
+      </ScreenHeader>
 
       <form method="get" className="card flex flex-wrap items-end gap-3">
         <div className="min-w-[240px] flex-1">
           <label className="lbl" htmlFor="q">Rechercher une action</label>
           <input id="q" name="q" defaultValue={params.q ?? ""} className="input" placeholder="ex. login, ticket, user" />
         </div>
+        <div>
+          <label className="lbl" htmlFor="action">Action</label>
+          <select id="action" name="action" className="input" defaultValue={params.action ?? ""} style={{ width: 200 }}>
+            <option value="">Toutes</option>
+            {Object.keys(ACTION_LABELS).map((a) => <option key={a} value={a}>{label(a)}</option>)}
+          </select>
+        </div>
+        {user.role === "platform_admin" && (
+          <div>
+            <label className="lbl" htmlFor="structure">Structure</label>
+            <select id="structure" name="structure" className="input" defaultValue={params.structure ?? ""} style={{ width: 200 }}>
+              <option value="">Toutes</option>
+              {(allStructures ?? []).map((s) => <option key={s.id} value={s.id}>{s.name}</option>)}
+            </select>
+          </div>
+        )}
         <button type="submit" className="btn-primary" style={{ height: 40, padding: "0 16px" }}>Filtrer</button>
-        {params.q && <Link href="/journal" className="btn-secondary" style={{ height: 40, padding: "0 16px" }}>Réinitialiser</Link>}
+        <Link href="/journal" className="btn-secondary" style={{ height: 40, padding: "0 16px" }}>Réinitialiser</Link>
       </form>
 
       <section className="card overflow-x-auto">

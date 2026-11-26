@@ -184,6 +184,12 @@ export default function SidebarNav({ role }: { role: Role }) {
         { href: "/admin/inscriptions", label: "Inscriptions", icon: "users" },
         { href: "/admin/formules", label: "Formules", icon: "tag" },
         { href: "/admin/structures", label: "Structures", icon: "admin" },
+        { href: "/admin/abonnements", label: "Abonnements", icon: "subscription" },
+        { href: "/admin/facturation", label: "Facturation", icon: "invoice" },
+        { href: "/admin/support", label: "Support", icon: "users" },
+        { href: "/admin/notifications", label: "Notifications", icon: "journal" },
+        { href: "/admin/rapports", label: "Rapports", icon: "dashboard" },
+        { href: "/admin/parametres", label: "Paramètres", icon: "settings" },
         { href: "/journal", label: "Journal", icon: "journal" },
       ],
     });
@@ -325,7 +331,7 @@ export default function SidebarNav({ role }: { role: Role }) {
       </div>
 
       {openGroupData && (
-        <div role="menu" className="flex w-[196px] shrink-0 flex-col gap-1 border-l border-white/10 px-3 pt-4">
+        <div role="menu" className="flex max-h-screen w-[196px] shrink-0 flex-col gap-1 overflow-y-auto border-l border-white/10 px-3 pb-4 pt-4">
           <p className="mb-2 px-2 text-[11px] font-bold uppercase tracking-wide text-nav">
             {openGroupData.label}
           </p>

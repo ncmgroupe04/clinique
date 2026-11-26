@@ -1,7 +1,7 @@
 import { connection } from "next/server";
 import { requireUser } from "@/lib/auth";
 import SidebarNav from "./sidebar-nav";
-import { createServiceClient } from "@/lib/supabase/server";
+import { createClient, createServiceClient } from "@/lib/supabase/server";
 import { redirect } from "next/navigation";
 import Link from "next/link";
 import LogoutButton from "./logout-button";
@@ -15,6 +15,16 @@ export default async function AppLayout({
   const user = await requireUser();
 
   let renewalAlert: string | null = null;
+  let unreadNotifications = 0;
+  if (user.role === "platform_admin") {
+    const notifClient = await createClient();
+    const { count } = await notifClient
+      .from("notifications")
+      .select("id", { count: "exact", head: true })
+      .eq("user_id", user.id)
+      .eq("read", false);
+    unreadNotifications = count ?? 0;
+  }
   if (user.structureId) {
     const supabase = createServiceClient();
     const { data: structure } = await supabase
@@ -42,6 +52,21 @@ export default async function AppLayout({
       <SidebarNav role={user.role} />
       <div className="flex min-w-0 flex-1 flex-col">
         <header className="print:hidden flex items-center justify-end gap-3 px-6 py-3 lg:px-10 lg:py-4">
+          {user.role === "platform_admin" && (
+            <Link
+              href="/admin/notifications"
+              aria-label="Notifications"
+              className="btn-secondary"
+              style={{ height: 48, padding: "0 14px", borderRadius: 14, fontSize: 13, width: "auto" }}
+            >
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+                <path d="M18 8a6 6 0 0 0-12 0c0 7-3 7-3 9h18c0-2-3-2-3-9M13.7 21a2 2 0 0 1-3.4 0" />
+              </svg>
+              {unreadNotifications > 0 && (
+                <span className="rounded-full bg-danger px-2 py-0.5 text-[11px] font-bold text-white">{unreadNotifications}</span>
+              )}
+            </Link>
+          )}
           <Link
             href="/profil"
             className="btn-secondary"
