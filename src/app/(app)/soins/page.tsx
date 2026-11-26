@@ -1,4 +1,5 @@
 import { redirect } from "next/navigation";
+import Link from "next/link";
 import { connection } from "next/server";
 import { requireUser } from "@/lib/auth";
 import { createClient, createServiceClient } from "@/lib/supabase/server";
@@ -60,7 +61,11 @@ export default async function SoinsPage() {
       <ScreenHeader
         title="Réglages · Soins et prix"
         subtitle="Catalogue des soins facturables (injections, pansements, perfusions, chambres…)."
-      />
+      >
+        <Link href="/factures/nouvelle" className="go" style={{ height: 44, width: "auto", padding: "0 20px", borderRadius: 12, fontSize: 14 }}>
+          Facture
+        </Link>
+      </ScreenHeader>
       <SoinsClient cares={cares ?? []} categories={categoryRows} />
     </div>
   );
