@@ -6,7 +6,7 @@ import { useRouter } from "next/navigation";
 
 type Care = { id: string; name: string; price: number; unit: string; category: string };
 type Category = { name: string; slug: string; active: boolean };
-type Line = { careId: string; name: string; price: number; qty: number; unit: string };
+type Line = { careId: string; name: string; price: string; qty: number; unit: string };
 
 function fcfa(v: number): string {
   return `${v.toLocaleString("fr-FR")} F CFA`;
@@ -17,8 +17,8 @@ export default function FactureForm({ cares, categories }: { cares: Care[]; cate
   const [state, action, pending] = useActionState<InvoiceState, FormData>(createInvoice, undefined);
   const [lines, setLines] = useState<Line[]>([]);
   const [patientName, setPatientName] = useState("");
-  const [discount, setDiscount] = useState(0);
-  const [advance, setAdvance] = useState(0);
+  const [discount, setDiscount] = useState("");
+  const [advance, setAdvance] = useState("");
 
   // Sélection en cours (cases cochées)
   const [selected, setSelected] = useState<string[]>([]);
@@ -41,7 +41,7 @@ export default function FactureForm({ cares, categories }: { cares: Care[]; cate
       for (const id of selected) {
         const care = cares.find((c) => c.id === id);
         if (!care) continue;
-        const price = override !== null && Number.isFinite(override) && override >= 0 ? override : care.price;
+        const price = override !== null && Number.isFinite(override) && override >= 0 ? String(override) : String(care.price);
         const existing = next.findIndex((l) => l.careId === care.id);
         if (existing >= 0) {
           next[existing] = { ...next[existing], qty: next[existing].qty + qty, price };
@@ -59,13 +59,17 @@ export default function FactureForm({ cares, categories }: { cares: Care[]; cate
   const removeLine = (careId: string) => setLines((prev) => prev.filter((l) => l.careId !== careId));
   const setQtyLine = (careId: string, value: number) =>
     setLines((prev) => prev.map((l) => (l.careId === careId ? { ...l, qty: Math.max(1, value) } : l)));
+  const setPriceLine = (careId: string, value: string) =>
+    setLines((prev) => prev.map((l) => (l.careId === careId ? { ...l, price: value.replace(/[^0-9]/g, "") } : l)));
 
-  const subtotal = lines.reduce((s, l) => s + l.price * l.qty, 0);
-  const total = Math.max(0, subtotal - discount);
-  const reste = Math.max(0, total - advance);
+  const discountValue = Number(discount) || 0;
+  const advanceValue = Number(advance) || 0;
+  const subtotal = lines.reduce((s, l) => s + (Number(l.price) || 0) * l.qty, 0);
+  const total = Math.max(0, subtotal - discountValue);
+  const reste = Math.max(0, total - advanceValue);
 
   const itemsJson = JSON.stringify(
-    lines.map((l) => ({ care_name: l.name, quantity: l.qty, unit_price: l.price })),
+    lines.map((l) => ({ care_name: l.name, quantity: l.qty, unit_price: Number(l.price) || 0 })),
   );
 
   return (
@@ -174,8 +178,18 @@ export default function FactureForm({ cares, categories }: { cares: Care[]; cate
                         <button type="button" onClick={() => setQtyLine(l.careId, l.qty + 1)} className="x" style={{ width: 28, height: 28, fontSize: 14 }}>+</button>
                       </div>
                     </td>
-                    <td className="py-2 text-right">{fcfa(l.price)}</td>
-                    <td className="py-2 text-right font-bold">{fcfa(l.price * l.qty)}</td>
+                    <td className="py-2 text-right">
+                      <input
+                        type="text"
+                        inputMode="numeric"
+                        aria-label={`Prix unitaire ${l.name}`}
+                        value={l.price}
+                        onChange={(e) => setPriceLine(l.careId, e.target.value)}
+                        className="input text-right"
+                        style={{ width: 110, height: 38, padding: "0 10px" }}
+                      />
+                    </td>
+                    <td className="py-2 text-right font-bold">{fcfa((Number(l.price) || 0) * l.qty)}</td>
                     <td className="py-2 text-right">
                       <button type="button" onClick={() => removeLine(l.careId)} className="x" style={{ width: 28, height: 28, fontSize: 13 }}>×</button>
                     </td>
@@ -192,10 +206,10 @@ export default function FactureForm({ cares, categories }: { cares: Care[]; cate
             <input
               id="discount"
               name="discount"
-              type="number"
-              min={0}
+              type="text"
+              inputMode="numeric"
               value={discount}
-              onChange={(e) => setDiscount(Number(e.target.value) || 0)}
+              onChange={(e) => setDiscount(e.target.value.replace(/[^0-9]/g, ""))}
               className="input"
             />
           </div>
@@ -204,10 +218,10 @@ export default function FactureForm({ cares, categories }: { cares: Care[]; cate
             <input
               id="advance"
               name="advance"
-              type="number"
-              min={0}
+              type="text"
+              inputMode="numeric"
               value={advance}
-              onChange={(e) => setAdvance(Number(e.target.value) || 0)}
+              onChange={(e) => setAdvance(e.target.value.replace(/[^0-9]/g, ""))}
               className="input"
             />
           </div>
@@ -222,11 +236,11 @@ export default function FactureForm({ cares, categories }: { cares: Care[]; cate
         <section className="card flex flex-1 flex-col gap-3">
           <h3 className="text-sm font-bold uppercase tracking-wide text-muted">Récapitulatif</h3>
           <div className="row"><span>Sous-total</span><span className="font-bold">{fcfa(subtotal)}</span></div>
-          <div className="row"><span>Remise</span><span className="font-bold">−{fcfa(discount)}</span></div>
+          <div className="row"><span>Remise</span><span className="font-bold">−{fcfa(discountValue)}</span></div>
           <div className="border-t border-border pt-2">
             <div className="row" style={{ fontSize: 16, fontWeight: 800 }}><span>Total</span><span>{fcfa(total)}</span></div>
           </div>
-          <div className="row"><span>Avance</span><span className="font-bold">{fcfa(advance)}</span></div>
+          <div className="row"><span>Avance</span><span className="font-bold">{fcfa(advanceValue)}</span></div>
           <div className="row" style={{ fontSize: 16, fontWeight: 800, color: "#0b5f54" }}>
             <span>Reste à payer</span><span>{fcfa(reste)}</span>
           </div>
