@@ -62,7 +62,11 @@ export default async function SoinsPage() {
         title="Réglages · Soins et prix"
         subtitle="Catalogue des soins facturables (injections, pansements, perfusions, chambres…)."
       >
-        <Link href="/factures/nouvelle" className="go" style={{ height: 44, width: "auto", padding: "0 20px", borderRadius: 12, fontSize: 14 }}>
+        <Link
+          href="/factures/nouvelle"
+          className="go"
+          style={{ height: 52, width: 240, borderRadius: 14, fontSize: 17, fontWeight: 800, boxShadow: "0 6px 16px rgba(11,122,107,.28)" }}
+        >
           Facture
         </Link>
       </ScreenHeader>
