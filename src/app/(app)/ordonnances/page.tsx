@@ -35,7 +35,12 @@ export default async function OrdonnancesPage() {
 
   return (
     <div className="flex flex-1 flex-col gap-[26px]">
-      <ScreenHeader title="Ordonnances" subtitle="Tapez les premières lettres, choisissez, imprimez." />
+      <ScreenHeader title="Ordonnances" subtitle="Tapez les premières lettres, choisissez, imprimez.">
+        <div className="mt-10 hidden items-center gap-3 lg:flex">
+          <span className="text-[11px] font-bold uppercase tracking-[1.6px] text-[#8CA1AC]">Aperçu avant impression</span>
+          <span className="rounded-full bg-[#DFF3EF] px-2.5 py-1 text-[10px] font-extrabold tracking-[1px] text-[#0B5F54]">A5</span>
+        </div>
+      </ScreenHeader>
       <OrdonnancesClient alternatives={alternatives} structure={structure ?? null} logoUrl={logoUrl} />
     </div>
   );

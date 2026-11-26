@@ -61,6 +61,33 @@ export async function GET(request: Request) {
     query = query.or(parts);
   }
 
-  const { data } = await query.order("dci").limit(20);
-  return NextResponse.json({ medications: data ?? [] });
+  const { data } = await query.order("dci").limit(q ? 60 : 20);
+  const rows = data ?? [];
+
+  // Sans recherche texte, l'ordre alphabétique suffit.
+  if (!q) return NextResponse.json({ medications: rows });
+
+  // Classement par pertinence : le nom qui commence par la saisie passe avant
+  // les simples correspondances au milieu du mot (ex. « para » → Paracétamol
+  // avant Adlipara-sp).
+  const needle = q.toLowerCase();
+  const words = (value: string) => value.split(/[\s/+]+/).filter(Boolean);
+  const rank = (m: (typeof rows)[number]) => {
+    const dci = m.dci.toLowerCase();
+    const brand = (m.brand ?? "").toLowerCase();
+    if (dci === needle || brand === needle) return 0;
+    if (dci.startsWith(needle)) return 1;
+    if (brand.startsWith(needle)) return 2;
+    if (words(dci).some((w) => w.startsWith(needle))) return 3;
+    if (words(brand).some((w) => w.startsWith(needle))) return 4;
+    return 5;
+  };
+
+  const medications = rows
+    .map((m) => ({ m, r: rank(m) }))
+    .sort((a, b) => a.r - b.r || a.m.dci.length - b.m.dci.length || a.m.dci.localeCompare(b.m.dci))
+    .slice(0, 20)
+    .map((x) => x.m);
+
+  return NextResponse.json({ medications });
 }
