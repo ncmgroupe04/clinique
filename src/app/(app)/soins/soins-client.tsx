@@ -48,18 +48,15 @@ export default function SoinsClient({ cares, categories }: { cares: Care[]; cate
   const [catCreateState, catCreateAction, catCreatePending] = useActionState<CategoryState, FormData>(createCareCategory, undefined);
   const [catEditState, catEditAction, catEditPending] = useActionState<CategoryState, FormData>(updateCareCategory, undefined);
   const [localCategories, setLocalCategories] = useState<Category[]>(() => {
-    if (typeof window === "undefined") return [];
+    if (typeof window === "undefined") return DEFAULT_CATEGORIES;
     try {
-      return JSON.parse(localStorage.getItem("care_categories_fallback") ?? "[]") as Category[];
+      const stored = JSON.parse(localStorage.getItem("care_categories_fallback") ?? "null");
+      return Array.isArray(stored) ? (stored as Category[]) : DEFAULT_CATEGORIES;
     } catch {
-      return [];
+      return DEFAULT_CATEGORIES;
     }
   });
-  const effectiveCategories = categories.length
-    ? categories
-    : localCategories.length
-      ? localCategories
-      : DEFAULT_CATEGORIES;
+  const effectiveCategories = categories.length ? categories : localCategories;
   const activeCategories = effectiveCategories.filter((c) => c.active);
   useEffect(() => {
     if (typeof window !== "undefined" && categories.length === 0) {
