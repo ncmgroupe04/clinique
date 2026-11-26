@@ -105,8 +105,10 @@ export default function FactureForm({ cares, categories }: { cares: Care[]; cate
             <p className="text-sm text-muted">Aucun soin actif dans le catalogue.</p>
           ) : (
             <div className="grid grid-cols-1 gap-3 md:grid-cols-3">
-              {effectiveCategories.filter((c) => c.active).map((group) => {
-                const items = cares.filter((c) => (c.category ?? "intervention") === group.slug);
+              {[...effectiveCategories.filter((c) => c.active), ...(cares.some((c) => !effectiveCategories.some((cat) => cat.active && (c.category ?? "intervention") === cat.slug)) ? [{ slug: "__other__", name: "Autres", active: true }] : [])].map((group) => {
+                const items = group.slug === "__other__"
+                  ? cares.filter((c) => !effectiveCategories.some((cat) => cat.active && (c.category ?? "intervention") === cat.slug))
+                  : cares.filter((c) => (c.category ?? "intervention") === group.slug);
                 return (
                   <div key={group.slug} className="rounded-[18px] border border-border bg-white p-4">
                     <h3 className="mb-2 text-sm font-extrabold text-ink">{group.name}</h3>
