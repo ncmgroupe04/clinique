@@ -49,6 +49,7 @@ export default function TicketStep({
 
   // Case « payer le total » : on remplit l'encaissement automatiquement.
   useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     if (payFull) setAdvance(String(total));
   }, [payFull, total]);
   const paperWidth = structure?.paper_width_mm === 58 ? 58 : 80;

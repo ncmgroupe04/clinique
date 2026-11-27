@@ -66,6 +66,7 @@ export default function TarifsClient({
 
   // La base est la source de vérité : on resynchronise dès qu'elle répond.
   useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     setDbServices(cleanServices(services));
   }, [services]);
 
