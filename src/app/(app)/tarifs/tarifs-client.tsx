@@ -187,7 +187,7 @@ export default function TarifsClient({
                       type="button"
                       onClick={() => setLocalServices((prev) => prev.map((x) => (x.id === s.id ? { ...x, active: !x.active } : x)))}
                       className={s.active ? "btn-warning-solid" : "btn-secondary"}
-                      style={{ height: 32, padding: "0 14px", borderRadius: 10, fontSize: 12, width: "auto", background: s.active ? "#dbeafe" : undefined, color: s.active ? "#1e40af" : "#fff" }}
+                      style={{ height: 32, padding: "0 14px", borderRadius: 10, fontSize: 12, width: "auto", background: s.active ? "#dbeafe" : undefined, color: s.active ? "#1e40af" : "#0B1F2A" }}
                     >
                       {s.active ? "Désactiver ce service" : "Réactiver ce service"}
                     </button>

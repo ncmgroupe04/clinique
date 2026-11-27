@@ -313,7 +313,7 @@ export default function SoinsClient({ cares, categories }: { cares: Care[]; cate
                           type="button"
                           onClick={() => setLocalCares((prev) => prev.map((x) => (x.id === c.id ? { ...x, active: !x.active } : x)))}
                           className={c.active ? "btn-warning-solid" : "btn-secondary"}
-                          style={{ height: 32, padding: "0 14px", borderRadius: 10, fontSize: 12, width: "auto", background: c.active ? "#dbeafe" : undefined, color: c.active ? "#1e40af" : "#fff" }}
+                          style={{ height: 32, padding: "0 14px", borderRadius: 10, fontSize: 12, width: "auto", background: c.active ? "#dbeafe" : undefined, color: c.active ? "#1e40af" : "#0B1F2A" }}
                         >
                           {c.active ? "Désactiver" : "Réactiver"}
                         </button>
@@ -401,7 +401,7 @@ export default function SoinsClient({ cares, categories }: { cares: Care[]; cate
                           type="button"
                           onClick={() => setLocalCategories((prev) => prev.map((x) => (x.id === cat.id ? { ...x, active: !x.active } : x)))}
                           className={cat.active ? "btn-warning-solid" : "btn-secondary"}
-                          style={{ height: 32, padding: "0 14px", borderRadius: 10, fontSize: 12, width: "auto", background: cat.active ? "#dbeafe" : undefined, color: cat.active ? "#1e40af" : "#fff" }}
+                          style={{ height: 32, padding: "0 14px", borderRadius: 10, fontSize: 12, width: "auto", background: cat.active ? "#dbeafe" : undefined, color: cat.active ? "#1e40af" : "#0B1F2A" }}
                         >
                           {cat.active ? "Désactiver" : "Réactiver"}
                         </button>
