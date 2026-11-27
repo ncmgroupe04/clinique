@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { useActionState, useState } from "react";
+import { useActionState, useEffect, useState } from "react";
 import { createTicket, type CreateTicketState } from "@/app/actions/tickets";
 
 type ChosenService = {
@@ -38,12 +38,19 @@ export default function TicketStep({
 }) {
   const [state, action, pending] = useActionState<CreateTicketState, FormData>(createTicket, undefined);
   const [patientName, setPatientName] = useState("");
-  const [advance, setAdvance] = useState<number>(0);
+  const [advance, setAdvance] = useState("");
+  const [payFull, setPayFull] = useState(false);
   const [totalOverride, setTotalOverride] = useState<number | null>(null);
 
   const unitPrice = service.price;
   const total = isAdmin && totalOverride !== null ? totalOverride : unitPrice;
-  const reste = Math.max(0, total - advance);
+  const advanceValue = Math.max(0, Number(advance) || 0);
+  const reste = Math.max(0, total - advanceValue);
+
+  // Case « payer le total » : on remplit l'encaissement automatiquement.
+  useEffect(() => {
+    if (payFull) setAdvance(String(total));
+  }, [payFull, total]);
   const paperWidth = structure?.paper_width_mm === 58 ? 58 : 80;
 
   return (
@@ -114,17 +121,37 @@ export default function TicketStep({
             />
           </div>
           <div className="flex-1">
-            <label className="lbl" htmlFor="advance">
-              Avance
-            </label>
+            <div className="flex flex-wrap items-center justify-between gap-2">
+              <label className="lbl" htmlFor="advance">
+                Encaissement (avance)
+              </label>
+              <label className="flex cursor-pointer items-center gap-1 text-[11px] font-bold text-accent">
+                <input
+                  type="checkbox"
+                  name="pay_full"
+                  checked={payFull}
+                  onChange={(e) => {
+                    const checked = e.target.checked;
+                    setPayFull(checked);
+                    setAdvance(checked ? String(total) : "");
+                  }}
+                  className="h-4 w-4 accent-accent"
+                />
+                Encaisser le total
+              </label>
+            </div>
             <input
               id="advance"
               name="advance"
-              type="number"
-              min={0}
-              step={1}
+              type="text"
+              inputMode="numeric"
               value={advance}
-              onChange={(e) => setAdvance(Number(e.target.value) || 0)}
+              onChange={(e) => {
+                const digits = e.target.value.replace(/[^0-9]/g, "");
+                setAdvance(digits);
+                if (payFull && digits !== String(total)) setPayFull(false);
+              }}
+              placeholder="0"
               className="in in-xl"
             />
           </div>
@@ -210,8 +237,8 @@ export default function TicketStep({
               <span style={{ color: "#0B1F2A", fontWeight: 600 }}>{fcfa(total)}</span>
             </div>
             <div className="row" style={{ fontSize: 13 }}>
-              <span>Avance</span>
-              <span style={{ color: "#0B1F2A", fontWeight: 600 }}>{fcfa(advance)}</span>
+              <span>Encaissement</span>
+              <span style={{ color: "#0B1F2A", fontWeight: 600 }}>{fcfa(advanceValue)}</span>
             </div>
             <div className="row" style={{ fontSize: 15, fontWeight: 800 }}>
               <span style={{ color: "#0B1F2A", fontWeight: 800 }}>RESTE</span>
