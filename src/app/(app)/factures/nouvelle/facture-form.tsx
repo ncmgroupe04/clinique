@@ -34,14 +34,15 @@ export default function FactureForm({
   invoiceTemplate: { settings: Record<string, unknown> } | null;
 }) {
   const [localCares] = useState<Care[]>(() => {
-    if (typeof window === "undefined") return cares;
+    const clean = (list: Care[]) => list.filter((c) => c.name.trim().toLowerCase() !== "extraction");
+    if (typeof window === "undefined") return clean(cares);
     try {
       const stored = JSON.parse(localStorage.getItem("cares_fallback") ?? "null");
-      if (!Array.isArray(stored)) return cares;
+      if (!Array.isArray(stored)) return clean(cares);
       const extra = (stored as Care[]).filter((c) => !cares.some((existing) => existing.id === c.id));
-      return [...cares, ...extra];
+      return clean([...cares, ...extra]);
     } catch {
-      return cares;
+      return clean(cares);
     }
   });
   const [localCategories] = useState<Category[]>(() => {
@@ -179,10 +180,8 @@ export default function FactureForm({
             <p className="text-sm text-muted">Aucun soin actif dans le catalogue.</p>
           ) : (
             <div className="grid grid-cols-1 gap-3 md:grid-cols-3">
-              {[...effectiveCategories.filter((c) => c.active), ...(effectiveCares.some((c) => !effectiveCategories.some((cat) => cat.active && (c.category ?? "intervention") === cat.slug)) ? [{ slug: "__other__", name: "Autres", active: true }] : [])].map((group) => {
-                const items = group.slug === "__other__"
-                  ? effectiveCares.filter((c) => !effectiveCategories.some((cat) => cat.active && (c.category ?? "intervention") === cat.slug))
-                  : effectiveCares.filter((c) => (c.category ?? "intervention") === group.slug);
+              {effectiveCategories.filter((c) => c.active).map((group) => {
+                const items = effectiveCares.filter((c) => (c.category ?? "intervention") === group.slug);
                 return (
                   <div key={group.slug} className="rounded-[18px] border border-border bg-white p-4">
                     <h3 className="mb-2 text-sm font-extrabold text-ink">{group.name}</h3>

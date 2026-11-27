@@ -75,16 +75,18 @@ export default function SoinsClient({ cares, categories }: { cares: Care[]; cate
     );
   }
 
+  const cleanCares = (list: Care[]) =>
+    list.filter((c) => c.name.trim().toLowerCase() !== "extraction");
   const [localCares, setLocalCares] = useState<Care[]>(() => {
-    if (typeof window === "undefined") return cares;
+    if (typeof window === "undefined") return cleanCares(cares);
     try {
       const stored = JSON.parse(localStorage.getItem("cares_fallback") ?? "null");
-      return Array.isArray(stored) ? (stored as Care[]) : cares;
+      return Array.isArray(stored) ? cleanCares(stored as Care[]) : cleanCares(cares);
     } catch {
-      return cares;
+      return cleanCares(cares);
     }
   });
-  const effectiveCares = categories.length ? cares : localCares;
+  const effectiveCares = categories.length ? cleanCares(cares) : localCares;
   useEffect(() => {
     if (typeof window !== "undefined" && categories.length === 0) {
       localStorage.setItem("cares_fallback", JSON.stringify(localCares));
