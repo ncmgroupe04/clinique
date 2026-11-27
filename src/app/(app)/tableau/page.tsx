@@ -73,13 +73,13 @@ export default async function TableauPage() {
               <Link href="/tickets/nouveau" className="go" style={{ height: 48, fontSize: 14, borderRadius: 14, background: "#0b7a6b", color: "#fff" }}>
                 Nouveau Ticket
               </Link>
-              <Link href="/factures/nouvelle" className="go" style={{ height: 48, fontSize: 14, borderRadius: 14, background: "#2563eb", color: "#fff" }}>
+              <Link href="/factures/nouvelle" className="go" style={{ height: 48, fontSize: 14, borderRadius: 14, background: "#0b7a6b", color: "#fff" }}>
                 Nouvelle Facture
               </Link>
             </>
           )}
           {(user.role === "structure_admin" || user.role === "docteur") && (
-            <Link href="/ordonnances" className="go" style={{ height: 48, fontSize: 14, borderRadius: 14, background: "#7c3aed", color: "#fff" }}>
+            <Link href="/ordonnances" className="go" style={{ height: 48, fontSize: 14, borderRadius: 14, background: "#0b7a6b", color: "#fff" }}>
               Nouvelle Ordonnance
             </Link>
           )}
