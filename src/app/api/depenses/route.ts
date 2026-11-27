@@ -42,7 +42,7 @@ export async function POST(request: Request) {
     .single();
 
   if (error) {
-    return NextResponse.json({ error: error.message }, { status: 400 });
+    return NextResponse.json({ error: "Opération impossible." }, { status: 400 });
   }
   return NextResponse.json({ depense: data }, { status: 201 });
 }
@@ -97,7 +97,7 @@ export async function PATCH(request: Request) {
     .maybeSingle();
 
   if (error) {
-    return NextResponse.json({ error: error.message }, { status: 400 });
+    return NextResponse.json({ error: "Opération impossible." }, { status: 400 });
   }
   if (!data) {
     return NextResponse.json({ error: "Dépense introuvable ou déjà annulée." }, { status: 404 });

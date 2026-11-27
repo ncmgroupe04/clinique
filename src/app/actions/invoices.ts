@@ -22,14 +22,28 @@ export async function createInvoice(
 
   if (!patientName) return { message: "Nom du patient requis." };
 
-  let items: { care_name: string; quantity: number; unit_price: number }[];
+  let items: { care_id?: string | null; care_name: string; quantity: number; unit_price: number; cotation?: string; dents?: string }[];
   try {
     items = JSON.parse(itemsJson);
   } catch {
     return { message: "Lignes invalides." };
   }
-  if (!Array.isArray(items) || items.length === 0) {
-    return { message: "Au moins un soin requis." };
+  if (!Array.isArray(items) || items.length === 0 || items.length > 200) {
+    return { message: "Au moins un soin requis (200 lignes maximum)." };
+  }
+  for (const it of items) {
+    if (typeof it.care_name !== "string" || it.care_name.trim().length === 0 || it.care_name.length > 200) {
+      return { message: "Désignation invalide." };
+    }
+    if (!Number.isInteger(it.quantity) || it.quantity < 1 || it.quantity > 1000) {
+      return { message: "Quantité invalide." };
+    }
+    if (typeof it.unit_price !== "number" || it.unit_price < 0 || it.unit_price > 100000000) {
+      return { message: "Prix invalide." };
+    }
+    if (it.care_id && !/^[0-9a-f-]{36}$/i.test(it.care_id)) {
+      return { message: "Soin invalide." };
+    }
   }
 
   const supabase = await createClient();
@@ -57,7 +71,7 @@ export async function createInvoice(
     error = retry.error;
   }
 
-  if (error) return { message: error.message ?? "Création impossible." };
+  if (error) return { message: "Création impossible. Réessayez dans un instant." };
 
   revalidatePath("/factures");
   return { success: true, message: "Facture créée.", invoiceId: (data as { id: string }).id };

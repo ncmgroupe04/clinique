@@ -40,7 +40,9 @@ export function formatFcfa(v: number): string {
 }
 
 export function csvCell(value: unknown): string {
-  const s = value === null || value === undefined ? "" : String(value);
+  let s = value === null || value === undefined ? "" : String(value);
+  // Neutralise l'injection de formules (CSV injection) dans Excel/LibreOffice.
+  if (/^[=+\-@\t\r]/.test(s)) s = `'${s}`;
   return `"${s.replace(/"/g, '""')}"`;
 }
 

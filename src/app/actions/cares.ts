@@ -4,6 +4,7 @@ import { revalidatePath } from "next/cache";
 import { requireRole } from "@/lib/auth";
 import { createClient } from "@/lib/supabase/server";
 import { logAudit } from "@/lib/audit";
+import { assertPlanFeature } from "@/lib/plans";
 import * as z from "zod";
 
 const careSchema = z.object({
@@ -24,6 +25,11 @@ export async function createCare(
 ): Promise<CareState> {
   const user = await requireRole("structure_admin", "platform_admin");
   if (!user.structureId) return { message: "Aucune structure associée." };
+  try {
+    await assertPlanFeature(user.structureId, "soins");
+  } catch (e) {
+    return { message: e instanceof Error ? e.message : "Fonctionnalité non disponible." };
+  }
 
   const parsed = careSchema.safeParse({
     name: formData.get("name"),

@@ -4,6 +4,7 @@ import { revalidatePath } from "next/cache";
 import { requireRole } from "@/lib/auth";
 import { createClient, createServiceClient } from "@/lib/supabase/server";
 import { logAudit } from "@/lib/audit";
+import { assertPlanLimit } from "@/lib/plans";
 import { createUserSchema, updateUserSchema, resetPasswordSchema, type UserState } from "@/lib/validations/users";
 
 export type { UserState };
@@ -29,6 +30,14 @@ export async function createUser(
     return { errors: parsed.error.flatten().fieldErrors };
   }
   const d = parsed.data;
+
+  if ((d.role === "cashier" || d.role === "docteur") && user.role === "structure_admin") {
+    try {
+      await assertPlanLimit(structureId, d.role as "cashier" | "docteur");
+    } catch (e) {
+      return { message: e instanceof Error ? e.message : "Limite atteinte." };
+    }
+  }
 
   const admin = createServiceClient();
 
@@ -186,8 +195,10 @@ export async function toggleUserActive(formData: FormData): Promise<void> {
     .eq("id", userId)
     .maybeSingle();
   if (!target || target.role === "structure_admin" || target.role === "platform_admin") return;
+  // Isolation inter-structures : un admin ne touche qu'aux utilisateurs de sa structure.
+  if (user.role !== "platform_admin" && target.structure_id !== user.structureId) return;
 
-  await admin.from("profiles").update({ active }).eq("id", userId);
+  await admin.from("profiles").update({ active }).eq("id", userId).eq("structure_id", user.structureId);
   await logAudit({
     structureId: user.structureId ?? target.structure_id,
     userId: user.id,

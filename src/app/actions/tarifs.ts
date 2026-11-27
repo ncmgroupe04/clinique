@@ -5,6 +5,7 @@ import { revalidatePath } from "next/cache";
 import { requireRole } from "@/lib/auth";
 import { createClient, createServiceClient } from "@/lib/supabase/server";
 import { logAudit } from "@/lib/audit";
+import { assertPlanFeature } from "@/lib/plans";
 import {
   createServiceSchema,
   updateServiceSchema,
@@ -19,6 +20,11 @@ export async function createService(
 ): Promise<TarifState> {
   const user = await requireRole("structure_admin", "platform_admin");
   if (!user.structureId) return { message: "Aucune structure associée." };
+  try {
+    await assertPlanFeature(user.structureId, "tarifs");
+  } catch (e) {
+    return { message: e instanceof Error ? e.message : "Fonctionnalité non disponible." };
+  }
 
   const parsed = createServiceSchema.safeParse({
     name: formData.get("name"),

@@ -26,10 +26,10 @@ export async function requestPasswordReset(
   if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
     return { errors: { email: ["Adresse e-mail invalide."] } };
   }
-  const origin = (await headers()).get("origin") ?? "https://ticketordonnance.vercel.app";
+  const siteUrl = process.env.NEXT_PUBLIC_SITE_URL ?? "https://ticketordonnance.vercel.app";
   const supabase = await createClient();
   const { error } = await supabase.auth.resetPasswordForEmail(email, {
-    redirectTo: `${origin}/mot-de-passe-modifier`,
+    redirectTo: `${siteUrl}/mot-de-passe-modifier`,
   });
   if (error) {
     return { message: "Envoi impossible. Réessayez dans un instant." };
@@ -65,22 +65,16 @@ export async function signup(
   }
   const { email, password, structureName, fullName, address, phone, headerText, planId } = parsed.data;
 
-  // Empêche qu'une même adresse e-mail soit utilisée pour plusieurs comptes vérifiés.
-  const admin = createServiceClient();
-  const { data: existingUsers } = await admin.auth.admin.listUsers();
-  const alreadyExists = existingUsers?.users?.some(
-    (u) => u.email?.toLowerCase() === email.toLowerCase() && u.email_confirmed_at,
-  );
-  if (alreadyExists) {
-    return {
-      message: "Un compte vérifié existe déjà avec cette adresse e-mail. Connectez-vous ou utilisez une autre adresse.",
-    };
-  }
-
+  // Ne pas révéler si une adresse est déjà enregistrée : on laisse Supabase
+  // gérer le cas (identités vides) et on renvoie un message générique.
+  const siteUrl = process.env.NEXT_PUBLIC_SITE_URL ?? "https://ticketordonnance.vercel.app";
   const supabase = await createClient();
-  const { data, error } = await supabase.auth.signUp({ email, password, options: { emailRedirectTo: `${(await headers()).get("origin") ?? "https://ticketordonnance.vercel.app"}/connexion` } });
+  const { data, error } = await supabase.auth.signUp({ email, password, options: { emailRedirectTo: `${siteUrl}/connexion` } });
+  if (!error && data.user && Array.isArray(data.user.identities) && data.user.identities.length === 0) {
+    return { message: "Si cette adresse est éligible, un lien de confirmation a été envoyé." };
+  }
   if (error || !data.user) {
-    return { message: error?.message ?? "Inscription impossible." };
+    return { message: "Inscription impossible. Réessayez dans un instant." };
   }
 
   const userId = data.user.id;
@@ -184,7 +178,8 @@ export async function login(
   const email = parsed.data.email.toLowerCase();
   const admin = createServiceClient();
 
-  // Anti force brute : 5 tentatives maximum par minute et par e-mail.
+  // Anti force brute : 5 tentatives maximum par minute et par e-mail,
+  // et 30 par minute et par adresse IP.
   const since = new Date(Date.now() - 60_000).toISOString();
   const { data: recent } = await admin
     .from("login_attempts")
@@ -194,13 +189,27 @@ export async function login(
   if ((recent?.length ?? 0) >= 5) {
     return { message: "Trop de tentatives de connexion. Réessayez dans une minute." };
   }
+  const ip =
+    (await headers()).get("x-forwarded-for")?.split(",")[0]?.trim() ??
+    (await headers()).get("x-real-ip") ??
+    null;
+  if (ip) {
+    const { data: recentIp } = await admin
+      .from("login_attempts")
+      .select("id")
+      .eq("ip", ip)
+      .gte("created_at", since);
+    if ((recentIp?.length ?? 0) >= 30) {
+      return { message: "Trop de tentatives de connexion. Réessayez dans une minute." };
+    }
+  }
 
   const { data, error } = await supabase.auth.signInWithPassword(parsed.data);
   if (error) {
-    await admin.from("login_attempts").insert({ email });
+    await admin.from("login_attempts").insert({ email, ip });
     await logAudit({
       action: "login_failed",
-      details: { email, reason: error.message },
+      details: { reason: "invalid_credentials" },
     });
     console.error("[login] Supabase error:", error.message, error.status);
     // On ne révèle pas si c'est l'e-mail ou le mot de passe qui est faux,
@@ -211,7 +220,7 @@ export async function login(
     ) {
       return { message: "Identifiants incorrects." };
     }
-    return { message: `Connexion impossible : ${error.message}` };
+    return { message: "Connexion impossible. Réessayez dans un instant." };
   }
   await admin.from("login_attempts").delete().eq("email", email);
   const { data: profile } = await admin

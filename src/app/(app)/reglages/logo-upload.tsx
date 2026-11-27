@@ -19,38 +19,26 @@ export default function LogoUpload({ structureId, initialPath }: { structureId: 
 
   async function upload(file: File) {
     setError("");
-    if (!["image/png", "image/jpeg", "image/webp"].includes(file.type)) {
-      setError("Format accepté : PNG, JPEG ou WebP."); return;
-    }
-    if (file.size > 2 * 1024 * 1024) {
-      setError("Taille maximale : 2 Mo."); return;
-    }
     setBusy(true);
-    const supabase = createClient();
-    const ext = file.type === "image/png" ? "png" : file.type === "image/webp" ? "webp" : "jpg";
-    const newPath = `${structureId}/logo.${ext}`;
-    const { error: upErr } = await supabase.storage.from("structure-logos").upload(newPath, file, { upsert: true, contentType: file.type });
-    if (upErr) {
-      setError(
-        upErr.message.toLowerCase().includes("bucket")
-          ? "Stockage des logos non configuré : appliquez la migration 0027_structure_logo.sql dans Supabase."
-          : upErr.message,
-      );
+    const form = new FormData();
+    form.append("file", file);
+    const res = await fetch("/api/logo", { method: "POST", body: form });
+    const data = (await res.json().catch(() => ({}))) as { path?: string; url?: string; error?: string };
+    if (!res.ok || !data.path) {
+      setError(data.error ?? "Téléversement impossible.");
       setBusy(false);
       return;
     }
-    const { error: dbErr } = await supabase.from("structures").update({ logo_path: newPath }).eq("id", structureId);
-    if (dbErr) { setError(dbErr.message); setBusy(false); return; }
-    setPath(newPath);
+    setPath(data.path);
+    if (data.url) setUrl(data.url);
     setBusy(false);
   }
 
   async function remove() {
     setBusy(true);
-    const supabase = createClient();
-    if (path) await supabase.storage.from("structure-logos").remove([path]);
-    await supabase.from("structures").update({ logo_path: null }).eq("id", structureId);
+    await fetch("/api/logo", { method: "DELETE" });
     setPath("");
+    setUrl(null);
     setBusy(false);
   }
 

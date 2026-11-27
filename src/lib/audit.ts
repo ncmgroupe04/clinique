@@ -8,7 +8,7 @@ export type AuditEntry = {
   ticketId?: string | null;
 };
 
-const FORBIDDEN_KEY = /password|secret|token|authorization|cookie|api_key/i;
+const FORBIDDEN_KEY = /password|secret|token|authorization|cookie|api_key|email|full_name|patient_name|patient_age/i;
 
 /**
  * Écrit une ligne dans le journal d'audit. Les champs sensibles sont retirés

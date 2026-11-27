@@ -2,7 +2,7 @@
 
 import { revalidatePath } from "next/cache";
 import { requireUser } from "@/lib/auth";
-import { createServiceClient } from "@/lib/supabase/server";
+import { createClient, createServiceClient } from "@/lib/supabase/server";
 import { logAudit } from "@/lib/audit";
 
 export type ProfileState = { message?: string; success?: boolean } | undefined;
@@ -35,7 +35,17 @@ export async function changePassword(
   formData: FormData,
 ): Promise<ProfileState> {
   const user = await requireUser();
+  const current = String(formData.get("current_password") ?? "");
   const next = String(formData.get("password") ?? "");
+  if (!current) return { message: "Mot de passe actuel requis." };
+  // Vérification de la preuve d'identité avant tout changement.
+  const checkClient = await createClient();
+  const { error: authError } = await checkClient.auth.signInWithPassword({
+    email: user.email,
+    password: current,
+  });
+  if (authError) return { message: "Mot de passe actuel incorrect." };
+
   if (
     next.length < 12 ||
     !/[A-Z]/.test(next) ||

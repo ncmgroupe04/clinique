@@ -8,7 +8,7 @@ export default function ConfidentialitePage() {
         <p className="text-sm text-muted">Dernière mise à jour : 24 novembre 2026</p>
         <section className="space-y-2 text-sm leading-relaxed text-ink">
           <h2 className="text-base font-bold">1. Données collectées</h2>
-          <p>Nous collectons les informations de la structure (nom, adresse, téléphone), les comptes utilisateurs (nom, e-mail) et les données de facturation nécessaires au service : nom du patient, service ou soin, montant, avance, reste, numéro de reçu et date. Aucune donnée de santé superflue n&apos;est demandée.</p>
+          <p>Nous collectons les informations de la structure (nom, adresse, téléphone), les comptes utilisateurs (nom, e-mail) et les données nécessaires au service : tickets et factures (nom du patient, service ou soin, montant, avance, reste, numéro de reçu et date), ainsi que, si la structure les utilise, des données de santé au sens strict (ordonnances : patient, âge, médicaments et posologies ; notes patient ; motifs et notes de rendez-vous). Ces données de santé sont collectées uniquement à la demande explicite de la structure et conservées selon sa durée de conservation.</p>
           <h2 className="text-base font-bold">2. Finalités</h2>
           <p>Les données servent exclusivement à l&apos;édition des tickets et factures, à la tenue de l&apos;historique, au calcul des totaux journaliers et à la gestion des abonnements. Elles ne sont pas utilisées à des fins publicitaires et ne font l&apos;objet d&apos;aucun analytics tiers.</p>
           <h2 className="text-base font-bold">3. Isolation entre structures</h2>
