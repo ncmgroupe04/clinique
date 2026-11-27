@@ -284,7 +284,8 @@ function DeleteServiceButton({ id }: { id: string }) {
       <button
         type="button"
         onClick={() => setOpen(true)}
-        className="text-xs font-medium text-danger underline-offset-2 hover:underline"
+        className="btn-danger-solid"
+        style={{ height: 32, padding: "0 14px", borderRadius: 10, fontSize: 12, width: "auto" }}
         title={state?.message}
       >
         Supprimer

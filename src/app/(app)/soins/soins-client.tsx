@@ -373,7 +373,8 @@ export default function SoinsClient({ cares, categories }: { cares: Care[]; cate
                         <button
                           type="button"
                           onClick={() => setLocalCategories((prev) => prev.filter((x) => x.id !== cat.id))}
-                          className="text-xs font-medium text-danger underline-offset-2 hover:underline"
+                          className="btn-danger-solid"
+                          style={{ height: 32, padding: "0 14px", borderRadius: 10, fontSize: 12, width: "auto" }}
                         >
                           Supprimer
                         </button>
@@ -417,7 +418,8 @@ function DeleteCareButton({ id }: { id: string }) {
       <button
         type="button"
         onClick={() => setOpen(true)}
-        className="text-xs font-medium text-danger underline-offset-2 hover:underline"
+        className="btn-danger-solid"
+        style={{ height: 32, padding: "0 14px", borderRadius: 10, fontSize: 12, width: "auto" }}
         title={state?.message}
       >
         Supprimer
@@ -466,7 +468,8 @@ function DeleteCategoryButton({ id }: { id: string }) {
       <button
         type="button"
         onClick={() => setOpen(true)}
-        className="text-xs font-medium text-danger underline-offset-2 hover:underline"
+        className="btn-danger-solid"
+        style={{ height: 32, padding: "0 14px", borderRadius: 10, fontSize: 12, width: "auto" }}
         title={state?.message}
       >
         Supprimer
