@@ -33,13 +33,15 @@ export default function TarifsClient({
 }) {
   const [editingId, setEditingId] = useState<string | null>(null);
   const nameRef = useRef<HTMLInputElement>(null);
+  const cleanServices = (list: Service[]) =>
+    list.filter((s) => !(s.name.trim().toLowerCase() === "visite prénatale" && s.price === 3000));
   const [localServices, setLocalServices] = useState<Service[]>(() => {
-    if (typeof window === "undefined") return services;
+    if (typeof window === "undefined") return cleanServices(services);
     try {
       const stored = JSON.parse(localStorage.getItem("services_fallback") ?? "null");
-      return Array.isArray(stored) && stored.length ? (stored as Service[]) : services;
+      return Array.isArray(stored) && stored.length ? cleanServices(stored as Service[]) : cleanServices(services);
     } catch {
-      return services;
+      return cleanServices(services);
     }
   });
   const effectiveServices = localServices;

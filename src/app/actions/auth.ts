@@ -122,11 +122,6 @@ export async function signup(
       details: { email, plan_id: planId || null, structure: structureName },
     });
 
-    // Two example services (modifiable by the structure).
-    await admin.from("services").insert([
-      { structure_id: structure.id, name: "Consultation", price: 5000 },
-      { structure_id: structure.id, name: "Visite prénatale", price: 3000 },
-    ]);
   } catch {
     return {
       message:
