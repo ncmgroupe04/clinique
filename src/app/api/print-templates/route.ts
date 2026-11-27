@@ -59,15 +59,18 @@ export async function POST(request: Request) {
 
   const { kind, header_text, footer_text, settings } = parsed.data;
   const supabase = await createClient();
+  const payload: Record<string, unknown> = {
+    structure_id: user.structureId,
+    kind,
+    header_text,
+    footer_text,
+    updated_at: new Date().toISOString(),
+  };
+  // N'écrire `settings` que pour la facture et seulement si la colonne existe
+  // (migration 0036). Sinon, l'upsert échouerait aussi pour Ticket et Ordonnance.
+  if (kind === "facture" && settings) payload.settings = settings;
   const { error } = await supabase.from("print_templates").upsert(
-    {
-      structure_id: user.structureId,
-      kind,
-      header_text,
-      footer_text,
-      settings: kind === "facture" ? settings ?? {} : {},
-      updated_at: new Date().toISOString(),
-    },
+    payload,
     { onConflict: "structure_id,kind" },
   );
 
