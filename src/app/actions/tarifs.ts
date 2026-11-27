@@ -43,6 +43,7 @@ export async function createService(
   });
 
   revalidatePath("/tarifs");
+  revalidatePath("/tickets/nouveau");
   return { success: true, message: "Service ajouté." };
 }
 
@@ -75,6 +76,7 @@ export async function updateService(
   });
 
   revalidatePath("/tarifs");
+  revalidatePath("/tickets/nouveau");
   return { success: true, message: "Service modifié." };
 }
 
@@ -99,6 +101,7 @@ export async function toggleService(formData: FormData): Promise<void> {
   });
 
   revalidatePath("/tarifs");
+  revalidatePath("/tickets/nouveau");
 }
 
 export async function deleteService(
@@ -111,27 +114,53 @@ export async function deleteService(
   const id = String(formData.get("id") ?? "");
   if (!id) return { message: "Service introuvable." };
 
-  const admin = createServiceClient();
-  const { data: service } = await admin
-    .from("services")
-    .select("name, structure_id")
-    .eq("id", id)
-    .maybeSingle();
+  const supabase = await createClient();
+  let service: { name: string; structure_id: string } | null = null;
+  let client = supabase;
+  try {
+    const admin = createServiceClient();
+    const { data } = await admin
+      .from("services")
+      .select("name, structure_id")
+      .eq("id", id)
+      .maybeSingle();
+    if (data) {
+      service = data;
+      client = admin;
+    }
+  } catch {
+    /* la clé service n'est pas disponible : on passe par la session utilisateur */
+  }
+
+  if (!service) {
+    const { data } = await supabase
+      .from("services")
+      .select("name, structure_id")
+      .eq("id", id)
+      .maybeSingle();
+    service = data;
+  }
+
   if (!service || service.structure_id !== user.structureId) {
     return { message: "Service introuvable." };
   }
 
-  const { data: used } = await admin
+  const { data: used } = await client
     .from("tickets")
     .select("id")
-    .eq("service_name", service.name)
+    .eq("structure_id", user.structureId)
+    .eq("service_id", id)
     .limit(1);
-  console.log("deleteService: id=", id, "service=", JSON.stringify(service), "used=", used?.length);
   if (used && used.length > 0) {
     return { message: "Ce service a déjà été utilisé : désactivez-le plutôt." };
   }
 
-  const { error } = await admin.from("services").delete().eq("id", id);
+  let { error } = await client.from("services").delete().eq("id", id);
+  if (error) {
+    // Repli sur la session utilisateur (policy de suppression) si la clé service a échoué.
+    const retry = await supabase.from("services").delete().eq("id", id);
+    error = retry.error;
+  }
   if (error) return { message: "Suppression impossible." };
   await logAudit({
     structureId: user.structureId,

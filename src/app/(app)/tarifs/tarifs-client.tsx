@@ -1,6 +1,7 @@
 "use client";
 
-import { useActionState, useRef, useState, useEffect } from "react";
+import { useEffect, useRef, useState } from "react";
+import { useRouter } from "next/navigation";
 import {
   createService,
   updateService,
@@ -9,7 +10,6 @@ import {
   type TarifState,
 } from "@/app/actions/tarifs";
 import { updatePaperWidth } from "@/app/actions/settings";
-import ConfirmActionButton from "../confirm-action-button";
 
 type Service = {
   id: string;
@@ -18,8 +18,29 @@ type Service = {
   active: boolean;
 };
 
+const LOCAL_PREFIX = "local-service-";
+const LOCAL_KEY = "services_local_extra";
+const LEGACY_KEY = "services_fallback";
+
 function fcfa(value: number): string {
   return `${value.toLocaleString("fr-FR")} F`;
+}
+
+const cleanServices = (list: Service[]) =>
+  list.filter(
+    (s) => !(s.name.trim().toLowerCase() === "visite prénatale" && s.price === 3000),
+  );
+
+/** Services créés hors ligne, conservés sur cet appareil uniquement. */
+function readLocalServices(): Service[] {
+  if (typeof window === "undefined") return [];
+  try {
+    const stored = JSON.parse(localStorage.getItem(LOCAL_KEY) ?? "[]");
+    if (Array.isArray(stored)) return stored as Service[];
+  } catch {
+    /* ignore */
+  }
+  return [];
 }
 
 export default function TarifsClient({
@@ -31,53 +52,186 @@ export default function TarifsClient({
   printFormat: string;
   nextReceipt: { year: number; number: number };
 }) {
-  const [editingId, setEditingId] = useState<string | null>(null);
+  const router = useRouter();
   const nameRef = useRef<HTMLInputElement>(null);
-  const cleanServices = (list: Service[]) =>
-    list.filter((s) => !(s.name.trim().toLowerCase() === "visite prénatale" && s.price === 3000));
-  const [localServices, setLocalServices] = useState<Service[]>(() => {
-    if (typeof window === "undefined") return cleanServices(services);
-    try {
-      const stored = JSON.parse(localStorage.getItem("services_fallback") ?? "null");
-      return Array.isArray(stored) && stored.length ? cleanServices(stored as Service[]) : cleanServices(services);
-    } catch {
-      return cleanServices(services);
-    }
-  });
-  const effectiveServices = localServices;
+  const [editingId, setEditingId] = useState<string | null>(null);
+  const [confirmId, setConfirmId] = useState<string | null>(null);
+  const [busyId, setBusyId] = useState<string | null>(null);
+  const [notice, setNotice] = useState<{ error: boolean; text: string } | null>(null);
+
+  const [dbServices, setDbServices] = useState<Service[]>(() => cleanServices(services));
+  const [localServices, setLocalServices] = useState<Service[]>([]);
+
+  // La base est la source de vérité : on resynchronise dès qu'elle répond.
   useEffect(() => {
-    if (typeof window !== "undefined") {
-      localStorage.setItem("services_fallback", JSON.stringify(localServices));
+    setDbServices(cleanServices(services));
+  }, [services]);
+
+  // Récupère les éventuels services hors ligne, puis purge l'ancien cache
+  // complet qui provoquait la divergence avec l'écran Nouveau Ticket.
+  useEffect(() => {
+    const locals = readLocalServices();
+    // eslint-disable-next-line react-hooks/set-state-in-effect
+    setLocalServices(locals);
+    try {
+      const legacy = JSON.parse(localStorage.getItem(LEGACY_KEY) ?? "null");
+      if (Array.isArray(legacy)) {
+        const legacyLocals = (legacy as Service[]).filter((s) => s.id.startsWith(LOCAL_PREFIX));
+        if (legacyLocals.length > 0 && locals.length === 0) {
+          setLocalServices(legacyLocals);
+          localStorage.setItem(LOCAL_KEY, JSON.stringify(legacyLocals));
+        }
+      }
+      localStorage.removeItem(LEGACY_KEY);
+    } catch {
+      localStorage.removeItem(LEGACY_KEY);
     }
+  }, []);
+
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+    localStorage.setItem(LOCAL_KEY, JSON.stringify(localServices));
   }, [localServices]);
 
-  function addLocalService(formData: FormData) {
+  const effectiveServices = [...dbServices, ...localServices];
+  const isLocal = (id: string) => id.startsWith(LOCAL_PREFIX);
+
+  const showState = (state: TarifState, fallback: string) => {
+    if (state?.success) {
+      setNotice({ error: false, text: state.message ?? fallback });
+      return true;
+    }
+    const errors = state?.errors ? Object.values(state.errors).flat().join(" ") : "";
+    setNotice({ error: true, text: errors || state?.message || fallback });
+    return false;
+  };
+
+  async function handleCreate(formData: FormData) {
     const name = String(formData.get("name") ?? "").trim();
-    const price = Number(formData.get("price") ?? 0) || 0;
-    if (!name) return;
-    setLocalServices((prev) => [...prev, { id: `local-service-${Date.now()}`, name, price, active: true }]);
+    const price = Number(formData.get("price") ?? NaN);
+    if (!name) {
+      setNotice({ error: true, text: "Nom requis." });
+      return;
+    }
+    if (!Number.isFinite(price) || price < 0) {
+      setNotice({ error: true, text: "Prix invalide." });
+      return;
+    }
+    setBusyId("create");
+    const fd = new FormData();
+    fd.set("name", name);
+    fd.set("price", String(Math.round(price)));
+    try {
+      const state = await createService(undefined, fd);
+      if (showState(state, "Service ajouté.")) router.refresh();
+    } catch {
+      setNotice({ error: true, text: "Ajout impossible : base indisponible." });
+    } finally {
+      setBusyId(null);
+    }
   }
 
-  function updateLocalService(id: string, formData: FormData) {
-    setLocalServices((prev) => prev.map((s) => (s.id === id ? {
-      ...s,
-      name: String(formData.get("name") ?? "").trim() || s.name,
-      price: Number(formData.get("price") ?? 0) || 0,
-    } : s)));
-  }
-  const [createState, createAction, createPending] = useActionState<
-    TarifState,
-    FormData
-  >(createService, undefined);
-  const [editState, editAction, editPending] = useActionState<TarifState, FormData>(
-    updateService,
-    undefined,
-  );
+  async function handleUpdate(service: Service, formData: FormData) {
+    const name = String(formData.get("name") ?? "").trim();
+    const price = Number(formData.get("price") ?? NaN);
+    if (!name) {
+      setNotice({ error: true, text: "Nom requis." });
+      return;
+    }
+    if (!Number.isFinite(price) || price < 0) {
+      setNotice({ error: true, text: "Prix invalide." });
+      return;
+    }
+    const value = Math.round(price);
 
-  useEffect(() => {
-    // eslint-disable-next-line react-hooks/set-state-in-effect
-    if (editState?.success) setEditingId(null);
-  }, [editState]);
+    if (isLocal(service.id)) {
+      setLocalServices((prev) =>
+        prev.map((s) => (s.id === service.id ? { ...s, name, price: value } : s)),
+      );
+      setEditingId(null);
+      setNotice({ error: false, text: "Service modifié (sur cet appareil)." });
+      return;
+    }
+
+    setBusyId(service.id);
+    const fd = new FormData();
+    fd.set("id", service.id);
+    fd.set("name", name);
+    fd.set("price", String(value));
+    try {
+      const state = await updateService(undefined, fd);
+      if (showState(state, "Service modifié.")) {
+        setDbServices((prev) =>
+          prev.map((s) => (s.id === service.id ? { ...s, name, price: value } : s)),
+        );
+        setEditingId(null);
+        router.refresh();
+      }
+    } catch {
+      setNotice({ error: true, text: "Modification impossible : base indisponible." });
+    } finally {
+      setBusyId(null);
+    }
+  }
+
+  async function handleToggle(service: Service) {
+    const nextActive = !service.active;
+
+    if (isLocal(service.id)) {
+      setLocalServices((prev) =>
+        prev.map((s) => (s.id === service.id ? { ...s, active: nextActive } : s)),
+      );
+      return;
+    }
+
+    setBusyId(service.id);
+    setDbServices((prev) =>
+      prev.map((s) => (s.id === service.id ? { ...s, active: nextActive } : s)),
+    );
+    const fd = new FormData();
+    fd.set("id", service.id);
+    fd.set("active", String(nextActive));
+    try {
+      await toggleService(fd);
+      setNotice({
+        error: false,
+        text: nextActive ? "Service réactivé." : "Service désactivé.",
+      });
+      router.refresh();
+    } catch {
+      setDbServices((prev) =>
+        prev.map((s) => (s.id === service.id ? { ...s, active: service.active } : s)),
+      );
+      setNotice({ error: true, text: "Changement impossible : base indisponible." });
+    } finally {
+      setBusyId(null);
+    }
+  }
+
+  async function handleDelete(service: Service) {
+    setConfirmId(null);
+
+    if (isLocal(service.id)) {
+      setLocalServices((prev) => prev.filter((s) => s.id !== service.id));
+      setNotice({ error: false, text: "Service supprimé (sur cet appareil)." });
+      return;
+    }
+
+    setBusyId(service.id);
+    const fd = new FormData();
+    fd.set("id", service.id);
+    try {
+      const state = await deleteService(undefined, fd);
+      if (showState(state, "Service supprimé.")) {
+        setDbServices((prev) => prev.filter((s) => s.id !== service.id));
+        router.refresh();
+      }
+    } catch {
+      setNotice({ error: true, text: "Suppression impossible : base indisponible." });
+    } finally {
+      setBusyId(null);
+    }
+  }
 
   return (
     <div className="flex flex-1 flex-col items-stretch gap-7 lg:flex-row">
@@ -94,6 +248,12 @@ export default function TarifsClient({
           </button>
         </div>
 
+        {notice && (
+          <p className={`mb-2 text-sm ${notice.error ? "text-danger" : "text-accent"}`}>
+            {notice.text}
+          </p>
+        )}
+
         {effectiveServices.length === 0 ? (
           <p className="py-3 text-sm text-muted">Aucun service pour le moment.</p>
         ) : (
@@ -105,8 +265,7 @@ export default function TarifsClient({
                     <form
                       onSubmit={(e) => {
                         e.preventDefault();
-                        updateLocalService(s.id, new FormData(e.currentTarget));
-                        setEditingId(null);
+                        void handleUpdate(s, new FormData(e.currentTarget));
                       }}
                       className="flex flex-wrap items-end gap-3"
                     >
@@ -140,11 +299,11 @@ export default function TarifsClient({
                       </div>
                       <button
                         type="submit"
-                        disabled={editPending}
+                        disabled={busyId === s.id}
                         className="go"
                         style={{ height: 52, width: "auto", padding: "0 24px", borderRadius: 14, fontSize: 15 }}
                       >
-                        {editPending ? "…" : "Enregistrer"}
+                        {busyId === s.id ? "…" : "Enregistrer"}
                       </button>
                       <button
                         type="button"
@@ -155,30 +314,20 @@ export default function TarifsClient({
                         Annuler
                       </button>
                     </form>
-
-                    {editState?.message && (
-                      <p
-                        className={
-                          editState.success ? "text-sm text-accent" : "text-sm text-danger"
-                        }
-                      >
-                        {editState.message}
-                      </p>
-                    )}
                   </div>
                 ) : (
                   <>
                     <div className="flex-1 font-bold">{s.name}</div>
                     <b className="text-lg">{fcfa(s.price)}</b>
-                    <span
-                      className={`cd ${s.active ? "" : "off"}`}
-                      style={{ width: 70 }}
-                    >
+                    <span className={`cd ${s.active ? "" : "off"}`} style={{ width: 70 }}>
                       {s.active ? "Actif" : "Inactif"}
                     </span>
                     <button
                       type="button"
-                      onClick={() => setEditingId(s.id)}
+                      onClick={() => {
+                        setNotice(null);
+                        setEditingId(s.id);
+                      }}
                       aria-label={`Modifier ${s.name}`}
                       className="btn-edit-solid"
                       style={{ height: 32, padding: "0 14px", borderRadius: 10, fontSize: 12, width: "auto", background: "#475569", color: "#fff" }}
@@ -187,7 +336,8 @@ export default function TarifsClient({
                     </button>
                     <button
                       type="button"
-                      onClick={() => setLocalServices((prev) => prev.map((x) => (x.id === s.id ? { ...x, active: !x.active } : x)))}
+                      disabled={busyId === s.id}
+                      onClick={() => void handleToggle(s)}
                       className={s.active ? "btn-warning-solid" : "btn-secondary"}
                       style={{ height: 32, padding: "0 14px", borderRadius: 10, fontSize: 12, width: "auto", background: s.active ? "#dbeafe" : undefined, color: s.active ? "#1e40af" : "#0B1F2A" }}
                     >
@@ -195,7 +345,8 @@ export default function TarifsClient({
                     </button>
                     <button
                       type="button"
-                      onClick={() => setLocalServices((prev) => prev.filter((x) => x.id !== s.id))}
+                      disabled={busyId === s.id}
+                      onClick={() => setConfirmId(s.id)}
                       className="btn-danger-solid"
                       style={{ height: 32, padding: "0 14px", borderRadius: 10, fontSize: 12, width: "auto", background: "#dc2626", color: "#fff" }}
                     >
@@ -211,8 +362,8 @@ export default function TarifsClient({
         <form
           onSubmit={(e) => {
             e.preventDefault();
-            addLocalService(new FormData(e.currentTarget));
-            e.currentTarget.reset();
+            const form = e.currentTarget;
+            void handleCreate(new FormData(form)).then(() => form.reset());
           }}
           className="mt-3.5 flex flex-col gap-3 rounded-[18px] border-[1.5px] border-dashed border-accent bg-[#EEF8F6] p-[18px] sm:flex-row sm:items-end"
         >
@@ -246,29 +397,13 @@ export default function TarifsClient({
           </div>
           <button
             type="submit"
-            disabled={createPending}
+            disabled={busyId === "create"}
             className="go"
             style={{ height: 52, width: "auto", padding: "0 24px", borderRadius: 14, fontSize: 15 }}
           >
-            {createPending ? "Ajout…" : "Enregistrer"}
+            {busyId === "create" ? "Ajout…" : "Enregistrer"}
           </button>
         </form>
-
-        {createState?.message && (
-          <p
-            className={
-              createState.success ? "mt-3 text-sm text-accent" : "mt-3 text-sm text-danger"
-            }
-          >
-            {createState.message}
-          </p>
-        )}
-        {createState?.errors?.name && (
-          <p className="mt-2 text-sm text-danger">{createState.errors.name}</p>
-        )}
-        {createState?.errors?.price && (
-          <p className="mt-2 text-sm text-danger">{createState.errors.price}</p>
-        )}
 
         <div className="mt-auto pt-6 text-[13px] text-muted">
           Changer un prix ne modifie jamais les anciens reçus.
@@ -318,56 +453,43 @@ export default function TarifsClient({
           </p>
         </section>
       </div>
-    </div>
-  );
-}
 
-function DeleteServiceButton({ id }: { id: string }) {
-  const [state, action, pending] = useActionState<TarifState, FormData>(deleteService, undefined);
-  const [open, setOpen] = useState(false);
-  return (
-    <>
-      <button
-        type="button"
-        onClick={() => setOpen(true)}
-        className="btn-danger-solid"
-        style={{ height: 32, padding: "0 14px", borderRadius: 10, fontSize: 12, width: "auto", background: "#dc2626", color: "#fff" }}
-        title={state?.message}
-      >
-        Supprimer
-      </button>
-      {open && (
+      {confirmId && (
         <div
           className="fixed inset-0 z-50 flex items-center justify-center p-4"
           style={{ background: "rgba(11, 31, 42, 0.55)" }}
-          onClick={() => setOpen(false)}
+          onClick={() => setConfirmId(null)}
         >
           <div className="card w-full max-w-md" onClick={(e) => e.stopPropagation()}>
             <h3 className="text-lg font-extrabold text-ink">Supprimer ce service ?</h3>
             <p className="mt-2 text-sm text-muted">
-              Cette action est définitive. Un service déjà utilisé dans un ticket ne peut pas être supprimé.
+              Cette action est définitive. Un service déjà utilisé dans un ticket ne peut pas
+              être supprimé : désactivez-le plutôt.
             </p>
-            {state?.message && <p className="mt-2 text-sm text-danger">{state.message}</p>}
             <div className="mt-5 flex justify-end gap-2">
-              <button type="button" onClick={() => setOpen(false)} className="btn-secondary" style={{ height: 40, padding: "0 18px", borderRadius: 12, fontSize: 13 }}>
+              <button
+                type="button"
+                onClick={() => setConfirmId(null)}
+                className="btn-secondary"
+                style={{ height: 40, padding: "0 18px", borderRadius: 12, fontSize: 13 }}
+              >
                 Annuler
               </button>
-              <form action={action}>
-                <input type="hidden" name="id" value={id} />
-                <button
-                  type="submit"
-                  disabled={pending}
-                  className="btn-danger-solid"
-                  style={{ height: 40, padding: "0 18px", borderRadius: 12, fontSize: 13, width: "auto" }}
-                  onClick={() => setOpen(false)}
-                >
-                  {pending ? "…" : "Supprimer"}
-                </button>
-              </form>
+              <button
+                type="button"
+                onClick={() => {
+                  const target = effectiveServices.find((s) => s.id === confirmId);
+                  if (target) void handleDelete(target);
+                }}
+                className="btn-danger-solid"
+                style={{ height: 40, padding: "0 18px", borderRadius: 12, fontSize: 13, width: "auto", background: "#dc2626", color: "#fff" }}
+              >
+                Supprimer
+              </button>
             </div>
           </div>
         </div>
       )}
-    </>
+    </div>
   );
 }
