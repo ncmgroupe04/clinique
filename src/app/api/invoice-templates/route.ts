@@ -77,14 +77,14 @@ export async function POST(request: Request) {
     return NextResponse.json({ ok: true });
   }
 
-  const { error } = await supabase.from("invoice_templates").insert({
+  const { data: created, error } = await supabase.from("invoice_templates").insert({
     structure_id: user.structureId,
     name: name ?? "Nouveau modèle",
     settings: settings ?? {},
     is_default: is_default ?? false,
-  });
+  }).select("id").single();
   if (error) return NextResponse.json({ error: "Création impossible." }, { status: 400 });
-  return NextResponse.json({ ok: true });
+  return NextResponse.json({ ok: true, id: created.id });
 }
 
 export async function DELETE(request: Request) {

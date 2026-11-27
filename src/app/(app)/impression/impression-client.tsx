@@ -219,15 +219,25 @@ export default function ImpressionClient({
 
   const createTemplate = async () => {
     if (!newTemplateName.trim()) return;
-    const res = await fetch("/api/invoice-templates", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ name: newTemplateName.trim(), settings: invoiceSettings, is_default: false }),
-    });
-    if (!res.ok) return;
-    const data = (await res.json().catch(() => ({}))) as { id?: string };
-    setInvoiceTemplatesState((prev) => [...prev, { id: data.id ?? crypto.randomUUID(), name: newTemplateName.trim(), settings: invoiceSettings as unknown as Record<string, unknown>, is_default: false }]);
+    let localOnly = false;
+    let id = crypto.randomUUID();
+    try {
+      const res = await fetch("/api/invoice-templates", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ name: newTemplateName.trim(), settings: invoiceSettings, is_default: false }),
+      });
+      if (!res.ok) throw new Error("api");
+      const data = (await res.json().catch(() => ({}))) as { id?: string };
+      id = data.id ?? id;
+    } catch {
+      localOnly = true;
+    }
+    const created = { id, name: newTemplateName.trim(), settings: invoiceSettings as unknown as Record<string, unknown>, is_default: false };
+    setInvoiceTemplatesState((prev) => [...prev, created]);
+    setActiveTemplateId(id);
     setNewTemplateName("");
+    setMessage({ ok: true, text: localOnly ? "Modèle créé localement (base non disponible)." : "Modèle créé." });
   };
 
   const setDefaultTemplate = async (id: string) => {
@@ -362,8 +372,28 @@ export default function ImpressionClient({
                     ))}
                   </select>
                 </div>
-                <button type="button" onClick={() => void saveInvoiceTemplate()} className="btn-secondary" style={{ height: 44, padding: "0 16px", borderRadius: 12, fontSize: 13 }}>
+                <button
+                  type="button"
+                  onClick={() => {
+                    void saveInvoiceTemplate()
+                      .then(() => setMessage({ ok: true, text: "Modèle enregistré." }))
+                      .catch(() => {
+                        if (typeof window !== "undefined") localStorage.setItem("invoice_template_local", JSON.stringify(invoiceSettings));
+                        setMessage({ ok: true, text: "Modèle enregistré localement (base non disponible)." });
+                      });
+                  }}
+                  className="btn-secondary"
+                  style={{ height: 44, padding: "0 16px", borderRadius: 12, fontSize: 13 }}
+                >
                   Enregistrer le modèle
+                </button>
+                <button
+                  type="button"
+                  onClick={() => { if (activeTemplateId) void deleteTemplate(activeTemplateId); }}
+                  className="btn-danger-solid"
+                  style={{ height: 44, padding: "0 16px", borderRadius: 12, fontSize: 13, background: "#dc2626", color: "#fff" }}
+                >
+                  Supprimer le modèle
                 </button>
               </div>
               <div className="mt-2 flex flex-wrap items-center gap-2">
