@@ -24,8 +24,11 @@ export default function ServiceStep({ services }: { services: Service[] }) {
   const [otherLabel, setOtherLabel] = useState("");
   const [otherPrice, setOtherPrice] = useState("");
 
+  const visibleServices = services.filter(
+    (s) => !(s.name.trim().toLowerCase() === "visite prénatale" && s.price === 3000),
+  );
   const other = selectedId === "__other__";
-  const selected = services.find((s) => s.id === selectedId) ?? null;
+  const selected = visibleServices.find((s) => s.id === selectedId) ?? null;
   const otherValid = otherLabel.trim().length > 0 && Number(otherPrice) >= 0 && otherPrice !== "";
   const canContinue = other ? otherValid : selected !== null;
 
@@ -69,7 +72,7 @@ export default function ServiceStep({ services }: { services: Service[] }) {
           )}
         </button>
 
-        {services.map((s, index) => {
+        {visibleServices.map((s, index) => {
           const on = selectedId === s.id;
           const tone = PALETTE[index % PALETTE.length];
           return (
