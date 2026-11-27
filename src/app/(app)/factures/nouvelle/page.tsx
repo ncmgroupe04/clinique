@@ -1,3 +1,4 @@
+import Link from "next/link";
 import { redirect } from "next/navigation";
 import { connection } from "next/server";
 import { requireUser } from "@/lib/auth";
@@ -49,7 +50,25 @@ export default async function NouvelleFacturePage() {
 
   return (
     <div className="flex flex-1 flex-col gap-[26px]">
-      <ScreenHeader title="Nouvelle facture" subtitle="Étape unique · Patient et soins" />
+      <ScreenHeader title="Nouvelle facture" subtitle="Étape unique · Patient et soins">
+        {user.role === "structure_admin" && (
+          <Link
+            href="/soins?ajouter=1"
+            className="go"
+            style={{
+              height: 44,
+              width: "auto",
+              padding: "0 20px",
+              borderRadius: 14,
+              fontSize: 14,
+              background: "#0b7a6b",
+              color: "#fff",
+            }}
+          >
+            + Nouveau soin
+          </Link>
+        )}
+      </ScreenHeader>
       <FactureForm
         cares={cares ?? []}
         categories={categories ?? []}

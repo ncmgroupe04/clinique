@@ -38,7 +38,15 @@ function fcfa(value: number): string {
   return `${value.toLocaleString("fr-FR")} F`;
 }
 
-export default function SoinsClient({ cares, categories }: { cares: Care[]; categories: Category[] }) {
+export default function SoinsClient({
+  cares,
+  categories,
+  autoFocus,
+}: {
+  cares: Care[];
+  categories: Category[];
+  autoFocus?: boolean;
+}) {
   const [editingId, setEditingId] = useState<string | null>(null);
   const [editingCategoryId, setEditingCategoryId] = useState<string | null>(null);
   const nameRef = useRef<HTMLInputElement>(null);
@@ -121,6 +129,11 @@ export default function SoinsClient({ cares, categories }: { cares: Care[]; cate
       cotation: String(formData.get("cotation") ?? "") || null,
     } : c)));
   }
+  // Accès rapide « Nouveau soin » depuis la facture : on ouvre directement la saisie.
+  useEffect(() => {
+    if (autoFocus) nameRef.current?.focus();
+  }, [autoFocus]);
+
   useEffect(() => {
     // eslint-disable-next-line react-hooks/set-state-in-effect
     if (editState?.success) setEditingId(null);

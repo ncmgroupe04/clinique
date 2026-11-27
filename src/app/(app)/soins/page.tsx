@@ -6,7 +6,11 @@ import { createClient, createServiceClient } from "@/lib/supabase/server";
 import ScreenHeader from "../screen-header";
 import SoinsClient from "./soins-client";
 
-export default async function SoinsPage() {
+export default async function SoinsPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ ajouter?: string }>;
+}) {
   await connection();
   const user = await requireUser();
   if (user.role !== "structure_admin" && user.role !== "platform_admin") {
@@ -56,6 +60,8 @@ export default async function SoinsPage() {
     }
   }
 
+  const params = await searchParams;
+
   return (
     <div className="flex flex-1 flex-col gap-[26px]">
       <ScreenHeader
@@ -70,7 +76,11 @@ export default async function SoinsPage() {
           Facture
         </Link>
       </ScreenHeader>
-      <SoinsClient cares={cares ?? []} categories={categoryRows} />
+      <SoinsClient
+        cares={cares ?? []}
+        categories={categoryRows}
+        autoFocus={params.ajouter === "1"}
+      />
     </div>
   );
 }
