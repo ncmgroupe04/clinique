@@ -155,8 +155,9 @@ export default function TarifsClient({
                         { name: "id", value: s.id },
                         { name: "active", value: s.active ? "false" : "true" },
                       ]}
-                      buttonClassName="text-sm font-medium text-muted underline-offset-2 hover:underline"
-                      buttonStyle={{ padding: "0 6px" }}
+                      confirmClassName={s.active ? "btn-warning-solid" : "btn-primary"}
+                      buttonClassName={s.active ? "btn-warning-solid" : "btn-secondary"}
+                      buttonStyle={{ height: 32, padding: "0 14px", borderRadius: 10, fontSize: 12, width: "auto" }}
                     />
                     <DeleteServiceButton id={s.id} />
                   </>

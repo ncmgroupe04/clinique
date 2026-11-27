@@ -200,6 +200,8 @@ input:-webkit-autofill:focus { -webkit-text-fill-color: #0b1f2a; -webkit-box-sha
 .btn-danger { background: #fff; color: #dc2626; border: 1.5px solid #fecaca; border-radius: 14px; padding: 0.5rem 1rem; font: 500 14px "Plus Jakarta Sans", Inter, sans-serif; cursor: pointer; }
 .btn-danger-solid { background: #dc2626; color: #fff; border: none; border-radius: 18px; height: 60px; padding: 0 24px; font: 700 17px "Plus Jakarta Sans", Inter, sans-serif; display: flex; align-items: center; justify-content: center; cursor: pointer; white-space: nowrap; }
 .btn-danger-solid:disabled { opacity: 0.6; cursor: not-allowed; }
+.btn-warning-solid { background: #ea580c; color: #fff; border: none; border-radius: 18px; height: 60px; padding: 0 24px; font: 700 17px "Plus Jakarta Sans", Inter, sans-serif; display: flex; align-items: center; justify-content: center; cursor: pointer; white-space: nowrap; }
+.btn-warning-solid:disabled { opacity: 0.6; cursor: not-allowed; }
 
 @media print {
   body { background: #fff; margin: 0; }

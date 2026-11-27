@@ -295,8 +295,9 @@ export default function SoinsClient({ cares, categories }: { cares: Care[]; cate
                         { name: "id", value: c.id },
                         { name: "active", value: c.active ? "false" : "true" },
                       ]}
-                      buttonClassName="text-sm font-medium text-muted underline-offset-2 hover:underline"
-                      buttonStyle={{ padding: "0 6px" }}
+                      confirmClassName={c.active ? "btn-warning-solid" : "btn-primary"}
+                      buttonClassName={c.active ? "btn-warning-solid" : "btn-secondary"}
+                      buttonStyle={{ height: 32, padding: "0 14px", borderRadius: 10, fontSize: 12, width: "auto" }}
                     />
                     <DeleteCareButton id={c.id} />
                   </>
@@ -365,8 +366,8 @@ export default function SoinsClient({ cares, categories }: { cares: Care[]; cate
                         <button
                           type="button"
                           onClick={() => setLocalCategories((prev) => prev.map((x) => (x.id === cat.id ? { ...x, active: !x.active } : x)))}
-                          className="text-sm font-medium text-muted underline-offset-2 hover:underline"
-                          style={{ padding: "0 6px" }}
+                          className={cat.active ? "btn-warning-solid" : "btn-secondary"}
+                          style={{ height: 32, padding: "0 14px", borderRadius: 10, fontSize: 12, width: "auto" }}
                         >
                           {cat.active ? "Désactiver" : "Réactiver"}
                         </button>
@@ -393,8 +394,9 @@ export default function SoinsClient({ cares, categories }: { cares: Care[]; cate
                             { name: "id", value: cat.id },
                             { name: "active", value: cat.active ? "false" : "true" },
                           ]}
-                          buttonClassName="text-sm font-medium text-muted underline-offset-2 hover:underline"
-                          buttonStyle={{ padding: "0 6px" }}
+                          confirmClassName={cat.active ? "btn-warning-solid" : "btn-primary"}
+                          buttonClassName={cat.active ? "btn-warning-solid" : "btn-secondary"}
+                          buttonStyle={{ height: 32, padding: "0 14px", borderRadius: 10, fontSize: 12, width: "auto" }}
                         />
                         <DeleteCategoryButton id={cat.id} />
                       </>

@@ -141,7 +141,8 @@ export default function UtilisateursClient({ users }: { users: User[] }) {
                           { name: "user_id", value: u.id },
                           { name: "active", value: u.active ? "false" : "true" },
                         ]}
-                        buttonClassName={u.active ? "btn-danger-solid" : "btn-secondary"}
+                        confirmClassName={u.active ? "btn-warning-solid" : "btn-primary"}
+                        buttonClassName={u.active ? "btn-warning-solid" : "btn-secondary"}
                         buttonStyle={{ height: 34, padding: "0 12px", borderRadius: 10, fontSize: 12, width: "auto" }}
                       />
                     )}
