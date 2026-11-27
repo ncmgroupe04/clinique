@@ -297,7 +297,7 @@ export default function SoinsClient({ cares, categories }: { cares: Care[]; cate
                       ]}
                       confirmClassName={c.active ? "btn-warning-solid" : "btn-primary"}
                       buttonClassName={c.active ? "btn-warning-solid" : "btn-secondary"}
-                      buttonStyle={{ height: 32, padding: "0 14px", borderRadius: 10, fontSize: 12, width: "auto" }}
+                      buttonStyle={{ height: 32, padding: "0 14px", borderRadius: 10, fontSize: 12, width: "auto", background: "#2563eb", color: "#fff" }}
                     />
                     <DeleteCareButton id={c.id} />
                   </>
@@ -367,7 +367,7 @@ export default function SoinsClient({ cares, categories }: { cares: Care[]; cate
                           type="button"
                           onClick={() => setLocalCategories((prev) => prev.map((x) => (x.id === cat.id ? { ...x, active: !x.active } : x)))}
                           className={cat.active ? "btn-warning-solid" : "btn-secondary"}
-                          style={{ height: 32, padding: "0 14px", borderRadius: 10, fontSize: 12, width: "auto" }}
+                          style={{ height: 32, padding: "0 14px", borderRadius: 10, fontSize: 12, width: "auto", background: cat.active ? "#2563eb" : undefined, color: "#fff" }}
                         >
                           {cat.active ? "Désactiver" : "Réactiver"}
                         </button>
@@ -396,7 +396,7 @@ export default function SoinsClient({ cares, categories }: { cares: Care[]; cate
                           ]}
                           confirmClassName={cat.active ? "btn-warning-solid" : "btn-primary"}
                           buttonClassName={cat.active ? "btn-warning-solid" : "btn-secondary"}
-                          buttonStyle={{ height: 32, padding: "0 14px", borderRadius: 10, fontSize: 12, width: "auto" }}
+                          buttonStyle={{ height: 32, padding: "0 14px", borderRadius: 10, fontSize: 12, width: "auto", background: "#2563eb", color: "#fff" }}
                         />
                         <DeleteCategoryButton id={cat.id} />
                       </>
