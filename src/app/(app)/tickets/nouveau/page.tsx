@@ -37,6 +37,7 @@ export default async function NouveauTicketPage({
       .select("id, name, price")
       .eq("structure_id", user.structureId)
       .eq("active", true)
+      .neq("name", "Visite prénatale")
       .order("name", { ascending: true });
 
     return (
@@ -69,6 +70,7 @@ export default async function NouveauTicketPage({
       .eq("structure_id", user.structureId)
       .eq("id", sp.service)
       .eq("active", true)
+      .neq("name", "Visite prénatale")
       .maybeSingle();
     if (data) {
       chosen = { id: data.id, label: data.name, price: data.price, other: false };
