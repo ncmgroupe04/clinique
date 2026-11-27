@@ -67,7 +67,7 @@ export default async function TableauPage() {
       {/* Accès rapide */}
       <div className="card">
         <p className="text-[13px] font-semibold text-muted">Accès rapide</p>
-        <div className="mt-3 grid grid-cols-1 gap-3 sm:grid-cols-3 lg:grid-cols-6">
+        <div className="mt-3 grid grid-cols-1 gap-3 sm:grid-cols-3 lg:grid-cols-5">
           {(user.role === "structure_admin" || user.role === "cashier") && (
             <>
               <Link href="/tickets/nouveau" className="go" style={{ height: 48, fontSize: 14, borderRadius: 14, background: "#0b7a6b", color: "#fff" }}>
@@ -83,18 +83,15 @@ export default async function TableauPage() {
               Nouvelle Ordonnance
             </Link>
           )}
+          {(user.role === "structure_admin" || user.role === "cashier") && (
+            <Link href="/tarifs" className="go" style={{ height: 48, fontSize: 14, borderRadius: 14, background: "#475569", color: "#fff" }}>
+              Tarifs
+            </Link>
+          )}
           {user.role === "structure_admin" && (
-            <>
-              <Link href="/tarifs" className="go" style={{ height: 48, fontSize: 14, borderRadius: 14, background: "#475569", color: "#fff" }}>
-                Tarifs
-              </Link>
-              <Link href="/tarifs?ajouter=1" className="go" style={{ height: 48, fontSize: 14, borderRadius: 14, background: "#b45309", color: "#fff" }}>
-                Nouveau tarif
-              </Link>
-              <Link href="/soins" className="go" style={{ height: 48, fontSize: 14, borderRadius: 14, background: "#0e7490", color: "#fff" }}>
-                Soins
-              </Link>
-            </>
+            <Link href="/soins" className="go" style={{ height: 48, fontSize: 14, borderRadius: 14, background: "#0e7490", color: "#fff" }}>
+              Soins
+            </Link>
           )}
         </div>
       </div>

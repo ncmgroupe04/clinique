@@ -1,3 +1,4 @@
+import Link from "next/link";
 import { redirect } from "next/navigation";
 import { connection } from "next/server";
 import { requireUser } from "@/lib/auth";
@@ -28,6 +29,24 @@ export default async function NouveauTicketPage({
   if (!user.structureId) redirect("/tableau");
 
   const sp = await searchParams;
+  const newTarifButton =
+    user.role === "structure_admin" ? (
+      <Link
+        href="/tarifs?ajouter=1"
+        className="go"
+        style={{
+          height: 44,
+          width: "auto",
+          padding: "0 20px",
+          borderRadius: 14,
+          fontSize: 14,
+          background: "#0b7a6b",
+          color: "#fff",
+        }}
+      >
+        + Nouveau tarif
+      </Link>
+    ) : null;
   const supabase = await createClient();
   const step2Requested = Boolean(sp.service) || sp.autre === "1";
 
@@ -46,13 +65,16 @@ export default async function NouveauTicketPage({
           title="Nouveau ticket"
           subtitle="Étape 1 sur 2 · Choisissez le service pour continuer"
         >
-          <div className="flex flex-wrap gap-2.5">
-            <span className="rounded-full bg-accent px-[18px] py-2.5 text-sm font-bold text-white">
-              1 · Service
-            </span>
-            <span className="rounded-full border border-border bg-white px-[18px] py-2.5 text-sm font-semibold text-muted">
-              2 · Patient et paiement
-            </span>
+          <div className="flex flex-wrap items-center gap-2.5">
+            {newTarifButton}
+            <div className="flex flex-wrap gap-2.5">
+              <span className="rounded-full bg-accent px-[18px] py-2.5 text-sm font-bold text-white">
+                1 · Service
+              </span>
+              <span className="rounded-full border border-border bg-white px-[18px] py-2.5 text-sm font-semibold text-muted">
+                2 · Patient et paiement
+              </span>
+            </div>
           </div>
         </ScreenHeader>
         <ServiceStep services={services ?? []} />
@@ -96,9 +118,12 @@ export default async function NouveauTicketPage({
   return (
     <div className="flex flex-1 flex-col gap-[26px]">
       <ScreenHeader title="Nouveau ticket" subtitle="Étape 2 sur 2 · Patient et paiement">
-        <div className="rounded-full border border-border bg-white px-[18px] py-2.5 text-sm font-semibold">
-          <span className="font-medium text-muted">Prochain reçu</span>{" "}
-          {nextReceipt.year}-{String(nextReceipt.number).padStart(4, "0")}
+        <div className="flex flex-wrap items-center gap-2.5">
+          {newTarifButton}
+          <div className="rounded-full border border-border bg-white px-[18px] py-2.5 text-sm font-semibold">
+            <span className="font-medium text-muted">Prochain reçu</span>{" "}
+            {nextReceipt.year}-{String(nextReceipt.number).padStart(4, "0")}
+          </div>
         </div>
       </ScreenHeader>
       <TicketStep
