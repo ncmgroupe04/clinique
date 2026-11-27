@@ -234,7 +234,7 @@ export default function AdminStructuresTable({
                             className={s.active
                               ? "btn-warning-solid"
                               : "rounded-[10px] bg-[#DFF3EF] px-3 py-1.5 text-xs font-bold text-[#0B5F54] hover:bg-[#CDEBE4]"}
-                            style={s.active ? { height: 32, padding: "0 14px", borderRadius: 10, fontSize: 12, width: "auto", background: "#2563eb", color: "#fff" } : undefined}
+                            style={s.active ? { height: 32, padding: "0 14px", borderRadius: 10, fontSize: 12, width: "auto", background: "#dbeafe", color: "#1e40af" } : undefined}
                           >
                             {s.active ? "Désactiver" : "Réactiver structure"}
                           </button>
