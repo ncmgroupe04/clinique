@@ -315,14 +315,6 @@ export default function SoinsClient({ cares, categories }: { cares: Care[]; cate
             <h2 className="text-lg font-extrabold">Catégories</h2>
             <p className="mt-0.5 text-xs text-muted">Liste personnalisable de votre structure, utilisée pour classer les soins.</p>
           </div>
-          <button
-            type="button"
-            onClick={() => categoryNameRef.current?.focus()}
-            className="go"
-            style={{ height: 42, width: "auto", padding: "0 18px", borderRadius: 12, fontSize: 14 }}
-          >
-            + Ajouter une catégorie
-          </button>
         </div>
 
         {effectiveCategories.length === 0 ? (
