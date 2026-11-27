@@ -36,7 +36,7 @@ export default function ProfileActions({ fullName }: { fullName: string }) {
           </div>
         </form>
       ) : (
-        <button type="button" onClick={() => setPanel("name")} className="btn-primary w-full" style={{ height: 40, borderRadius: 10, fontSize: 13 }}>
+        <button type="button" onClick={() => setPanel("name")} className="btn-edit-solid w-full" style={{ height: 40, borderRadius: 10, fontSize: 13 }}>
           Modifier le profil
         </button>
       )}

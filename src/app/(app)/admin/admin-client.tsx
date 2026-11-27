@@ -325,8 +325,8 @@ export function EditPlanButton({ plan }: { plan: PlanEdit }) {
       <button
         type="button"
         onClick={() => setOpen(true)}
-        className="btn-secondary text-xs"
-        style={{ height: 34, padding: "0 12px", borderRadius: 10, width: "auto" }}
+        className="btn-edit-solid"
+        style={{ height: 34, padding: "0 14px", borderRadius: 10, fontSize: 12, width: "auto", background: "#475569", color: "#fff" }}
       >
         Modifier
       </button>

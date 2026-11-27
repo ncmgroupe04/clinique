@@ -202,6 +202,8 @@ input:-webkit-autofill:focus { -webkit-text-fill-color: #0b1f2a; -webkit-box-sha
 .btn-danger-solid:disabled { opacity: 0.6; cursor: not-allowed; }
 .btn-warning-solid { background: #2563eb; color: #fff; border: none; border-radius: 18px; height: 60px; padding: 0 24px; font: 700 17px "Plus Jakarta Sans", Inter, sans-serif; display: flex; align-items: center; justify-content: center; cursor: pointer; white-space: nowrap; }
 .btn-warning-solid:disabled { opacity: 0.6; cursor: not-allowed; }
+.btn-edit-solid { background: #475569; color: #fff; border: none; border-radius: 18px; height: 60px; padding: 0 24px; font: 700 17px "Plus Jakarta Sans", Inter, sans-serif; display: flex; align-items: center; justify-content: center; cursor: pointer; white-space: nowrap; }
+.btn-edit-solid:disabled { opacity: 0.6; cursor: not-allowed; }
 
 @media print {
   body { background: #fff; margin: 0; }

@@ -118,8 +118,8 @@ export default function UtilisateursClient({ users }: { users: User[] }) {
                     <button
                       type="button"
                       onClick={() => { setEditingId(editingId === u.id ? null : u.id); setResetId(null); }}
-                      className="btn-secondary text-xs"
-                      style={smallBtn}
+                      className="btn-edit-solid"
+                      style={{ ...smallBtn, background: "#475569", color: "#fff" }}
                     >
                       Modifier
                     </button>

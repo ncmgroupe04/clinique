@@ -283,7 +283,7 @@ export default function SoinsClient({ cares, categories }: { cares: Care[]; cate
                     <span className={`cd ${c.active ? "" : "off"}`} style={{ width: 70 }}>
                       {c.active ? "Actif" : "Inactif"}
                     </span>
-                    <button type="button" onClick={() => setEditingId(c.id)} aria-label={`Modifier ${c.name}`} className="x" style={{ width: "auto", padding: "0 16px", fontSize: 13, fontWeight: 600 }}>
+                    <button type="button" onClick={() => setEditingId(c.id)} aria-label={`Modifier ${c.name}`} className="btn-edit-solid" style={{ height: 32, padding: "0 14px", borderRadius: 10, fontSize: 12, width: "auto" }}>
                       Modifier
                     </button>
                     <ConfirmActionButton
@@ -382,7 +382,7 @@ export default function SoinsClient({ cares, categories }: { cares: Care[]; cate
                       </>
                     ) : (
                       <>
-                        <button type="button" onClick={() => setEditingCategoryId(cat.id)} aria-label={`Modifier ${cat.name}`} className="x" style={{ width: "auto", padding: "0 16px", fontSize: 13, fontWeight: 600 }}>
+                        <button type="button" onClick={() => setEditingCategoryId(cat.id)} aria-label={`Modifier ${cat.name}`} className="btn-edit-solid" style={{ height: 32, padding: "0 14px", borderRadius: 10, fontSize: 12, width: "auto" }}>
                           Modifier
                         </button>
                         <ConfirmActionButton

@@ -141,8 +141,8 @@ export default function TarifsClient({
                       type="button"
                       onClick={() => setEditingId(s.id)}
                       aria-label={`Modifier ${s.name}`}
-                      className="x"
-                      style={{ width: "auto", padding: "0 16px", fontSize: 13, fontWeight: 600 }}
+                      className="btn-edit-solid"
+                      style={{ height: 32, padding: "0 14px", borderRadius: 10, fontSize: 12, width: "auto" }}
                     >
                       Modifier
                     </button>
