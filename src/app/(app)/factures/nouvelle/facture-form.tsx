@@ -33,7 +33,32 @@ export default function FactureForm({
   template: TemplateInfo | null;
   invoiceTemplate: { settings: Record<string, unknown> } | null;
 }) {
-  const effectiveCategories = categories.length ? categories : DEFAULT_CATEGORIES;
+  const [localCares] = useState<Care[]>(() => {
+    if (typeof window === "undefined") return cares;
+    try {
+      const stored = JSON.parse(localStorage.getItem("cares_fallback") ?? "null");
+      if (!Array.isArray(stored)) return cares;
+      const extra = (stored as Care[]).filter((c) => !cares.some((existing) => existing.id === c.id));
+      return [...cares, ...extra];
+    } catch {
+      return cares;
+    }
+  });
+  const [localCategories] = useState<Category[]>(() => {
+    if (typeof window === "undefined") return [];
+    try {
+      const stored = JSON.parse(localStorage.getItem("care_categories_fallback") ?? "null");
+      return Array.isArray(stored) ? (stored as Category[]) : [];
+    } catch {
+      return [];
+    }
+  });
+  const effectiveCares = localCares;
+  const effectiveCategories = categories.length
+    ? categories
+    : localCategories.length
+      ? localCategories
+      : DEFAULT_CATEGORIES;
   const router = useRouter();
   const [state, action, pending] = useActionState<InvoiceState, FormData>(createInvoice, undefined);
   const [lines, setLines] = useState<Line[]>([]);
@@ -61,7 +86,7 @@ export default function FactureForm({
     setLines((prev) => {
       const next = [...prev];
       for (const id of selected) {
-        const care = cares.find((c) => c.id === id);
+        const care = effectiveCares.find((c) => c.id === id);
         if (!care) continue;
         const price = override !== null && Number.isFinite(override) && override >= 0 ? String(override) : String(care.price);
         const existing = next.findIndex((l) => l.careId === care.id);
@@ -150,14 +175,14 @@ export default function FactureForm({
         {/* Liste à cocher groupée par catégorie */}
         <div>
           <span className="lbl">Ajouter un soin</span>
-          {cares.length === 0 ? (
+          {effectiveCares.length === 0 ? (
             <p className="text-sm text-muted">Aucun soin actif dans le catalogue.</p>
           ) : (
             <div className="grid grid-cols-1 gap-3 md:grid-cols-3">
-              {[...effectiveCategories.filter((c) => c.active), ...(cares.some((c) => !effectiveCategories.some((cat) => cat.active && (c.category ?? "intervention") === cat.slug)) ? [{ slug: "__other__", name: "Autres", active: true }] : [])].map((group) => {
+              {[...effectiveCategories.filter((c) => c.active), ...(effectiveCares.some((c) => !effectiveCategories.some((cat) => cat.active && (c.category ?? "intervention") === cat.slug)) ? [{ slug: "__other__", name: "Autres", active: true }] : [])].map((group) => {
                 const items = group.slug === "__other__"
-                  ? cares.filter((c) => !effectiveCategories.some((cat) => cat.active && (c.category ?? "intervention") === cat.slug))
-                  : cares.filter((c) => (c.category ?? "intervention") === group.slug);
+                  ? effectiveCares.filter((c) => !effectiveCategories.some((cat) => cat.active && (c.category ?? "intervention") === cat.slug))
+                  : effectiveCares.filter((c) => (c.category ?? "intervention") === group.slug);
                 return (
                   <div key={group.slug} className="rounded-[18px] border border-border bg-white p-4">
                     <h3 className="mb-2 text-sm font-extrabold text-ink">{group.name}</h3>
