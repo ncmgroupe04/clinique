@@ -314,11 +314,6 @@ export default function SoinsClient({ cares, categories }: { cares: Care[]; cate
           <div>
             <h2 className="text-lg font-extrabold">Catégories</h2>
             <p className="mt-0.5 text-xs text-muted">Liste personnalisable de votre structure, utilisée pour classer les soins.</p>
-            {categories.length === 0 && (
-              <p className="mt-1 text-xs text-danger">
-                Mode local de test : les ajouts sont conservés dans ce navigateur et alimentent immédiatement la liste déroulante des soins et de la facture.
-              </p>
-            )}
           </div>
           <button
             type="button"
