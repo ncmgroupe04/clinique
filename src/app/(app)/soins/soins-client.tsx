@@ -108,6 +108,17 @@ export default function SoinsClient({ cares, categories }: { cares: Care[]; cate
       },
     ]);
   }
+
+  function updateLocalCare(id: string, formData: FormData) {
+    setLocalCares((prev) => prev.map((c) => (c.id === id ? {
+      ...c,
+      name: String(formData.get("name") ?? "").trim() || c.name,
+      price: Number(formData.get("price") ?? 0) || 0,
+      unit: String(formData.get("unit") ?? "unité"),
+      category: String(formData.get("category") ?? "intervention"),
+      cotation: String(formData.get("cotation") ?? "") || null,
+    } : c)));
+  }
   useEffect(() => {
     // eslint-disable-next-line react-hooks/set-state-in-effect
     if (editState?.success) setEditingId(null);
@@ -222,7 +233,15 @@ export default function SoinsClient({ cares, categories }: { cares: Care[]; cate
               <div key={c.id} className="ln" style={{ paddingTop: 6, paddingBottom: 6 }}>
                 {editingId === c.id ? (
                   <div className="flex w-full flex-col gap-3">
-                    <form action={editAction} className="flex flex-wrap items-end gap-3">
+                    <form
+                      action={categories.length ? editAction : undefined}
+                      onSubmit={categories.length ? undefined : (e) => {
+                        e.preventDefault();
+                        updateLocalCare(c.id, new FormData(e.currentTarget));
+                        setEditingId(null);
+                      }}
+                      className="flex flex-wrap items-end gap-3"
+                    >
                       <input type="hidden" name="id" value={c.id} />
                       <div className="min-w-[180px] flex-1">
                         <label className="lbl" htmlFor={`name-${c.id}`}>Nom du soin</label>
@@ -283,23 +302,49 @@ export default function SoinsClient({ cares, categories }: { cares: Care[]; cate
                     <span className={`cd ${c.active ? "" : "off"}`} style={{ width: 70 }}>
                       {c.active ? "Actif" : "Inactif"}
                     </span>
-                    <button type="button" onClick={() => setEditingId(c.id)} aria-label={`Modifier ${c.name}`} className="btn-edit-solid" style={{ height: 32, padding: "0 14px", borderRadius: 10, fontSize: 12, width: "auto", background: "#475569", color: "#fff" }}>
-                      Modifier
-                    </button>
-                    <ConfirmActionButton
-                      label={c.active ? "Désactiver" : "Réactiver"}
-                      confirmTitle={c.active ? "Désactiver ce soin ?" : "Réactiver ce soin ?"}
-                      confirmMessage={c.active ? "Le soin ne sera plus proposé à la facturation." : "Le soin sera à nouveau disponible."}
-                      formAction={toggleCare}
-                      hiddenInputs={[
-                        { name: "id", value: c.id },
-                        { name: "active", value: c.active ? "false" : "true" },
-                      ]}
-                      confirmClassName={c.active ? "btn-warning-solid" : "btn-primary"}
-                      buttonClassName={c.active ? "btn-warning-solid" : "btn-secondary"}
-                      buttonStyle={{ height: 32, padding: "0 14px", borderRadius: 10, fontSize: 12, width: "auto", background: "#dbeafe", color: "#1e40af" }}
-                    />
-                    <DeleteCareButton id={c.id} />
+                    {categories.length === 0 ? (
+                      <>
+                        <button type="button" onClick={() => setEditingId(c.id)} aria-label={`Modifier ${c.name}`} className="btn-edit-solid" style={{ height: 32, padding: "0 14px", borderRadius: 10, fontSize: 12, width: "auto", background: "#475569", color: "#fff" }}>
+                          Modifier
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => setLocalCares((prev) => prev.map((x) => (x.id === c.id ? { ...x, active: !x.active } : x)))}
+                          className={c.active ? "btn-warning-solid" : "btn-secondary"}
+                          style={{ height: 32, padding: "0 14px", borderRadius: 10, fontSize: 12, width: "auto", background: c.active ? "#dbeafe" : undefined, color: c.active ? "#1e40af" : "#fff" }}
+                        >
+                          {c.active ? "Désactiver" : "Réactiver"}
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => setLocalCares((prev) => prev.filter((x) => x.id !== c.id))}
+                          className="btn-danger-solid"
+                          style={{ height: 32, padding: "0 14px", borderRadius: 10, fontSize: 12, width: "auto", background: "#dc2626", color: "#fff" }}
+                        >
+                          Supprimer
+                        </button>
+                      </>
+                    ) : (
+                      <>
+                        <button type="button" onClick={() => setEditingId(c.id)} aria-label={`Modifier ${c.name}`} className="btn-edit-solid" style={{ height: 32, padding: "0 14px", borderRadius: 10, fontSize: 12, width: "auto", background: "#475569", color: "#fff" }}>
+                          Modifier
+                        </button>
+                        <ConfirmActionButton
+                          label={c.active ? "Désactiver" : "Réactiver"}
+                          confirmTitle={c.active ? "Désactiver ce soin ?" : "Réactiver ce soin ?"}
+                          confirmMessage={c.active ? "Le soin ne sera plus proposé à la facturation." : "Le soin sera à nouveau disponible."}
+                          formAction={toggleCare}
+                          hiddenInputs={[
+                            { name: "id", value: c.id },
+                            { name: "active", value: c.active ? "false" : "true" },
+                          ]}
+                          confirmClassName={c.active ? "btn-warning-solid" : "btn-primary"}
+                          buttonClassName={c.active ? "btn-warning-solid" : "btn-secondary"}
+                          buttonStyle={{ height: 32, padding: "0 14px", borderRadius: 10, fontSize: 12, width: "auto", background: "#dbeafe", color: "#1e40af" }}
+                        />
+                        <DeleteCareButton id={c.id} />
+                      </>
+                    )}
                   </>
                 )}
               </div>
