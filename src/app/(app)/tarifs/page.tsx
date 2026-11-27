@@ -6,7 +6,11 @@ import { getNextReceipt } from "@/lib/receipts";
 import ScreenHeader from "../screen-header";
 import TarifsClient from "./tarifs-client";
 
-export default async function TarifsPage() {
+export default async function TarifsPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ ajouter?: string }>;
+}) {
   await connection();
   const user = await requireUser();
   if (user.role !== "structure_admin" && user.role !== "platform_admin") {
@@ -28,6 +32,7 @@ export default async function TarifsPage() {
     .maybeSingle();
 
   const nextReceipt = await getNextReceipt(supabase, user.structureId);
+  const params = await searchParams;
 
   return (
     <div className="flex flex-1 flex-col gap-[26px]">
@@ -39,6 +44,7 @@ export default async function TarifsPage() {
         services={services ?? []}
         printFormat={structure?.print_format ?? "80"}
         nextReceipt={nextReceipt}
+        autoFocus={params.ajouter === "1"}
       />
     </div>
   );

@@ -47,10 +47,12 @@ export default function TarifsClient({
   services,
   printFormat,
   nextReceipt,
+  autoFocus,
 }: {
   services: Service[];
   printFormat: string;
   nextReceipt: { year: number; number: number };
+  autoFocus?: boolean;
 }) {
   const router = useRouter();
   const nameRef = useRef<HTMLInputElement>(null);
@@ -92,6 +94,11 @@ export default function TarifsClient({
     if (typeof window === "undefined") return;
     localStorage.setItem(LOCAL_KEY, JSON.stringify(localServices));
   }, [localServices]);
+
+  // Accès rapide « Nouveau tarif » : on ouvre directement la saisie.
+  useEffect(() => {
+    if (autoFocus) nameRef.current?.focus();
+  }, [autoFocus]);
 
   const effectiveServices = [...dbServices, ...localServices];
   const isLocal = (id: string) => id.startsWith(LOCAL_PREFIX);
