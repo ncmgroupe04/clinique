@@ -4,6 +4,7 @@ import { redirect } from "next/navigation";
 import { headers } from "next/headers";
 import { createClient, createServiceClient } from "@/lib/supabase/server";
 import { logAudit } from "@/lib/audit";
+import { STANDARD_INVOICE_SETTINGS } from "@/lib/invoice-defaults";
 import {
   signupSchema,
   loginSchema,
@@ -114,6 +115,35 @@ export async function signup(
       full_name: fullName,
     });
     if (profileError) throw profileError;
+
+    // Tableau de facture standard pour la nouvelle structure uniquement.
+    // Les structures déjà inscrites ne sont jamais réécrites ici.
+    const standardSettings = JSON.parse(JSON.stringify(STANDARD_INVOICE_SETTINGS));
+    // La colonne `settings` n'existe que depuis la migration 0036 : on ignore
+    // l'erreur si elle n'est pas encore appliquée, sans bloquer l'inscription.
+    const printTemplate = await admin
+      .from("print_templates")
+      .upsert(
+        {
+          structure_id: structure.id,
+          kind: "facture",
+          header_text: "Facture",
+          footer_text: "Merci de votre confiance",
+          settings: standardSettings,
+        },
+        { onConflict: "structure_id,kind" },
+      );
+    if (printTemplate.error) console.warn("Modèle de facture standard non enregistré", printTemplate.error.message);
+
+    const invoiceTemplate = await admin
+      .from("invoice_templates")
+      .insert({
+        structure_id: structure.id,
+        name: "Modèle par défaut",
+        settings: standardSettings,
+        is_default: true,
+      });
+    if (invoiceTemplate.error) console.warn("Modèle de facture standard non enregistré", invoiceTemplate.error.message);
 
     await logAudit({
       structureId: structure.id,

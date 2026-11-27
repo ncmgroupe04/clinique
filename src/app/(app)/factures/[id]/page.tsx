@@ -111,6 +111,8 @@ export default async function FactureDetailPage({ params }: { params: Promise<{ 
       case "date": return new Date(invoice.created_at).toLocaleDateString("fr-FR");
       case "dents": return it.dents || "—";
       case "label": return it.care_name;
+      // « Texte libre » dans une colonne = désignation libre de l'acte.
+      case "texte": return it.care_name;
       case "cotation": return it.cotation || "—";
       case "quantite": return it.quantity;
       case "prix_unitaire": return formatCfa(it.unit_price);

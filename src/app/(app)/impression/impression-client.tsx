@@ -313,9 +313,9 @@ export default function ImpressionClient({
   };
 
   const sampleRows = [
-    { patient: "Cheikh Bamba GUYE", date: "31/08/2026", dents: "14", label: "Consultation", cotation: "D5", quantite: "1", prix_unitaire: "6 000 F", total: "6 000 F" },
-    { patient: "Cheikh Bamba GUYE", date: "31/08/2026", dents: "14", label: "Radiographie", cotation: "D5", quantite: "1", prix_unitaire: "6 000 F", total: "6 000 F" },
-    { patient: "Cheikh Bamba GUYE", date: "31/08/2026", dents: "14", label: "Couronne coulée", cotation: "D80", quantite: "1", prix_unitaire: "96 000 F", total: "96 000 F" },
+    { patient: "Cheikh Bamba GUYE", date: "31/08/2026", dents: "14", label: "Consultation", texte: "Consultation", cotation: "D5", quantite: "1", prix_unitaire: "6 000 F", total: "6 000 F" },
+    { patient: "Cheikh Bamba GUYE", date: "31/08/2026", dents: "14", label: "Radiographie", texte: "Radiographie", cotation: "D5", quantite: "1", prix_unitaire: "6 000 F", total: "6 000 F" },
+    { patient: "Cheikh Bamba GUYE", date: "31/08/2026", dents: "14", label: "Couronne coulée", texte: "Couronne coulée", cotation: "D80", quantite: "1", prix_unitaire: "96 000 F", total: "96 000 F" },
   ];
 
   const formatLabel =
@@ -543,6 +543,10 @@ export default function ImpressionClient({
                   onChange={(e) => setInvoiceSettings((s) => ({ ...s, extra_rows: e.target.value.split("\n") }))}
                   style={{ height: 80, padding: "10px 12px", resize: "vertical", lineHeight: 1.4 }}
                 />
+                <p className="mt-1 text-[11px] text-muted">
+                  Une ligne saisie = une ligne imprimée après le tableau (mentions, signature…).
+                  Cela ne remplace pas la colonne « Texte libre », qui affiche la désignation de chaque acte.
+                </p>
               </div>
             </div>
           )}
