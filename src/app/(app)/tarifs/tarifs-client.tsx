@@ -142,7 +142,7 @@ export default function TarifsClient({
                       onClick={() => setEditingId(s.id)}
                       aria-label={`Modifier ${s.name}`}
                       className="btn-edit-solid"
-                      style={{ height: 32, padding: "0 14px", borderRadius: 10, fontSize: 12, width: "auto" }}
+                      style={{ height: 32, padding: "0 14px", borderRadius: 10, fontSize: 12, width: "auto", background: "#475569", color: "#fff" }}
                     >
                       Modifier
                     </button>
@@ -286,7 +286,7 @@ function DeleteServiceButton({ id }: { id: string }) {
         type="button"
         onClick={() => setOpen(true)}
         className="btn-danger-solid"
-        style={{ height: 32, padding: "0 14px", borderRadius: 10, fontSize: 12, width: "auto" }}
+        style={{ height: 32, padding: "0 14px", borderRadius: 10, fontSize: 12, width: "auto", background: "#dc2626", color: "#fff" }}
         title={state?.message}
       >
         Supprimer

@@ -283,7 +283,7 @@ export default function SoinsClient({ cares, categories }: { cares: Care[]; cate
                     <span className={`cd ${c.active ? "" : "off"}`} style={{ width: 70 }}>
                       {c.active ? "Actif" : "Inactif"}
                     </span>
-                    <button type="button" onClick={() => setEditingId(c.id)} aria-label={`Modifier ${c.name}`} className="btn-edit-solid" style={{ height: 32, padding: "0 14px", borderRadius: 10, fontSize: 12, width: "auto" }}>
+                    <button type="button" onClick={() => setEditingId(c.id)} aria-label={`Modifier ${c.name}`} className="btn-edit-solid" style={{ height: 32, padding: "0 14px", borderRadius: 10, fontSize: 12, width: "auto", background: "#475569", color: "#fff" }}>
                       Modifier
                     </button>
                     <ConfirmActionButton
@@ -375,14 +375,14 @@ export default function SoinsClient({ cares, categories }: { cares: Care[]; cate
                           type="button"
                           onClick={() => setLocalCategories((prev) => prev.filter((x) => x.id !== cat.id))}
                           className="btn-danger-solid"
-                          style={{ height: 32, padding: "0 14px", borderRadius: 10, fontSize: 12, width: "auto" }}
+                          style={{ height: 32, padding: "0 14px", borderRadius: 10, fontSize: 12, width: "auto", background: "#dc2626", color: "#fff" }}
                         >
                           Supprimer
                         </button>
                       </>
                     ) : (
                       <>
-                        <button type="button" onClick={() => setEditingCategoryId(cat.id)} aria-label={`Modifier ${cat.name}`} className="btn-edit-solid" style={{ height: 32, padding: "0 14px", borderRadius: 10, fontSize: 12, width: "auto" }}>
+                        <button type="button" onClick={() => setEditingCategoryId(cat.id)} aria-label={`Modifier ${cat.name}`} className="btn-edit-solid" style={{ height: 32, padding: "0 14px", borderRadius: 10, fontSize: 12, width: "auto", background: "#475569", color: "#fff" }}>
                           Modifier
                         </button>
                         <ConfirmActionButton
@@ -421,7 +421,7 @@ function DeleteCareButton({ id }: { id: string }) {
         type="button"
         onClick={() => setOpen(true)}
         className="btn-danger-solid"
-        style={{ height: 32, padding: "0 14px", borderRadius: 10, fontSize: 12, width: "auto" }}
+        style={{ height: 32, padding: "0 14px", borderRadius: 10, fontSize: 12, width: "auto", background: "#dc2626", color: "#fff" }}
         title={state?.message}
       >
         Supprimer
@@ -471,7 +471,7 @@ function DeleteCategoryButton({ id }: { id: string }) {
         type="button"
         onClick={() => setOpen(true)}
         className="btn-danger-solid"
-        style={{ height: 32, padding: "0 14px", borderRadius: 10, fontSize: 12, width: "auto" }}
+        style={{ height: 32, padding: "0 14px", borderRadius: 10, fontSize: 12, width: "auto", background: "#dc2626", color: "#fff" }}
         title={state?.message}
       >
         Supprimer
