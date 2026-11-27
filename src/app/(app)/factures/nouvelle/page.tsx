@@ -28,6 +28,18 @@ export default async function NouvelleFacturePage() {
     .eq("structure_id", user.structureId)
     .order("name", { ascending: true });
 
+  // Soins les plus utilisés : on les place devant dans la facture.
+  const { data: usedItems } = await supabase
+    .from("invoice_items")
+    .select("care_name");
+  const usage = new Map<string, number>();
+  for (const item of usedItems ?? []) {
+    usage.set(item.care_name, (usage.get(item.care_name) ?? 0) + 1);
+  }
+  const favorites = [...usage.entries()]
+    .sort((a, b) => b[1] - a[1] || a[0].localeCompare(b[0], "fr"))
+    .map(([name]) => name);
+
   const [{ data: structure }, { data: template }, { data: invoiceTemplate }] = await Promise.all([
     supabase
       .from("structures")
@@ -75,6 +87,7 @@ export default async function NouvelleFacturePage() {
         structure={structure ?? null}
         template={template ?? null}
         invoiceTemplate={invoiceTemplate ?? null}
+        favorites={favorites}
       />
     </div>
   );

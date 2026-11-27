@@ -26,12 +26,14 @@ export default function FactureForm({
   structure,
   template,
   invoiceTemplate,
+  favorites,
 }: {
   cares: Care[];
   categories: Category[];
   structure: StructureInfo | null;
   template: TemplateInfo | null;
   invoiceTemplate: { settings: Record<string, unknown> } | null;
+  favorites: string[];
 }) {
   const [localCares] = useState<Care[]>(() => {
     const clean = (list: Care[]) => list.filter((c) => c.name.trim().toLowerCase() !== "extraction");
@@ -60,6 +62,24 @@ export default function FactureForm({
     : localCategories.length
       ? localCategories
       : DEFAULT_CATEGORIES;
+  // Les soins les plus fréquemment facturés passent devant ; le reste est
+  // accessible via le bouton « Voir tous les soins ».
+  const favoriteRank = (care: Care) => {
+    const index = favorites.indexOf(care.name);
+    return index === -1 ? Number.MAX_SAFE_INTEGER : index;
+  };
+  const sortedCares = [...effectiveCares].sort(
+    (a, b) => favoriteRank(a) - favoriteRank(b) || a.name.localeCompare(b.name, "fr"),
+  );
+  const favoriteCares = sortedCares.filter((c) => favoriteRank(c) !== Number.MAX_SAFE_INTEGER).slice(0, 8);
+  const favoriteIds = new Set(favoriteCares.map((c) => c.id));
+  const VISIBLE_LIMIT = 20;
+  const visibleOthers = sortedCares
+    .filter((c) => !favoriteIds.has(c.id))
+    .slice(0, Math.max(0, VISIBLE_LIMIT - favoriteCares.length));
+  const visibleIds = new Set([...favoriteCares, ...visibleOthers].map((c) => c.id));
+  const hiddenCount = effectiveCares.length - visibleIds.size;
+
   const router = useRouter();
   const [state, action, pending] = useActionState<InvoiceState, FormData>(createInvoice, undefined);
   const [lines, setLines] = useState<Line[]>([]);
@@ -72,6 +92,8 @@ export default function FactureForm({
   const [qty, setQty] = useState(1);
   const [priceOverride, setPriceOverride] = useState("");
   const [showPreview, setShowPreview] = useState(false);
+  const [showAllCares, setShowAllCares] = useState(false);
+  const [careSearch, setCareSearch] = useState("");
 
   if (state?.success && state.invoiceId) {
     router.push(`/factures/${state.invoiceId}`);
@@ -175,40 +197,78 @@ export default function FactureForm({
 
         {/* Liste à cocher groupée par catégorie */}
         <div>
-          <span className="lbl">Ajouter un soin</span>
+          <div className="flex flex-wrap items-center justify-between gap-2">
+            <span className="lbl">Ajouter un soin</span>
+            {effectiveCares.length > 0 && (
+              <button
+                type="button"
+                onClick={() => {
+                  setCareSearch("");
+                  setShowAllCares(true);
+                }}
+                className="btn-secondary"
+                style={{ height: 34, padding: "0 14px", borderRadius: 10, fontSize: 12, width: "auto" }}
+              >
+                Voir tous les soins ({effectiveCares.length})
+              </button>
+            )}
+          </div>
           {effectiveCares.length === 0 ? (
             <p className="text-sm text-muted">Aucun soin actif dans le catalogue.</p>
           ) : (
             <div className="grid grid-cols-1 gap-3 md:grid-cols-3">
+              {favoriteCares.length > 0 && (
+                <div className="rounded-[18px] border border-accent bg-accent-light p-4">
+                  <h3 className="mb-2 text-sm font-extrabold text-accent-text">★ Favoris</h3>
+                  <div className="space-y-1.5">
+                    {favoriteCares.map((care) => (
+                      <label
+                        key={care.id}
+                        className="flex cursor-pointer items-center gap-2 rounded-lg px-1 py-1 text-sm text-ink hover:bg-white"
+                      >
+                        <input
+                          type="checkbox"
+                          checked={selected.includes(care.id)}
+                          onChange={() => toggleCare(care.id)}
+                          className="h-4 w-4 shrink-0 accent-accent"
+                        />
+                        <span className="truncate font-semibold">{care.name}</span>
+                      </label>
+                    ))}
+                  </div>
+                </div>
+              )}
               {effectiveCategories.filter((c) => c.active).map((group) => {
-                const items = effectiveCares.filter((c) => (c.category ?? "intervention") === group.slug);
+                const items = visibleOthers.filter((c) => (c.category ?? "intervention") === group.slug);
+                if (items.length === 0) return null;
                 return (
                   <div key={group.slug} className="rounded-[18px] border border-border bg-white p-4">
                     <h3 className="mb-2 text-sm font-extrabold text-ink">{group.name}</h3>
                     <div className="space-y-1.5">
-                      {items.length === 0 ? (
-                        <p className="text-xs text-muted">Aucun soin.</p>
-                      ) : (
-                        items.map((care) => (
-                          <label
-                            key={care.id}
-                            className="flex cursor-pointer items-center gap-2 rounded-lg px-1 py-1 text-sm text-ink hover:bg-bg"
-                          >
-                            <input
-                              type="checkbox"
-                              checked={selected.includes(care.id)}
-                              onChange={() => toggleCare(care.id)}
-                              className="h-4 w-4 shrink-0 accent-accent"
-                            />
-                            <span className="truncate">{care.name}</span>
-                          </label>
-                        ))
-                      )}
+                      {items.map((care) => (
+                        <label
+                          key={care.id}
+                          className="flex cursor-pointer items-center gap-2 rounded-lg px-1 py-1 text-sm text-ink hover:bg-bg"
+                        >
+                          <input
+                            type="checkbox"
+                            checked={selected.includes(care.id)}
+                            onChange={() => toggleCare(care.id)}
+                            className="h-4 w-4 shrink-0 accent-accent"
+                          />
+                          <span className="truncate">{care.name}</span>
+                        </label>
+                      ))}
                     </div>
                   </div>
                 );
               })}
             </div>
+          )}
+          {hiddenCount > 0 && (
+            <p className="mt-2 text-xs text-muted">
+              {hiddenCount} soin{hiddenCount > 1 ? "s" : ""} supplémentaire{hiddenCount > 1 ? "s" : ""} disponible{hiddenCount > 1 ? "s" : ""} dans « Voir tous les soins ».
+            </p>
           )}
 
           <div className="mt-3 flex flex-wrap items-end gap-2">
@@ -444,6 +504,104 @@ export default function FactureForm({
               <span>{template?.footer_text?.trim() || "Merci de votre visite."}</span>
               {tpl.show_stamp && <span className="w-[120px] border-t border-black pt-1 text-center">Cachet / Signature</span>}
             </div>
+          </div>
+        </div>
+      </div>
+    )}
+
+    {showAllCares && (
+      <div
+        className="fixed inset-0 z-50 flex items-center justify-center p-4"
+        style={{ background: "rgba(11, 31, 42, 0.6)" }}
+        onClick={() => setShowAllCares(false)}
+      >
+        <div
+          className="card flex max-h-[85vh] w-full max-w-2xl flex-col"
+          onClick={(e) => e.stopPropagation()}
+        >
+          <div className="no-print mb-3 flex items-center justify-between gap-3">
+            <h3 className="text-lg font-extrabold text-ink">Tous les soins</h3>
+            <button
+              type="button"
+              onClick={() => setShowAllCares(false)}
+              className="btn-secondary"
+              style={{ height: 40, padding: "0 16px" }}
+            >
+              Fermer
+            </button>
+          </div>
+          <input
+            className="in"
+            placeholder="Rechercher un soin…"
+            value={careSearch}
+            onChange={(e) => setCareSearch(e.target.value)}
+            autoFocus
+          />
+          <div className="mt-3 max-h-[55vh] overflow-auto pr-1">
+            {(() => {
+              const term = careSearch.trim().toLowerCase();
+              const matches = sortedCares.filter((c) => c.name.toLowerCase().includes(term));
+              const groups = [
+                ...effectiveCategories.filter((c) => c.active).map((c) => ({ slug: c.slug, name: c.name })),
+                { slug: "__autres__", name: "Autres" },
+              ];
+              const rendered = groups
+                .map((group) => ({
+                  ...group,
+                  items: matches.filter((c) =>
+                    group.slug === "__autres__"
+                      ? !effectiveCategories.some((g) => g.slug === (c.category ?? "intervention"))
+                      : (c.category ?? "intervention") === group.slug,
+                  ),
+                }))
+                .filter((group) => group.items.length > 0);
+              return rendered.length === 0 ? (
+                <p className="text-sm text-muted">Aucun soin ne correspond à la recherche.</p>
+              ) : (
+                rendered.map((group) => (
+                  <div key={group.slug} className="mb-3">
+                    <h4 className="mb-1 text-xs font-extrabold uppercase tracking-wide text-muted">{group.name}</h4>
+                    <div className="grid grid-cols-1 gap-1 sm:grid-cols-2">
+                      {group.items.map((care) => (
+                        <label
+                          key={care.id}
+                          className="flex cursor-pointer items-center gap-2 rounded-lg px-1 py-1 text-sm text-ink hover:bg-bg"
+                        >
+                          <input
+                            type="checkbox"
+                            checked={selected.includes(care.id)}
+                            onChange={() => toggleCare(care.id)}
+                            className="h-4 w-4 shrink-0 accent-accent"
+                          />
+                          <span className="truncate">
+                            {favoriteRank(care) !== Number.MAX_SAFE_INTEGER && <span className="text-accent">★ </span>}
+                            {care.name}
+                          </span>
+                          <span className="ml-auto shrink-0 text-xs text-muted">{fcfa(care.price)}</span>
+                        </label>
+                      ))}
+                    </div>
+                  </div>
+                ))
+              );
+            })()}
+          </div>
+          <div className="no-print mt-3 flex items-center justify-between gap-3 border-t border-border pt-3">
+            <span className="text-sm text-muted">
+              {selected.length} soin{selected.length > 1 ? "s" : ""} sélectionné{selected.length > 1 ? "s" : ""}
+            </span>
+            <button
+              type="button"
+              disabled={selected.length === 0}
+              onClick={() => {
+                addSelected();
+                setShowAllCares(false);
+              }}
+              className="go"
+              style={{ height: 42, width: "auto", padding: "0 20px", borderRadius: 12, fontSize: 14 }}
+            >
+              Ajouter à la facture
+            </button>
           </div>
         </div>
       </div>
