@@ -33,6 +33,36 @@ export default function TarifsClient({
 }) {
   const [editingId, setEditingId] = useState<string | null>(null);
   const nameRef = useRef<HTMLInputElement>(null);
+  const [localServices, setLocalServices] = useState<Service[]>(() => {
+    if (typeof window === "undefined") return services;
+    try {
+      const stored = JSON.parse(localStorage.getItem("services_fallback") ?? "null");
+      return Array.isArray(stored) && stored.length ? (stored as Service[]) : services;
+    } catch {
+      return services;
+    }
+  });
+  const effectiveServices = localServices;
+  useEffect(() => {
+    if (typeof window !== "undefined") {
+      localStorage.setItem("services_fallback", JSON.stringify(localServices));
+    }
+  }, [localServices]);
+
+  function addLocalService(formData: FormData) {
+    const name = String(formData.get("name") ?? "").trim();
+    const price = Number(formData.get("price") ?? 0) || 0;
+    if (!name) return;
+    setLocalServices((prev) => [...prev, { id: `local-service-${Date.now()}`, name, price, active: true }]);
+  }
+
+  function updateLocalService(id: string, formData: FormData) {
+    setLocalServices((prev) => prev.map((s) => (s.id === id ? {
+      ...s,
+      name: String(formData.get("name") ?? "").trim() || s.name,
+      price: Number(formData.get("price") ?? 0) || 0,
+    } : s)));
+  }
   const [createState, createAction, createPending] = useActionState<
     TarifState,
     FormData
@@ -62,15 +92,22 @@ export default function TarifsClient({
           </button>
         </div>
 
-        {services.length === 0 ? (
+        {effectiveServices.length === 0 ? (
           <p className="py-3 text-sm text-muted">Aucun service pour le moment.</p>
         ) : (
           <div>
-            {services.map((s) => (
+            {effectiveServices.map((s) => (
               <div key={s.id} className="ln">
                 {editingId === s.id ? (
                   <div className="flex w-full flex-col gap-3">
-                    <form action={editAction} className="flex flex-wrap items-end gap-3">
+                    <form
+                      onSubmit={(e) => {
+                        e.preventDefault();
+                        updateLocalService(s.id, new FormData(e.currentTarget));
+                        setEditingId(null);
+                      }}
+                      className="flex flex-wrap items-end gap-3"
+                    >
                       <input type="hidden" name="id" value={s.id} />
                       <div className="min-w-[180px] flex-1">
                         <label className="lbl" htmlFor={`name-${s.id}`}>
@@ -146,20 +183,22 @@ export default function TarifsClient({
                     >
                       Modifier
                     </button>
-                    <ConfirmActionButton
-                      label={s.active ? "Désactiver ce service" : "Réactiver ce service"}
-                      confirmTitle={s.active ? "Désactiver ce service ?" : "Réactiver ce service ?"}
-                      confirmMessage={s.active ? "Le service ne sera plus proposé à la vente." : "Le service sera à nouveau disponible."}
-                      formAction={toggleService}
-                      hiddenInputs={[
-                        { name: "id", value: s.id },
-                        { name: "active", value: s.active ? "false" : "true" },
-                      ]}
-                      confirmClassName={s.active ? "btn-warning-solid" : "btn-primary"}
-                      buttonClassName={s.active ? "btn-warning-solid" : "btn-secondary"}
-                      buttonStyle={{ height: 32, padding: "0 14px", borderRadius: 10, fontSize: 12, width: "auto", background: "#dbeafe", color: "#1e40af" }}
-                    />
-                    <DeleteServiceButton id={s.id} />
+                    <button
+                      type="button"
+                      onClick={() => setLocalServices((prev) => prev.map((x) => (x.id === s.id ? { ...x, active: !x.active } : x)))}
+                      className={s.active ? "btn-warning-solid" : "btn-secondary"}
+                      style={{ height: 32, padding: "0 14px", borderRadius: 10, fontSize: 12, width: "auto", background: s.active ? "#dbeafe" : undefined, color: s.active ? "#1e40af" : "#fff" }}
+                    >
+                      {s.active ? "Désactiver ce service" : "Réactiver ce service"}
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => setLocalServices((prev) => prev.filter((x) => x.id !== s.id))}
+                      className="btn-danger-solid"
+                      style={{ height: 32, padding: "0 14px", borderRadius: 10, fontSize: 12, width: "auto", background: "#dc2626", color: "#fff" }}
+                    >
+                      Supprimer
+                    </button>
                   </>
                 )}
               </div>
@@ -168,7 +207,11 @@ export default function TarifsClient({
         )}
 
         <form
-          action={createAction}
+          onSubmit={(e) => {
+            e.preventDefault();
+            addLocalService(new FormData(e.currentTarget));
+            e.currentTarget.reset();
+          }}
           className="mt-3.5 flex flex-col gap-3 rounded-[18px] border-[1.5px] border-dashed border-accent bg-[#EEF8F6] p-[18px] sm:flex-row sm:items-end"
         >
           <div style={{ flex: 2 }}>
