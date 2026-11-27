@@ -70,6 +70,11 @@ export default async function FactureDetailPage({ params }: { params: Promise<{ 
     show_discount: true,
     show_advance: true,
     show_stamp: true,
+    show_logo: true,
+    doctor_name: "",
+    practice_line: "",
+    intro_text: "",
+    legal_footer: "",
     ...(template?.settings ?? {}),
     ...invoiceSettings,
   } as {
@@ -82,6 +87,11 @@ export default async function FactureDetailPage({ params }: { params: Promise<{ 
     show_discount: boolean;
     show_advance: boolean;
     show_stamp: boolean;
+    show_logo: boolean;
+    doctor_name: string;
+    practice_line: string;
+    intro_text: string;
+    legal_footer: string;
   };
   const numberLabel = `${tpl.number_prefix}${invoice.year}-${String(invoice.number).padStart(4, "0")}`;
 
@@ -131,12 +141,14 @@ export default async function FactureDetailPage({ params }: { params: Promise<{ 
 
       <div className="facture-print card mx-auto" style={{ maxWidth: "210mm", fontFamily: "Arial, Helvetica, sans-serif" }}>
         <div className="text-center mb-3">
-          {logoUrl && <img src={logoUrl} alt="Logo" style={{ maxHeight: 70, maxWidth: 180, objectFit: "contain", margin: "0 auto 8px" }} />}
+          {logoUrl && tpl.show_logo && <img src={logoUrl} alt="Logo" style={{ maxHeight: 70, maxWidth: 180, objectFit: "contain", margin: "0 auto 8px" }} />}
           <p className="font-bold text-lg leading-tight">{structure?.name}</p>
           {structure?.address && <p className="text-xs leading-tight">{structure.address}</p>}
           {structure?.phone && <p className="text-xs leading-tight">Tél. {structure.phone}</p>}
           {structure?.header_text && <p className="text-xs leading-tight mt-1">{structure.header_text}</p>}
           {template?.header_text?.trim() && <p className="text-xs leading-tight mt-1">{template.header_text}</p>}
+          {tpl.doctor_name?.trim() && <p className="text-xs leading-tight mt-1 font-bold">{tpl.doctor_name}</p>}
+          {tpl.practice_line?.trim() && <p className="text-xs leading-tight">{tpl.practice_line}</p>}
         </div>
         <div className="border-t border-dashed border-gray-400 my-2" />
         <p className="text-center font-bold" style={{ fontSize: "20px" }}>
@@ -146,6 +158,9 @@ export default async function FactureDetailPage({ params }: { params: Promise<{ 
           <p className="text-center font-bold text-red-600" style={{ fontSize: "14px" }}>DUPLICATA</p>
         )}
         <p className="text-xs text-center mt-1">{formatDateTime(invoice.created_at)}</p>
+        {tpl.intro_text?.trim() && (
+          <p className="mt-2 text-xs italic leading-relaxed">{tpl.intro_text}</p>
+        )}
         <div className="border-t border-dashed border-gray-400 my-2" />
         <p className="text-sm"><span className="font-bold">Patient :</span> {invoice.patient_name}</p>
         <div className="border-t border-dashed border-gray-400 my-2" />
@@ -184,6 +199,11 @@ export default async function FactureDetailPage({ params }: { params: Promise<{ 
         {((invoiceSettings.extra_rows as string[] | undefined) ?? []).filter(Boolean).map((line, i) => (
           <p key={i} className="mt-2 text-xs italic">{line}</p>
         ))}
+        {tpl.legal_footer?.trim() && (
+          <div className="mt-4 border-t border-dashed border-gray-400 pt-2 text-center text-[10px] leading-relaxed whitespace-pre-line">
+            {tpl.legal_footer}
+          </div>
+        )}
         <div className="border-t border-dashed border-gray-400 my-2" />
         <div className="flex justify-between items-end text-xs mt-4">
           <span>{template?.footer_text?.trim() || "Merci de votre visite."}</span>

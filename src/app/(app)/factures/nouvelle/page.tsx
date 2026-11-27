@@ -27,7 +27,7 @@ export default async function NouvelleFacturePage() {
     .eq("structure_id", user.structureId)
     .order("name", { ascending: true });
 
-  const [{ data: structure }, { data: template }] = await Promise.all([
+  const [{ data: structure }, { data: template }, { data: invoiceTemplate }] = await Promise.all([
     supabase
       .from("structures")
       .select("name, address, phone, header_text")
@@ -39,6 +39,12 @@ export default async function NouvelleFacturePage() {
       .eq("structure_id", user.structureId)
       .eq("kind", "facture")
       .maybeSingle(),
+    supabase
+      .from("invoice_templates")
+      .select("settings")
+      .eq("structure_id", user.structureId)
+      .eq("is_default", true)
+      .maybeSingle(),
   ]);
 
   return (
@@ -49,6 +55,7 @@ export default async function NouvelleFacturePage() {
         categories={categories ?? []}
         structure={structure ?? null}
         template={template ?? null}
+        invoiceTemplate={invoiceTemplate ?? null}
       />
     </div>
   );

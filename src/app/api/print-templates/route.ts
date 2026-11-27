@@ -13,6 +13,11 @@ const invoiceSettingsSchema = z.object({
   show_discount: z.boolean().default(true),
   show_advance: z.boolean().default(true),
   show_stamp: z.boolean().default(true),
+  show_logo: z.boolean().optional(),
+  doctor_name: z.string().max(120).optional(),
+  practice_line: z.string().max(120).optional(),
+  intro_text: z.string().max(500).optional(),
+  legal_footer: z.string().max(500).optional(),
   merge_rows: z.boolean().optional(),
   columns: z.array(z.object({
     key: z.string(),

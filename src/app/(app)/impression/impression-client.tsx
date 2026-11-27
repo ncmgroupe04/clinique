@@ -15,6 +15,11 @@ type InvoiceSettings = {
   show_discount: boolean;
   show_advance: boolean;
   show_stamp: boolean;
+  show_logo: boolean;
+  doctor_name: string;
+  practice_line: string;
+  intro_text: string;
+  legal_footer: string;
   merge_rows: boolean;
   columns: InvoiceColumn[];
   extra_rows: string[];
@@ -56,6 +61,11 @@ const DEFAULT_INVOICE_SETTINGS: InvoiceSettings = {
   show_discount: true,
   show_advance: true,
   show_stamp: true,
+  show_logo: true,
+  doctor_name: "",
+  practice_line: "",
+  intro_text: "",
+  legal_footer: "",
   merge_rows: false,
   columns: [
     { key: "patient", label: "Patients", source: "patient", visible: true, span: 1 },
@@ -395,6 +405,15 @@ export default function ImpressionClient({
                     </label>
                     <button type="button" onClick={() => moveColumn(i, -1)} className="btn-secondary" style={{ width: 32, height: 32 }}>↑</button>
                     <button type="button" onClick={() => moveColumn(i, 1)} className="btn-secondary" style={{ width: 32, height: 32 }}>↓</button>
+                    <button
+                      type="button"
+                      onClick={() => setInvoiceSettings((s) => ({ ...s, columns: s.columns.filter((_, index) => index !== i) }))}
+                      className="btn-danger-solid"
+                      style={{ width: 32, height: 32, padding: 0, borderRadius: 10, fontSize: 13, background: "#dc2626", color: "#fff" }}
+                      title="Supprimer cette colonne"
+                    >
+                      ×
+                    </button>
                   </div>
                 ))}
               </div>
@@ -458,8 +477,57 @@ export default function ImpressionClient({
                   />
                 </div>
               </div>
+              <div className="mt-3 grid gap-3 sm:grid-cols-2">
+                <div>
+                  <label className="lbl" htmlFor="invoice-doctor">Docteur / praticien</label>
+                  <input
+                    id="invoice-doctor"
+                    className="in"
+                    maxLength={120}
+                    value={invoiceSettings.doctor_name}
+                    onChange={(e) => setInvoiceSettings((s) => ({ ...s, doctor_name: e.target.value }))}
+                    placeholder="Dr Babacar FAYE - Chirurgien-Dentiste"
+                  />
+                </div>
+                <div>
+                  <label className="lbl" htmlFor="invoice-practice">Complément cabinet</label>
+                  <input
+                    id="invoice-practice"
+                    className="in"
+                    maxLength={120}
+                    value={invoiceSettings.practice_line}
+                    onChange={(e) => setInvoiceSettings((s) => ({ ...s, practice_line: e.target.value }))}
+                    placeholder="Darou Mignane, Niary Baye Fall"
+                  />
+                </div>
+              </div>
+              <div className="mt-3">
+                <label className="lbl" htmlFor="invoice-intro">Texte d’introduction</label>
+                <textarea
+                  id="invoice-intro"
+                  className="in"
+                  maxLength={500}
+                  value={invoiceSettings.intro_text}
+                  onChange={(e) => setInvoiceSettings((s) => ({ ...s, intro_text: e.target.value }))}
+                  placeholder="Le Cabinet Dentaire Akram vous présente ses compliments…"
+                  style={{ height: 78, padding: "10px 12px", resize: "vertical", lineHeight: 1.4 }}
+                />
+              </div>
+              <div className="mt-3">
+                <label className="lbl" htmlFor="invoice-legal">Bas de page propre à la facture</label>
+                <textarea
+                  id="invoice-legal"
+                  className="in"
+                  maxLength={500}
+                  value={invoiceSettings.legal_footer}
+                  onChange={(e) => setInvoiceSettings((s) => ({ ...s, legal_footer: e.target.value }))}
+                  placeholder="CABINET DENTAIRE AKRAM, RC : SN DBL 2019…"
+                  style={{ height: 90, padding: "10px 12px", resize: "vertical", lineHeight: 1.4 }}
+                />
+              </div>
               <div className="mt-3 grid gap-2 sm:grid-cols-2">
                 {([
+                  ["show_logo", "Afficher le logo"],
                   ["show_date", "Colonne Date"],
                   ["show_indice", "Colonne Indice / Cotation"],
                   ["show_quantity", "Colonne Quantité"],
@@ -634,6 +702,9 @@ export default function ImpressionClient({
                 </div>
               ) : (
                 <>
+                  {invoiceSettings.doctor_name?.trim() && <div className="mt-2 text-center text-xs font-bold">{invoiceSettings.doctor_name}</div>}
+                  {invoiceSettings.practice_line?.trim() && <div className="text-center text-xs">{invoiceSettings.practice_line}</div>}
+                  {invoiceSettings.intro_text?.trim() && <div className="mt-3 text-xs italic leading-relaxed">{invoiceSettings.intro_text}</div>}
                   <div className="mt-3 text-sm"><b>Patient :</b> Cheikh Bamba GUYE</div>
                   <table className="mt-3 w-full border-collapse border border-black text-xs">
                     <thead>
@@ -663,6 +734,11 @@ export default function ImpressionClient({
                     <p key={i} className="mt-2 text-xs italic">{line}</p>
                   ))}
                   <div className="mt-3 flex justify-between font-bold"><span>TOTAL</span><span>108 000 F</span></div>
+                  {invoiceSettings.legal_footer?.trim() && (
+                    <div className="mt-4 border-t border-dashed border-gray-400 pt-2 text-center text-[10px] leading-relaxed whitespace-pre-line">
+                      {invoiceSettings.legal_footer}
+                    </div>
+                  )}
                 </>
               )}
 

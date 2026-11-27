@@ -25,11 +25,13 @@ export default function FactureForm({
   categories,
   structure,
   template,
+  invoiceTemplate,
 }: {
   cares: Care[];
   categories: Category[];
   structure: StructureInfo | null;
   template: TemplateInfo | null;
+  invoiceTemplate: { settings: Record<string, unknown> } | null;
 }) {
   const effectiveCategories = categories.length ? categories : DEFAULT_CATEGORIES;
   const router = useRouter();
@@ -104,7 +106,13 @@ export default function FactureForm({
     show_discount: true,
     show_advance: true,
     show_stamp: true,
+    show_logo: true,
+    doctor_name: "",
+    practice_line: "",
+    intro_text: "",
+    legal_footer: "",
     ...(template?.settings ?? {}),
+    ...(invoiceTemplate?.settings ?? {}),
   } as {
     title: string;
     number_prefix: string;
@@ -115,6 +123,11 @@ export default function FactureForm({
     show_discount: boolean;
     show_advance: boolean;
     show_stamp: boolean;
+    show_logo: boolean;
+    doctor_name: string;
+    practice_line: string;
+    intro_text: string;
+    legal_footer: string;
   };
 
   return (
@@ -353,12 +366,15 @@ export default function FactureForm({
               {structure?.address && <p className="text-xs leading-tight">{structure.address}</p>}
               {structure?.phone && <p className="text-xs leading-tight">Tél. {structure.phone}</p>}
               {template?.header_text?.trim() && <p className="text-xs leading-tight mt-1">{template.header_text}</p>}
+              {tpl.doctor_name?.trim() && <p className="text-xs leading-tight mt-1 font-bold">{tpl.doctor_name}</p>}
+              {tpl.practice_line?.trim() && <p className="text-xs leading-tight">{tpl.practice_line}</p>}
             </div>
             <div className="border-t border-dashed border-gray-400 my-2" />
             <p className="text-center font-bold" style={{ fontSize: 20 }}>
               {`${tpl.title || "Facture"} ${tpl.number_prefix}${new Date().getFullYear()}-0001`}
             </p>
             <p className="text-xs text-center mt-1">{new Date().toLocaleDateString("fr-FR")}</p>
+            {tpl.intro_text?.trim() && <p className="mt-2 text-xs italic leading-relaxed">{tpl.intro_text}</p>}
             <div className="border-t border-dashed border-gray-400 my-2" />
             <p className="text-sm"><span className="font-bold">Patient :</span> {patientName || "—"}</p>
             <div className="border-t border-dashed border-gray-400 my-2" />
@@ -394,6 +410,11 @@ export default function FactureForm({
               {tpl.show_advance && <div className="flex justify-between"><span>Avance</span><span>{fcfa(advanceValue)}</span></div>}
               <div className="flex justify-between font-bold"><span>Reste à payer</span><span>{fcfa(reste)}</span></div>
             </div>
+            {tpl.legal_footer?.trim() && (
+              <div className="mt-4 border-t border-dashed border-gray-400 pt-2 text-center text-[10px] leading-relaxed whitespace-pre-line">
+                {tpl.legal_footer}
+              </div>
+            )}
             <div className="border-t border-dashed border-gray-400 my-2" />
             <div className="flex justify-between items-end text-xs mt-4">
               <span>{template?.footer_text?.trim() || "Merci de votre visite."}</span>
