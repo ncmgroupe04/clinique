@@ -65,8 +65,8 @@ export default async function SoinsPage({
   return (
     <div className="flex flex-1 flex-col gap-[26px]">
       <ScreenHeader
-        title="Réglages · Soins et prix"
-        subtitle="Catalogue des soins facturables (injections, pansements, perfusions, chambres…)."
+        title="Réglages · Tarifs soins"
+        subtitle="Prix des soins facturables sur les factures (injections, pansements, perfusions, chambres…)."
       >
         <Link
           href="/factures/nouvelle"

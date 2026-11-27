@@ -244,7 +244,7 @@ export default function TarifsClient({
     <div className="flex flex-1 flex-col items-stretch gap-7 lg:flex-row">
       <section className="card flex min-w-0 flex-1 flex-col">
         <div className="mb-2 flex flex-wrap items-center justify-between gap-3">
-          <h2 className="text-lg font-extrabold">Services et prix</h2>
+          <h2 className="text-lg font-extrabold">Tarifs des tickets</h2>
           <button
             type="button"
             onClick={() => nameRef.current?.focus()}

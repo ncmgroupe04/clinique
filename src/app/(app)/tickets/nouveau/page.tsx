@@ -44,7 +44,7 @@ export default async function NouveauTicketPage({
           color: "#fff",
         }}
       >
-        + Nouveau tarif
+        + Nouveau tarif ticket
       </Link>
     ) : null;
   const supabase = await createClient();

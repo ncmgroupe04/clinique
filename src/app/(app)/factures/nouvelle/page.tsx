@@ -65,7 +65,7 @@ export default async function NouvelleFacturePage() {
               color: "#fff",
             }}
           >
-            + Nouveau soin
+            + Nouveau tarif soin
           </Link>
         )}
       </ScreenHeader>

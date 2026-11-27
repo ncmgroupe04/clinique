@@ -147,7 +147,7 @@ export default function SoinsClient({
     <div className="flex flex-1 flex-col gap-6">
       <section className="card flex min-w-0 flex-1 flex-col">
         <div className="mb-3 flex flex-wrap items-center justify-between gap-3">
-          <h2 className="text-lg font-extrabold">Soins et prix</h2>
+          <h2 className="text-lg font-extrabold">Tarifs des soins</h2>
         </div>
 
         <div className="mb-3 grid gap-3 lg:grid-cols-2">

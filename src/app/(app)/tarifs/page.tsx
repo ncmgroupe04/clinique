@@ -37,8 +37,8 @@ export default async function TarifsPage({
   return (
     <div className="flex flex-1 flex-col gap-[26px]">
       <ScreenHeader
-        title="Réglages · Tarifs"
-        subtitle="Chaque structure saisit ses propres services et leurs prix."
+        title="Réglages · Tarifs tickets"
+        subtitle="Prix des services proposés à la création d’un ticket."
       />
       <TarifsClient
         services={services ?? []}

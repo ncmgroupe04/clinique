@@ -225,8 +225,8 @@ export default function SidebarNav({ role }: { role: Role }) {
     cliniqueItems.push({ href: "/notifications", label: "Notifications", icon: "bell" });
     cliniqueItems.push({ href: "/support", label: "Assistance", icon: "users" });
     if (adminAccess) {
-      cliniqueItems.push({ href: "/soins", label: "Soins", icon: "care" });
-      cliniqueItems.push({ href: "/tarifs", label: "Tarifs", icon: "tag" });
+      cliniqueItems.push({ href: "/soins", label: "Tarifs soins", icon: "care" });
+      cliniqueItems.push({ href: "/tarifs", label: "Tarifs tickets", icon: "tag" });
     }
     if (cliniqueItems.length) {
       groups.push({ key: "clinique", label: "Clinique", icon: "care", items: cliniqueItems });

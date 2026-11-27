@@ -85,12 +85,12 @@ export default async function TableauPage() {
           )}
           {(user.role === "structure_admin" || user.role === "cashier") && (
             <Link href="/tarifs" className="go" style={{ height: 48, fontSize: 14, borderRadius: 14, background: "#475569", color: "#fff" }}>
-              Tarifs
+              Tarifs tickets
             </Link>
           )}
           {user.role === "structure_admin" && (
             <Link href="/soins" className="go" style={{ height: 48, fontSize: 14, borderRadius: 14, background: "#0e7490", color: "#fff" }}>
-              Soins
+              Tarifs soins
             </Link>
           )}
         </div>
