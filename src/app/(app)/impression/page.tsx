@@ -13,7 +13,7 @@ export default async function ImpressionPage() {
   }
 
   const supabase = await createClient();
-  const [{ data: structure }, { data: templates }] = await Promise.all([
+  const [{ data: structure }, { data: templates }, { data: invoiceTemplates }] = await Promise.all([
     supabase
       .from("structures")
       .select("name, paper_width_mm, print_format, address, phone, header_text, logo_path")
@@ -23,6 +23,11 @@ export default async function ImpressionPage() {
       .from("print_templates")
       .select("kind, header_text, footer_text, settings")
       .eq("structure_id", user.structureId),
+    supabase
+      .from("invoice_templates")
+      .select("id, name, settings, is_default")
+      .eq("structure_id", user.structureId)
+      .order("created_at", { ascending: true }),
   ]);
 
   if (!structure) redirect("/tableau");
@@ -44,6 +49,7 @@ export default async function ImpressionPage() {
           logo_path: structure.logo_path ?? "",
         }}
         templates={templates ?? []}
+        invoiceTemplates={invoiceTemplates ?? []}
       />
     </div>
   );

@@ -13,6 +13,15 @@ const invoiceSettingsSchema = z.object({
   show_discount: z.boolean().default(true),
   show_advance: z.boolean().default(true),
   show_stamp: z.boolean().default(true),
+  merge_rows: z.boolean().optional(),
+  columns: z.array(z.object({
+    key: z.string(),
+    label: z.string(),
+    source: z.string(),
+    visible: z.boolean(),
+    span: z.number().int(),
+  })).optional(),
+  extra_rows: z.array(z.string()).optional(),
 });
 
 const printTemplateSchema = z.object({

@@ -6,7 +6,7 @@ import { useRouter } from "next/navigation";
 
 type Care = { id: string; name: string; price: number; unit: string; category: string; cotation?: string | null };
 type Category = { name: string; slug: string; active: boolean };
-type Line = { careId: string; name: string; price: string; qty: number; unit: string; cotation: string };
+type Line = { careId: string; name: string; price: string; qty: number; unit: string; cotation: string; dents: string };
 type StructureInfo = { name: string | null; address: string | null; phone: string | null; header_text: string | null };
 type TemplateInfo = { header_text: string | null; footer_text: string | null; settings?: Record<string, unknown> | null };
 
@@ -66,7 +66,7 @@ export default function FactureForm({
         if (existing >= 0) {
           next[existing] = { ...next[existing], qty: next[existing].qty + qty, price };
         } else {
-          next.push({ careId: care.id, name: care.name, price, qty, unit: care.unit ?? "unité", cotation: care.cotation ?? "" });
+          next.push({ careId: care.id, name: care.name, price, qty, unit: care.unit ?? "unité", cotation: care.cotation ?? "", dents: "" });
         }
       }
       return next;
@@ -91,7 +91,7 @@ export default function FactureForm({
   const reste = Math.max(0, total - advanceValue);
 
   const itemsJson = JSON.stringify(
-    lines.map((l) => ({ care_id: l.careId, care_name: l.name, quantity: l.qty, unit_price: Number(l.price) || 0, cotation: l.cotation })),
+    lines.map((l) => ({ care_id: l.careId, care_name: l.name, quantity: l.qty, unit_price: Number(l.price) || 0, cotation: l.cotation, dents: l.dents })),
   );
 
   const tpl = {
@@ -206,6 +206,7 @@ export default function FactureForm({
             <thead>
               <tr className="border-b border-border text-left text-xs font-bold uppercase tracking-wide text-muted">
                 <th className="py-2">Nom du soin</th>
+                <th className="py-2 text-center">Dents</th>
                 <th className="py-2 text-center">Indice</th>
                 <th className="py-2 text-center">Quantité</th>
                 <th className="py-2 text-right">Prix unitaire</th>
@@ -215,11 +216,23 @@ export default function FactureForm({
             </thead>
             <tbody>
               {lines.length === 0 ? (
-                <tr><td colSpan={6} className="py-3 text-sm text-muted">Aucun soin ajouté.</td></tr>
+                <tr><td colSpan={7} className="py-3 text-sm text-muted">Aucun soin ajouté.</td></tr>
               ) : (
                 lines.map((l) => (
                   <tr key={l.careId} className="border-b border-border">
                     <td className="py-2 font-semibold">{l.name}</td>
+                    <td className="py-2 text-center">
+                      <input
+                        type="text"
+                        aria-label={`Dents ${l.name}`}
+                        value={l.dents}
+                        onChange={(e) => setLines((prev) => prev.map((x) => (x.careId === l.careId ? { ...x, dents: e.target.value } : x)))}
+                        maxLength={30}
+                        placeholder="—"
+                        className="input text-center"
+                        style={{ width: 70, height: 38, padding: "0 8px" }}
+                      />
+                    </td>
                     <td className="py-2 text-center">
                       <input
                         type="text"

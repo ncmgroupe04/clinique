@@ -42,6 +42,24 @@ export default async function FactureDetailPage({ params }: { params: Promise<{ 
     .eq("kind", "facture")
     .maybeSingle();
 
+  let invoiceSettings: Record<string, unknown> = {};
+  if (invoice.template_id) {
+    const { data: t } = await supabase
+      .from("invoice_templates")
+      .select("settings")
+      .eq("id", invoice.template_id)
+      .maybeSingle();
+    invoiceSettings = (t?.settings as Record<string, unknown>) ?? {};
+  } else {
+    const { data: t } = await supabase
+      .from("invoice_templates")
+      .select("settings")
+      .eq("structure_id", invoice.structure_id)
+      .eq("is_default", true)
+      .maybeSingle();
+    invoiceSettings = (t?.settings as Record<string, unknown>) ?? {};
+  }
+
   const tpl = {
     title: "Facture",
     number_prefix: "",
@@ -53,6 +71,7 @@ export default async function FactureDetailPage({ params }: { params: Promise<{ 
     show_advance: true,
     show_stamp: true,
     ...(template?.settings ?? {}),
+    ...invoiceSettings,
   } as {
     title: string;
     number_prefix: string;
@@ -65,6 +84,30 @@ export default async function FactureDetailPage({ params }: { params: Promise<{ 
     show_stamp: boolean;
   };
   const numberLabel = `${tpl.number_prefix}${invoice.year}-${String(invoice.number).padStart(4, "0")}`;
+
+  type InvoiceColumn = { key?: string; label: string; source: string; visible: boolean; span: number };
+  const columns = (((invoiceSettings.columns as InvoiceColumn[] | undefined) ?? [
+    { label: "Soin", source: "label", visible: true, span: 1 },
+    { label: "Date", source: "date", visible: true, span: 1 },
+    { label: "Indice", source: "cotation", visible: true, span: 1 },
+    { label: "Qté", source: "quantite", visible: true, span: 1 },
+    { label: "Prix unit.", source: "prix_unitaire", visible: true, span: 1 },
+    { label: "Total", source: "total", visible: true, span: 1 },
+  ]) as InvoiceColumn[]).filter((c) => c.visible);
+
+  const columnValue = (source: string, it: { care_name: string; quantity: number; unit_price: number; line_total: number; cotation: string | null; dents: string | null }) => {
+    switch (source) {
+      case "patient": return invoice.patient_name;
+      case "date": return new Date(invoice.created_at).toLocaleDateString("fr-FR");
+      case "dents": return it.dents || "—";
+      case "label": return it.care_name;
+      case "cotation": return it.cotation || "—";
+      case "quantite": return it.quantity;
+      case "prix_unitaire": return formatCfa(it.unit_price);
+      case "total": return formatCfa(it.line_total);
+      default: return "";
+    }
+  };
 
   const logoUrl = structure?.logo_path
     ? supabase.storage.from("structure-logos").getPublicUrl(structure.logo_path).data.publicUrl
@@ -109,23 +152,23 @@ export default async function FactureDetailPage({ params }: { params: Promise<{ 
         <table className="w-full text-sm border-collapse">
           <thead>
             <tr className="border-b border-gray-400">
-              <th className="text-left py-1">Soin</th>
-              {tpl.show_date && <th className="text-center py-1">Date</th>}
-              {tpl.show_indice && <th className="text-center py-1">Indice</th>}
-              {tpl.show_quantity && <th className="text-right py-1">Qté</th>}
-              {tpl.show_unit_price && <th className="text-right py-1">Prix unit.</th>}
-              <th className="text-right py-1">Total</th>
+              {columns.map((c, i) => (
+                <th key={`${c.key ?? c.source}-${i}`} className="text-center py-1" colSpan={c.span}>{c.label}</th>
+              ))}
             </tr>
           </thead>
           <tbody>
-            {(items ?? []).map((it) => (
+            {(items ?? []).map((it, rowIndex) => (
               <tr key={it.id} className="border-b border-gray-200">
-                <td className="py-1">{it.care_name}</td>
-                {tpl.show_date && <td className="text-center py-1">{new Date(invoice.created_at).toLocaleDateString("fr-FR")}</td>}
-                {tpl.show_indice && <td className="text-center py-1 font-semibold">{it.cotation || "—"}</td>}
-                {tpl.show_quantity && <td className="text-right py-1">{it.quantity}</td>}
-                {tpl.show_unit_price && <td className="text-right py-1">{formatCfa(it.unit_price)}</td>}
-                <td className="text-right py-1">{formatCfa(it.line_total)}</td>
+                {columns.map((c, i) => {
+                  const merge = Boolean((invoiceSettings.merge_rows as boolean | undefined) && (c.source === "patient" || c.source === "date"));
+                  if (merge && rowIndex > 0) return null;
+                  return (
+                    <td key={`${c.key ?? c.source}-${i}`} className="py-1 text-center" colSpan={c.span} rowSpan={merge ? (items ?? []).length : 1}>
+                      {columnValue(c.source, it)}
+                    </td>
+                  );
+                })}
               </tr>
             ))}
           </tbody>
@@ -138,6 +181,9 @@ export default async function FactureDetailPage({ params }: { params: Promise<{ 
           {tpl.show_advance && <div className="flex justify-between"><span>Avance</span><span>{formatCfa(invoice.advance)}</span></div>}
           <div className="flex justify-between font-bold" style={{ fontSize: "16px" }}><span>Reste à payer</span><span>{formatCfa(invoice.remaining)}</span></div>
         </div>
+        {((invoiceSettings.extra_rows as string[] | undefined) ?? []).filter(Boolean).map((line, i) => (
+          <p key={i} className="mt-2 text-xs italic">{line}</p>
+        ))}
         <div className="border-t border-dashed border-gray-400 my-2" />
         <div className="flex justify-between items-end text-xs mt-4">
           <span>{template?.footer_text?.trim() || "Merci de votre visite."}</span>
