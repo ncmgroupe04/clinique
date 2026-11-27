@@ -114,10 +114,21 @@ export default function ImpressionClient({
   const [activeTemplateId, setActiveTemplateId] = useState(firstTemplate?.id ?? "");
   const [newTemplateName, setNewTemplateName] = useState("");
   const [previewKind, setPreviewKind] = useState<Kind | null>(null);
-  const [invoiceSettings, setInvoiceSettings] = useState<InvoiceSettings>(() => ({
-    ...DEFAULT_INVOICE_SETTINGS,
-    ...((firstTemplate?.settings as Partial<InvoiceSettings>) ?? templates.find((t) => t.kind === "facture")?.settings ?? {}),
-  }));
+  const [invoiceSettings, setInvoiceSettings] = useState<InvoiceSettings>(() => {
+    let stored: Partial<InvoiceSettings> = {};
+    if (typeof window !== "undefined") {
+      try {
+        stored = JSON.parse(localStorage.getItem("invoice_template_local") ?? "{}") as Partial<InvoiceSettings>;
+      } catch {
+        stored = {};
+      }
+    }
+    return {
+      ...DEFAULT_INVOICE_SETTINGS,
+      ...stored,
+      ...((firstTemplate?.settings as Partial<InvoiceSettings>) ?? templates.find((t) => t.kind === "facture")?.settings ?? {}),
+    };
+  });
 
   const activeModel = KINDS.find((k) => k.kind === active)!;
   const current = values[active];
@@ -133,22 +144,44 @@ export default function ImpressionClient({
     setSaving(true);
     setMessage(null);
     try {
-      const res = await fetch("/api/print-templates", {
+      const body = {
+        kind: active,
+        ...current,
+        ...(active === "facture" ? { settings: invoiceSettings } : {}),
+      };
+      let res = await fetch("/api/print-templates", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          kind: active,
-          ...current,
-          ...(active === "facture" ? { settings: invoiceSettings } : {}),
-        }),
+        body: JSON.stringify(body),
       });
+      if (!res.ok && active === "facture") {
+        // Base pas encore migrée (colonne settings absente) : on enregistre au moins les textes.
+        res = await fetch("/api/print-templates", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ kind: active, ...current }),
+        });
+      }
       const data = (await res.json().catch(() => ({}))) as { error?: string };
       if (!res.ok) {
         setMessage({ ok: false, text: data.error ?? "Enregistrement impossible." });
         return;
       }
-      if (active === "facture") await saveInvoiceTemplate();
-      setMessage({ ok: true, text: "Modèle enregistré." });
+      let localOnly = false;
+      if (active === "facture") {
+        try {
+          await saveInvoiceTemplate();
+        } catch {
+          localOnly = true;
+          if (typeof window !== "undefined") {
+            localStorage.setItem("invoice_template_local", JSON.stringify(invoiceSettings));
+          }
+        }
+      }
+      setMessage({
+        ok: true,
+        text: localOnly ? "Modèle enregistré localement (base non disponible)." : "Modèle enregistré.",
+      });
     } catch {
       setMessage({ ok: false, text: "Enregistrement impossible." });
     } finally {
