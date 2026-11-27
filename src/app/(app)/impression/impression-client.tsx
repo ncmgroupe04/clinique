@@ -363,7 +363,11 @@ export default function ImpressionClient({
             <div className="rounded-[14px] border border-border bg-white p-4">
               <h3 className="text-sm font-extrabold">Colonnes du tableau</h3>
               <p className="mt-1 text-xs text-muted">Ordre, libellé, source et fusion des colonnes de la facture.</p>
-              <div className="mt-3 space-y-2">
+              <div className="mt-3 flex flex-wrap gap-2 px-6">
+                <span className="w-[120px] text-[11px] font-extrabold uppercase tracking-wide text-muted">Titre affiché</span>
+                <span className="w-[140px] text-[11px] font-extrabold uppercase tracking-wide text-muted">Source des données</span>
+              </div>
+              <div className="mt-1 space-y-2">
                 {invoiceSettings.columns.map((col, i) => (
                   <div key={col.key} className="flex flex-wrap items-center gap-2">
                     <input
