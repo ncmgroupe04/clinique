@@ -110,7 +110,15 @@ export default function ImpressionClient({
   const [message, setMessage] = useState<{ text: string; ok: boolean } | null>(null);
   const [saving, setSaving] = useState(false);
   const firstTemplate = invoiceTemplates.find((t) => t.is_default) ?? invoiceTemplates[0] ?? null;
-  const [invoiceTemplatesState, setInvoiceTemplatesState] = useState(invoiceTemplates);
+  const [invoiceTemplatesState, setInvoiceTemplatesState] = useState<InvoiceTemplateRow[]>(() => {
+    if (typeof window === "undefined") return invoiceTemplates;
+    try {
+      const stored = JSON.parse(localStorage.getItem("invoice_templates_local") ?? "null");
+      return Array.isArray(stored) && stored.length ? (stored as InvoiceTemplateRow[]) : invoiceTemplates;
+    } catch {
+      return invoiceTemplates;
+    }
+  });
   const [activeTemplateId, setActiveTemplateId] = useState(firstTemplate?.id ?? "");
   const [newTemplateName, setNewTemplateName] = useState("");
   const [previewKind, setPreviewKind] = useState<Kind | null>(null);
@@ -234,32 +242,57 @@ export default function ImpressionClient({
       localOnly = true;
     }
     const created = { id, name: newTemplateName.trim(), settings: invoiceSettings as unknown as Record<string, unknown>, is_default: false };
-    setInvoiceTemplatesState((prev) => [...prev, created]);
+    setInvoiceTemplatesState((prev) => {
+      const next = [...prev, created];
+      persistLocalTemplates(next);
+      return next;
+    });
     setActiveTemplateId(id);
     setNewTemplateName("");
     setMessage({ ok: true, text: localOnly ? "Modèle créé localement (base non disponible)." : "Modèle créé." });
   };
 
+  const persistLocalTemplates = (list: InvoiceTemplateRow[]) => {
+    if (typeof window !== "undefined") {
+      localStorage.setItem("invoice_templates_local", JSON.stringify(list));
+    }
+  };
+
   const setDefaultTemplate = async (id: string) => {
-    const res = await fetch("/api/invoice-templates", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ id, is_default: true }),
-    });
-    if (!res.ok) return;
-    setInvoiceTemplatesState((prev) => prev.map((t) => ({ ...t, is_default: t.id === id })));
+    let localOnly = false;
+    try {
+      const res = await fetch("/api/invoice-templates", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ id, is_default: true }),
+      });
+      if (!res.ok) throw new Error("api");
+    } catch {
+      localOnly = true;
+    }
+    const next = invoiceTemplatesState.map((t) => ({ ...t, is_default: t.id === id }));
+    setInvoiceTemplatesState(next);
+    persistLocalTemplates(next);
+    setMessage({ ok: true, text: localOnly ? "Modèle défini par défaut localement (base non disponible)." : "Modèle défini par défaut." });
   };
 
   const deleteTemplate = async (id: string) => {
-    const res = await fetch(`/api/invoice-templates?id=${id}`, { method: "DELETE" });
-    if (!res.ok) return;
+    let localOnly = false;
+    try {
+      const res = await fetch(`/api/invoice-templates?id=${id}`, { method: "DELETE" });
+      if (!res.ok) throw new Error("api");
+    } catch {
+      localOnly = true;
+    }
     const next = invoiceTemplatesState.filter((t) => t.id !== id);
     setInvoiceTemplatesState(next);
+    persistLocalTemplates(next);
     if (activeTemplateId === id) {
       const first = next[0];
       setActiveTemplateId(first?.id ?? "");
       setInvoiceSettings({ ...DEFAULT_INVOICE_SETTINGS, ...((first?.settings as Partial<InvoiceSettings>) ?? {}) });
     }
+    setMessage({ ok: true, text: localOnly ? "Modèle supprimé localement (base non disponible)." : "Modèle supprimé." });
   };
 
   const updateColumn = (index: number, patch: Partial<InvoiceColumn>) => {
