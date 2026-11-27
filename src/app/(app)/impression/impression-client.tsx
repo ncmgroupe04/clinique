@@ -634,7 +634,7 @@ export default function ImpressionClient({
             </div>
           </section>
 
-          <section className="card flex flex-1 flex-col gap-3.5">
+          <section className="card flex max-h-[520px] flex-col gap-3.5 overflow-y-auto">
             <div className="text-xs font-bold uppercase tracking-[1px] text-muted">
               Aperçu · {activeModel.label}
             </div>
