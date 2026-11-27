@@ -70,24 +70,26 @@ export default async function TableauPage() {
         <div className="mt-3 grid grid-cols-1 gap-3 sm:grid-cols-3 lg:grid-cols-5">
           {(user.role === "structure_admin" || user.role === "cashier") && (
             <>
-              <Link href="/tickets/nouveau" className="go" style={{ height: 48, fontSize: 14, borderRadius: 14 }}>
+              <Link href="/tickets/nouveau" className="go" style={{ height: 48, fontSize: 14, borderRadius: 14, background: "#0b7a6b", color: "#fff" }}>
                 Nouveau Ticket
               </Link>
-              <Link href="/tickets" className="go" style={{ height: 48, fontSize: 14, borderRadius: 14 }}>
-                Tickets
-              </Link>
-              <Link href="/factures/nouvelle" className="go" style={{ height: 48, fontSize: 14, borderRadius: 14 }}>
+              <Link href="/factures/nouvelle" className="go" style={{ height: 48, fontSize: 14, borderRadius: 14, background: "#2563eb", color: "#fff" }}>
                 Nouvelle Facture
               </Link>
             </>
           )}
           {(user.role === "structure_admin" || user.role === "docteur") && (
-            <Link href="/ordonnances" className="go" style={{ height: 48, fontSize: 14, borderRadius: 14 }}>
+            <Link href="/ordonnances" className="go" style={{ height: 48, fontSize: 14, borderRadius: 14, background: "#7c3aed", color: "#fff" }}>
               Nouvelle Ordonnance
             </Link>
           )}
+          {(user.role === "structure_admin" || user.role === "cashier") && (
+            <Link href="/tarifs" className="go" style={{ height: 48, fontSize: 14, borderRadius: 14, background: "#475569", color: "#fff" }}>
+              Tarifs
+            </Link>
+          )}
           {user.role === "structure_admin" && (
-            <Link href="/soins" className="go" style={{ height: 48, fontSize: 14, borderRadius: 14 }}>
+            <Link href="/soins" className="go" style={{ height: 48, fontSize: 14, borderRadius: 14, background: "#0e7490", color: "#fff" }}>
               Soins
             </Link>
           )}
